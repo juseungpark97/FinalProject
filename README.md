@@ -27,7 +27,7 @@
   프로젝트 생성: `npx create-react-app my-app` (my-app 이름은 자유롭게 설정 가능)  
   HTTP 클라이언트 axios 설치: `npm install axios`  
   스타일 관련: `npm install styled-components`  
-  여러 페이지 구현 라이브러리: `npm install react-router-dom`
+  여러 페이지 구현 라이브러리: `npm install react-router-dom`  
   빌드 : `npm run build` (배포시 사용)
 
 ## 기본 개념
