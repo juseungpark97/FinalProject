@@ -1,5 +1,8 @@
 # FinalProject
 
+## import
+- import -> Maven -> Existing Maven Projects -> FINALPROJECT(루트폴더)선택.
+
 ## 버전 정보
 
 - **JDK:** Amazon Corretto 11  
