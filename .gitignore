@@ -26,3 +26,24 @@ replay_pid*
 
 # React 프로젝트의 node_modules 디렉토리 무시
 frontend/node_modules/
+
+# Node modules
+frontend/node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+node/
+jspm_packages/
+
+# IDE directories
+.metadata/
+Servers/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
