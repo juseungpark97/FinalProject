@@ -23,3 +23,6 @@
 hs_err_pid*
 replay_pid*
 /.metadata/
+
+# React 프로젝트의 node_modules 디렉토리 무시
+frontend/node_modules/
