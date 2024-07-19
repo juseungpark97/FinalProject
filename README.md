@@ -20,3 +20,20 @@ https://www.oracle.com/database/technologies/xe-downloads.html
 
 lombok : 1.18.32
 https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.32
+
+node.js : v20.15.1
+https://nodejs.org/en
+
+react
+(내가 리액트 프로젝트 만들기를 원하는곳에 가서)npx create-react-app (my-app) 이름은 자유
+HTTP 클라이언트 axios 설치 npm install axios
+
+react 스타일 관련
+npm install styled-components
+
+react 여러 페이지 만들기 위한 라이브러리
+react-router-dom
+
+# 기본개념
+npm이란?
+npm(Node Package Manager)은 Node.js의 기본 패키지 관리자
