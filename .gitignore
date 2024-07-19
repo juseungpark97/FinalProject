@@ -3,6 +3,7 @@
 
 # Log file
 *.log
+npm-debug.log*
 
 # BlueJ files
 *.ctxt
@@ -29,18 +30,14 @@ frontend/node_modules/
 
 # Logs
 logs
-*.log
-npm-debug.log*
 
 # Dependency directories
 node/
 jspm_packages/
 
 # IDE directories
-.metadata/
 Servers/
 
 # OS generated files
 .DS_Store
 Thumbs.db
-
