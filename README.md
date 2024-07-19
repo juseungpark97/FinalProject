@@ -3,6 +3,11 @@
 ## import
 - import -> Maven -> Existing Maven Projects -> FINALPROJECT(루트폴더)선택.
 
+## 포트번호 변경
+- package.json scripts부분 변경.
+- "start": "set PORT=3002 && react-scripts start"
+-  Mac & Linux 는 export PORT=변경할번호 && 코드
+
 ## 버전 정보
 
 - **JDK:** Amazon Corretto 11  
