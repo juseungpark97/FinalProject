@@ -4,13 +4,17 @@ import Home from './pages/Home';
 import About from './pages/About';
 import CreateMember from './pages/CreateMember';
 import LoginForm from './pages/LoginForm';
+import FlightSearch from './pages/FlightSearch';
 import axios from 'axios';
 import styled from 'styled-components';
 
-// Styled components
 const Nav = styled.nav`
   background-color: #333;
   padding: 10px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
 `;
 
 const NavList = styled.ul`
@@ -36,11 +40,7 @@ const NavLink = styled(Link)`
 `;
 
 const MainContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f0f2f5;
+  padding-top: 60px; /* 네비게이션 바와 콘텐츠 간의 여백 추가 */
 `;
 
 const AppContainer = styled.div`
@@ -89,38 +89,42 @@ function App() {
 
   return (
     <Router>
+      <Nav>
+        <NavList>
+          <NavItem>
+            <NavLink to="/">Home</NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/about">About</NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/create-member">Create Member</NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink to="/flight-search">Flight Search</NavLink>
+          </NavItem>
+          {currentUser ? (
+            <>
+              <NavItem>
+                <NavLink to="#" onClick={handleLogout}>Logout</NavLink>
+              </NavItem>
+              <WelcomeMessage>{currentUser.nickname}님 환영합니다</WelcomeMessage>
+            </>
+          ) : (
+            <NavItem>
+              <NavLink to="/login">Login</NavLink>
+            </NavItem>
+          )}
+        </NavList>
+      </Nav>
       <MainContainer>
         <AppContainer>
-          <Nav>
-            <NavList>
-              <NavItem>
-                <NavLink to="/">Home</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/about">About</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/create-member">Create Member</NavLink>
-              </NavItem>
-              {currentUser ? (
-                <>
-                  <NavItem>
-                    <NavLink to="#" onClick={handleLogout}>Logout</NavLink>
-                  </NavItem>
-                  <WelcomeMessage>{currentUser.nickname}님 환영합니다</WelcomeMessage>
-                </>
-              ) : (
-                <NavItem>
-                  <NavLink to="/login">Login</NavLink>
-                </NavItem>
-              )}
-            </NavList>
-          </Nav>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/create-member" element={<CreateMember />} />
             <Route path="/login" element={<LoginForm setCurrentUser={setCurrentUser} />} />
+            <Route path="/flight-search" element={<FlightSearch />} />
           </Routes>
         </AppContainer>
       </MainContainer>
