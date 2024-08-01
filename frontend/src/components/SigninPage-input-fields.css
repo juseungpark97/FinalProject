@@ -27,7 +27,8 @@
 .input-values1,
 .input-values2,
 .input-values3,
-.input-values4 {
+.input-values4,
+.input-values5 {
   width: 100%;
   border: 0;
   outline: 0;
@@ -97,13 +98,15 @@
 }
 .button-join,
 .signup-form {
+  margin-left: 15px;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   box-sizing: border-box;
   max-width: 100%;
 }
-.button-join {
+.button-join ,
+.button-send{
   cursor: pointer;
   border: 0;
   padding: var(--padding-2xs) var(--padding-xl) var(--padding-10xl);
@@ -113,7 +116,8 @@
   justify-content: center;
   z-index: 2;
 }
-.button-join:hover {
+.button-join:hover,
+.button-send:hover {
   background-color: var(--color-peru);
 }
 .signup-form {

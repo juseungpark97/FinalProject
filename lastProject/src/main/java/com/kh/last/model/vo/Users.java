@@ -1,28 +1,43 @@
 package com.kh.last.model.vo;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.*;
 import lombok.Data;
 
-@Entity
+import java.time.LocalDateTime;
+
 @Data
+@Entity
+@Table(name = "Users")
 public class Users {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "USER_SEQ", allocationSize = 1)
-    private Long id;
-    private String name;
-    private String password;
-    private String phone;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_no")
+    private Long userNo;
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-//    private String name;
-//    private String password;
-//    private String phone;
+    @Column(name = "userid", nullable = false, length = 255)
+    private String userId;
+
+    @Column(name = "email", nullable = false, length = 255)
+    private String email;
+
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
+
+    @Column(name = "role", nullable = true, length = 50)
+    private String role = "user";
+
+    @Column(name = "created_at", nullable = true)
+    private LocalDateTime createdAt;
+
+    @Column(name = "status", nullable = true, length = 3)
+    private String status;
+
+    @Column(name = "birthday", nullable = true, length = 100)
+    private String birthday;
+
+    @Column(name = "username", nullable = false, length = 100)
+    private String username;
+
+    @Column(name = "vNumber", nullable = true)
+    private Long vNumber;
 }

@@ -1,25 +1,41 @@
 package com.kh.last.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.kh.last.model.vo.Users;
-import com.kh.last.repository.UserRepository;
+import com.kh.last.service.UserService;
+
+import lombok.Data;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody Users user) {
-        userRepository.save(user); // 사용자 저장
-        return ResponseEntity.ok("User registered successfully!");
+    public Users createUser(@RequestBody UserCreateRequest request) {
+        return userService.createUser(
+        		request.getUserId(),
+        		request.getEmail(),
+        		request.getPassword(),
+        		request.getStatus(),
+        		request.getBirthday(),
+        		request.getUsername(),
+        		request.getVNumber()
+        );
     }
+}
+@Data
+class UserCreateRequest {
+    private String userId;
+    private String email;
+    private String password;
+    private String status;
+    private String birthday;
+    private String username;
+    private Long vNumber;
+
+    // Getters and Setters
 }

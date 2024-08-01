@@ -27,9 +27,13 @@ export const InputFields: React.FC<{ className?: string }> = ({ className = '' }
     }
     axios
       .post('http://localhost:8088/api/users/register', {
-        name: formData.NAME,
+        userId: formData.ID,
+        email: `${formData.ID}@example.com`,
         password: formData.PASSWORD,
-        phone: formData.PHONE
+        status: 'A',  // Assuming a default status
+        birthday: '1990-01-01',  // Placeholder, should be updated to actual input
+        username: formData.NAME,
+        vNumber: 1  // Placeholder, should be updated to actual input
       })
       .then((response) => {
         console.log('User registered:', response.data);
