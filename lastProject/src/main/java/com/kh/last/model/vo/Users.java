@@ -7,10 +7,11 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "MEMBER")
+@Table(name = "USERS")
 public class Users {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
     @Column(name = "user_no")
     private Long userNo;
 
