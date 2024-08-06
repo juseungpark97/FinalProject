@@ -4,9 +4,13 @@ import org.apache.http.auth.InvalidCredentialsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.kh.last.model.vo.Users;
+import com.kh.last.model.vo.USERS;
 import com.kh.last.service.UserService;
 
 import lombok.Getter;
@@ -23,7 +27,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> createUser(@RequestBody UserCreateRequest request) {
         try {
-            Users createdUser = userService.createUser(
+            USERS createdUser = userService.createUser(
                 request.getUserId(),
                 request.getEmail(),
                 request.getPassword(),
@@ -55,8 +59,33 @@ public class UserController {
         boolean exists = userService.emailExists(request.getEmail());
         return ResponseEntity.ok(new EmailCheckResponse(exists));
     }
+    @PostMapping("/check-password")
+    public ResponseEntity<?> checkPassword(@RequestBody PasswordRequest request) {
+        try {
+            boolean isValid = userService.checkPassword(request.getPassword());
+            return ResponseEntity.ok(new PasswordResponse(isValid));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while checking the password.");
+        }
+    }
+    
 }
 
+@Getter
+@Setter
+class PasswordRequest {
+    private String password;
+}
+
+@Getter
+@Setter
+class PasswordResponse {
+    private boolean valid;
+
+    public PasswordResponse(boolean valid) {
+        this.valid = valid;
+    }
+}
 @Getter
 @Setter
 class UserCreateRequest {

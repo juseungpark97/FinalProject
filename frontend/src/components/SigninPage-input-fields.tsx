@@ -71,7 +71,7 @@ export const InputFields: React.FC<{ className?: string }> = ({ className = '' }
             <input
               className="input-values"
               placeholder="아이디"
-              type="text"
+              type="email"
               name="ID"
               value={formData.ID}
               onChange={handleChange}
@@ -107,7 +107,7 @@ export const InputFields: React.FC<{ className?: string }> = ({ className = '' }
               name="PHONE"
               value={formData.PHONE}
               onChange={handleChange}
-            
+
             />
           </div>
         </div>

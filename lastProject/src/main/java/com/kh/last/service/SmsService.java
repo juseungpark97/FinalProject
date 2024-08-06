@@ -10,6 +10,16 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+<<<<<<< HEAD
+=======
+import okhttp3.Credentials;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+>>>>>>> origin/main
 @Service
 public class SmsService {
     @Value("${coolsms.api_key}")
@@ -37,7 +47,7 @@ public class SmsService {
         body.put("messages", new Object[]{message});
 
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
-        RequestBody requestBody = RequestBody.create(JSON, objectMapper.writeValueAsString(body));
+        RequestBody requestBody = RequestBody.create(objectMapper.writeValueAsString(body), JSON);
         String credential = Credentials.basic(apiKey, apiSecret);
 
         Request request = new Request.Builder()

@@ -7,11 +7,19 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+<<<<<<< HEAD:lastProject/src/main/java/com/kh/last/model/vo/Users.java
 @Table(name = "USERS")
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
+=======
+public class USERS {
+    @Id
+    //@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    //@SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+>>>>>>> origin/main:lastProject/src/main/java/com/kh/last/model/vo/USERS.java
     @Column(name = "user_no")
     private Long userNo;
 
