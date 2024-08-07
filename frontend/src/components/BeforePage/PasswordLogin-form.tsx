@@ -18,7 +18,8 @@ const PwLoginForm: React.FC = () => {
             });
             if (response.data.valid) {
                 console.log('Password is valid');
-                window.location.href = '/home'; // 비밀번호가 유효할 경우 홈 페이지로 이동
+                localStorage.setItem('user', JSON.stringify(response.data.user));  // 사용자 정보 저장
+                window.location.href = '/profiles'; // 비밀번호가 유효할 경우 홈 페이지로 이동
             } else {
                 setError('Invalid password. Please try again.');
             }

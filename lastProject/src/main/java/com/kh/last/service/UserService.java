@@ -42,7 +42,7 @@ public class UserService {
     }
 
     public String loginUser(String email, String password) throws InvalidCredentialsException {
-        Optional<USERS> userOpt = userRepository.findByEmail(email);
+    	Optional<USERS> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
             USERS user = userOpt.get();
             if (passwordEncoder.matches(password, user.getPassword())) {
@@ -76,5 +76,10 @@ public class UserService {
             }
         }
         return false;
+    }
+
+    public USERS getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

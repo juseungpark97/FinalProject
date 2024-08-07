@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Routes,
   Route,
@@ -17,10 +17,20 @@ import SubscribePage from "./pages/BeforePage/SubscribePage";
 import Pwlogin from "./components/BeforePage/PasswordLogin-form";
 import PwloginPage from "./pages/BeforePage/PwLogin";
 import PwLogin from "./pages/BeforePage/PwLogin";
+import ProfileSelectionPage from "./pages/BeforePage/ProfileSelectionPage";
 
 function App() {
   const location = useLocation();
   const pathname = location.pathname;
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userNo, setUserNo] = useState<number | null>(null);
+
+  // 로그인 처리 함수
+  const handleLogin = (id: string, no: number) => {
+    setUserId(id);
+    setUserNo(no);
+  };
+
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -84,7 +94,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/subscribe" element={<SubscribePage />} />
       <Route path="/passwordlogin" element={<PwLogin />} />
-
+      <Route path="/profiles" element={<ProfileSelectionPage />} />
     </Routes>
   );
 }
