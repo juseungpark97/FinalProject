@@ -1,3 +1,4 @@
+/* 기존 스타일 */
 body,
 html {
   user-select: none;
@@ -22,11 +23,26 @@ html {
   justify-content: flex-start;
   padding: 0;
   position: relative;
+
 }
 
 .section:first-child .sectionTitle {
   margin-top: 500px;
 }
+
+.searchResultsSection {
+  margin-top: 500px;
+  font-size: 30px; /* 제목의 글자 크기 설정 */
+  color: white; /* 제목의 색상 설정 */
+  align-items: flex-start;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0;
+  position: relative;
+}
+
+
+
 
 .tileRows {
   display: flex;
@@ -40,8 +56,7 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* 3개의 타일이 한 줄에 나타나도록 설정 */
-  height: auto;
+  height: 320px; /* 일관된 높이 설정 */
   margin-top: 16.4px;
 }
 
@@ -155,4 +170,32 @@ html {
     border: 1px solid #ccc;
     border-radius: 8px;
   }
+}
+
+/* 새로운 스타일 */
+.searchResults {
+  padding: 20px;
+  background: #141414;
+}
+
+.searchResults .sectionTitle {
+  margin-top: 0; /* Adjust the margin for search results */
+}
+
+.noResults {
+  color: white;
+  font-size: 20px;
+  text-align: center;
+  margin: 20px;
+}
+
+/* 일관된 슬라이더 높이 */
+.slick-slide {
+  display: flex;
+  justify-content: center;
+}
+
+.slick-slide img {
+  max-height: 320px; /* 타일 높이에 맞추어 조정 */
+  object-fit: cover;
 }

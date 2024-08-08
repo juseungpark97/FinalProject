@@ -16,8 +16,12 @@ interface Movie {
   description: string;
   url: string;
   thumbnailUrl: string;
-  tags: string[];
-  genre: string;
+  tagList: string[];
+  genre: string | null;
+  castList: string[];
+  director: string;
+  rating: number;
+  releaseYear: number;
 }
 
 const HomePage: React.FC = () => {
@@ -25,7 +29,17 @@ const HomePage: React.FC = () => {
   const [filteredMovies, setFilteredMovies] = React.useState<Movie[]>([]);
   const [isSearchVisible, setIsSearchVisible] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedGenre, setSelectedGenre] = React.useState<string | undefined>(undefined);
+
+  // Predefined tags
+  const predefinedTags = [
+    '드라마', '로맨스', '코미디', '스릴러', '미스터리', '호러', '액션', 'SF', '판타지',
+    '다큐멘터리', '어드벤처', '우화', '다문화', '가족', '음악', '해적', '심리적', '비극적',
+    '극복', '서스펜스', '정서적', '사랑', '운명', '실화', '철학적', '형이상학적', '패러디',
+    '반전', '서정적', '상상력', '유머', '혼란', '노스탤지어', '실험적', '미니멀리즘', '예술적',
+    '하이테크', '가상 현실', '미래적', '고전', '전쟁', '역사적', '대체 역사', '미래', '도시',
+    '자연', '실험실', '우주', '도시 전쟁', '기술', '사회적', '심리전', '성장', '관계',
+    '극단적', '아동'
+  ];
 
   React.useEffect(() => {
     axios.get('http://localhost:8088/api/movies')
@@ -33,8 +47,7 @@ const HomePage: React.FC = () => {
         console.log('Fetched movies:', response.data);
         const formattedMovies = response.data.map((movie: any) => ({
           ...movie,
-          id: movie.id,
-          tags: movie.tags ? movie.tags.split(',') : []
+          tagList: movie.tagList || [],
         }));
         setMovies(formattedMovies);
         setFilteredMovies(formattedMovies);
@@ -46,23 +59,19 @@ const HomePage: React.FC = () => {
 
   React.useEffect(() => {
     filterMovies();
-  }, [searchTerm, selectedGenre, movies]);
+  }, [searchTerm, movies]);
 
   const filterMovies = () => {
     let filtered = movies;
 
-    if (searchTerm) {
-      filtered = filtered.filter(movie =>
-        movie.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        movie.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
-    if (selectedGenre) {
-      filtered = filtered.filter(movie =>
-        movie.tags.some(tag => tag.toLowerCase().includes(selectedGenre.toLowerCase()))
-      );
-    }
+    filtered = filtered.filter(movie => {
+      const titleMatch = movie.title.toLowerCase().includes(lowerCaseSearchTerm);
+      const tagMatch = movie.tagList.some(tag => tag.toLowerCase() === lowerCaseSearchTerm);
+
+      return titleMatch || tagMatch;
+    });
 
     setFilteredMovies(filtered);
   };
@@ -75,9 +84,8 @@ const HomePage: React.FC = () => {
     setIsSearchVisible(false);
   };
 
-  const handleSearch = (query: string, genre?: string) => {
+  const handleSearch = (query: string) => {
     setSearchTerm(query);
-    setSelectedGenre(genre);
     handleCloseSearch();
   };
 
@@ -128,8 +136,8 @@ const HomePage: React.FC = () => {
     ]
   });
 
-  const renderSection = (title: string, movies: Movie[], keyPrefix: string) => (
-    <div className={styles.section} key={keyPrefix}>
+  const renderSection = (title: string, movies: Movie[], keyPrefix: string, additionalClass: string = '') => (
+    <div className={`${styles.section} ${additionalClass}`} key={keyPrefix}>
       <h2 className={styles.sectionTitle}>{title}</h2>
       <Slider {...getSliderSettings(movies.length)} className={styles.tileRows}>
         {movies.map((movie, index) => (
@@ -149,11 +157,34 @@ const HomePage: React.FC = () => {
         {/* 여기에 Hero Content 내용 추가 */}
       </div>
       <section className={styles.content}>
-        {renderSection('영화 이어보기', filteredMovies, 'section-1')}
-        <Frame />
-        {renderSection('시네마 클라우드 추천작', filteredMovies, 'section-2')}
-        <Frame />
-        {renderSection('밤늦게 즐기는 스릴러', filteredMovies, 'section-3')}
+        {searchTerm ? (
+          <>
+            <h2 className={styles.searchResultsSection}>
+              {predefinedTags.includes(searchTerm)
+                ? `${searchTerm} 장르인 영상`
+                : `제목이 ${searchTerm}인 영상`}
+            </h2>
+            {filteredMovies.length > 0 ? (
+              <Slider {...getSliderSettings(filteredMovies.length)} className={styles.tileRows}>
+                {filteredMovies.map((movie, index) => (
+                  <div className={styles.tile} key={`search-${index}`}>
+                    <VideoThumbnail video={movie} />
+                  </div>
+                ))}
+              </Slider>
+            ) : (
+              <p className={styles.noResults}>검색된 영화가 없습니다.</p>
+            )}
+          </>
+        ) : (
+          <>
+            {renderSection('영화 이어보기', filteredMovies, 'section-1')}
+            <Frame />
+            {renderSection('시네마 클라우드 추천작', filteredMovies, 'section-2')}
+            <Frame />
+            {renderSection('밤늦게 즐기는 스릴러', filteredMovies, 'section-3')}
+          </>
+        )}
       </section>
       {isSearchVisible && <SearchOverlay onClose={handleCloseSearch} onSearch={handleSearch} />}
       <Footer />
