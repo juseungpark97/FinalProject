@@ -1,7 +1,12 @@
 package com.kh.last.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
@@ -73,30 +78,49 @@ public class ProfileController {
 		}
 	}
 
-	@PostMapping("/upload")
-	public ResponseEntity<?> uploadProfileImage(@RequestParam("profileImg") MultipartFile file,
-			@RequestParam("profileNo") Long profileNo) {
+	@PostMapping("/{profileNo}/select-image")
+	public ResponseEntity<String> selectProfileImage(@PathVariable Long profileNo, @RequestParam String imageName) {
 		try {
-			String profileImgUrl = profileService.uploadProfileImage(file, profileNo);
-			return ResponseEntity.ok().body(Map.of("success", true, "profileImg", profileImgUrl));
+			String profileImgPath = profileService.selectProfileImage(profileNo, imageName);
+			return ResponseEntity.ok(profileImgPath);
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("success", false, "message", e.getMessage()));
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 	}
 
-	// 닉네임 변경 엔드포인트
-	@PutMapping("/update-name")
-	public ResponseEntity<?> updateProfileName(@RequestBody Map<String, String> request) {
+
+
+	@GetMapping("/available-images")
+	public ResponseEntity<List<String>> getAvailableImages() {
 		try {
-			Long profileNo = Long.parseLong(request.get("profileNo"));
-			String profileName = request.get("profileName");
-			profileService.updateProfileName(profileNo, profileName);
-			return ResponseEntity.ok().body(Map.of("success", true));
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("success", false, "message", e.getMessage()));
+			List<String> imageNames = Files.list(Paths.get("src/main/resources/static/profile-images"))
+					.map(path -> path.getFileName().toString()).collect(Collectors.toList());
+			return ResponseEntity.ok(imageNames);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(500).body(Collections.emptyList());
 		}
 	}
+    @PutMapping("/update-image")
+    public ResponseEntity<?> updateProfileImage(@RequestParam("profileNo") Long profileNo,
+                                                @RequestParam("profileImg") MultipartFile profileImg) {
+        try {
+            String updatedImagePath = profileService.updateProfileImage(profileNo, profileImg);
+            return ResponseEntity.ok().body(Map.of("profileImg", updatedImagePath));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
 
+    @PutMapping("/update-name")
+    public ResponseEntity<?> updateProfileName(@RequestBody Map<String, String> request) {
+        try {
+            Long profileNo = Long.parseLong(request.get("profileNo"));
+            String profileName = request.get("profileName");
+            profileService.updateProfileName(profileNo, profileName);
+            return ResponseEntity.ok().body(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 }

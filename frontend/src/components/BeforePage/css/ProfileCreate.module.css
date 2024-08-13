@@ -1,21 +1,31 @@
-.createProfile {
+.profileCreate {
     display: flex;
     flex-direction: column;
     align-items: center;
     background-color: #222;
-    padding: 20px;
+    padding: 30px;
     border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .input {
-    margin: 10px 0;
-    padding: 10px;
+    margin: 15px 0;
+    padding: 12px 15px;
     font-size: 1em;
     border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: white;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.createButton {
-    padding: 10px 20px;
+.selectImageButton,
+.createButton,
+.cancelButton {
+    padding: 12px 20px;
     font-size: 1em;
     background-color: #d6a060;
     color: white;
@@ -23,10 +33,22 @@
     cursor: pointer;
     transition: background-color 0.2s;
     border-radius: 5px;
+    width: 100%;
+    margin-top: 10px;
 }
 
-.createButton:hover {
+.selectImageButton:hover,
+.createButton:hover,
+.cancelButton:hover {
     background-color: #ad8350;
+}
+
+.cancelButton {
+    background-color: #666;
+}
+
+.cancelButton:hover {
+    background-color: #555;
 }
 
 .previewContainer {
@@ -36,9 +58,17 @@
     align-items: center;
 }
 
-.profileImage {
+.profileImage,
+.previewImage {
     width: 150px;
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid #ccc;
+    margin-top: 20px;
+}
+
+.imagePreview {
+    margin-top: 20px;
+    text-align: center;
 }

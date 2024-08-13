@@ -14,8 +14,6 @@ import com.kh.last.model.vo.USERS;
 import com.kh.last.repository.ProfileRepository;
 import com.kh.last.repository.UserRepository;
 
-import io.jsonwebtoken.io.IOException;
-
 @Service
 public class ProfileService {
 	@Autowired
@@ -38,20 +36,19 @@ public class ProfileService {
 		return profileRepository.save(profile);
 	}
 
-	public String uploadProfileImage(MultipartFile file, Long profileNo) throws IOException {
-		// 파일을 서버에 저장
-		String fileName = "profile_" + profileNo + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
-		Path path = Paths.get("uploads/" + fileName);
-		try {
-			Files.write(path, file.getBytes());
-		} catch (java.io.IOException e) {
-			e.printStackTrace();
+	public String selectProfileImage(Long profileNo, String selectedImageName) {
+		// 지정된 디렉토리에서 이미지 선택
+		String directory = "C:/Users/user1/Desktop/ll/FinalProject/lastProject/profile-images";
+		Path imagePath = Paths.get(directory, selectedImageName);
+
+		if (!Files.exists(imagePath)) {
+			throw new RuntimeException("Selected image not found in the directory");
 		}
 
 		// 데이터베이스에서 프로필을 찾아 이미지 경로 업데이트
 		Profile profile = profileRepository.findById(profileNo)
 				.orElseThrow(() -> new RuntimeException("Profile not found"));
-		profile.setProfileImg("/uploads/" + fileName);
+		profile.setProfileImg("/profile-images/" + selectedImageName);
 		profileRepository.save(profile);
 
 		return profile.getProfileImg();
@@ -63,5 +60,23 @@ public class ProfileService {
 				.orElseThrow(() -> new RuntimeException("Profile not found"));
 		profile.setProfileName(profileName);
 		profileRepository.save(profile);
+	}
+
+	public String updateProfileImage(Long profileNo, MultipartFile profileImg) throws java.io.IOException {
+		Profile profile = profileRepository.findById(profileNo)
+				.orElseThrow(() -> new RuntimeException("Profile not found"));
+
+		// 이미지 저장 경로 설정
+		String directory = "C:/Users/user1/Desktop/ll/FinalProject/lastProject/profile-images";
+		Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
+
+		// 이미지 저장
+		Files.write(imagePath, profileImg.getBytes());
+
+		// 프로필에 새로운 이미지 경로 설정 및 저장
+		profile.setProfileImg(profileImg.getOriginalFilename());
+		profileRepository.save(profile);
+
+		return profileImg.getOriginalFilename();
 	}
 }
