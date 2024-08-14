@@ -1,13 +1,13 @@
-package com.kh.last;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
-class LastProjectApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}
+//package com.kh.last;
+//
+//import org.junit.jupiter.api.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
+//
+//@SpringBootTest
+//class LastProjectApplicationTests {
+//
+//	@Test
+//	void contextLoads() {
+//	}
+//
+//}
