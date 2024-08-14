@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Slider from 'react-slick';
 import Header from '../../../src/components/CommonPage/Header';
 import Frame from '../../../src/components/HomePage/HomeFrame';
@@ -23,6 +23,11 @@ interface Movie {
   rating: number;
   releaseYear: number;
 }
+interface Profile {
+  profileNo: number;
+  profileImg: string;
+  profileName: string;
+}
 
 const HomePage: React.FC = () => {
   const [movies, setMovies] = React.useState<Movie[]>([]);
@@ -30,6 +35,7 @@ const HomePage: React.FC = () => {
   const [recentMovies, setRecentMovies] = React.useState<Movie[]>([]); // 최근 시청한 영화 상태
   const [isSearchVisible, setIsSearchVisible] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
   // Predefined tags
   const predefinedTags = [
@@ -186,7 +192,11 @@ const HomePage: React.FC = () => {
   return (
     <div className={styles.main}>
       <img className={styles.titleImageIcon} alt="Title" src="/titleimage@2x.png" />
-      <Header onSearchClick={handleSearchClick} />
+      <Header
+        onSearchClick={handleSearchClick}
+        selectedProfile={selectedProfile}
+        setSelectedProfile={setSelectedProfile}
+      />
       <div className={styles.heroContent}>
         {/* 여기에 Hero Content 내용 추가 */}
       </div>

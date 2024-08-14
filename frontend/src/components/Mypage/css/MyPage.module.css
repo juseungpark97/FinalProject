@@ -13,7 +13,6 @@
 
 .profileSection,
 .quickLinks {
-    background-color: #ffffff;
     border-radius: 30px;
     padding: 20px;
     border: solid rgb(221, 221, 221) 1px;
@@ -30,18 +29,28 @@
     height: 100px;
     border-radius: 50%;
     margin-right: 20px;
+    border: solid rgb(228, 228, 228) 1px;
 }
 
 .profile {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 100%;
+    /* 가로 크기를 전체로 */
 }
 
 .profile h2 {
     margin: 0;
     text-align: left;
+}
 
+.input {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .link {
@@ -54,6 +63,8 @@
 .link:hover {
     text-decoration: underline;
 }
+
+
 
 .quickLinks {
     display: flex;
@@ -101,5 +112,68 @@
 .arrow {
     font-size: 16px;
     color: #000;
+}
 
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+.modalProfileImage {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.updateButton {
+    margin-top: 10px;
+    background-color: #d6a060;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 30%;
+}
+
+.cancelButton {
+    margin-top: 10px;
+    background-color: #f44336;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 30%;
+}
+
+.updateButton:hover {
+    background-color: #ad8350;
+}
+
+.cancelButton:hover {
+    background-color: #5e0808;
 }
