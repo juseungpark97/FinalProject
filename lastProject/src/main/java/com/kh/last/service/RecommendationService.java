@@ -1,14 +1,17 @@
 package com.kh.last.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.kh.last.model.vo.Movie;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.repository.MovieRepository;
 import com.kh.last.repository.ProfileRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 @Service
 public class RecommendationService {
@@ -38,7 +41,7 @@ public class RecommendationService {
 
     private double calculateCosineSimilarity(String profileVector, String movieTags) {
         // 프로필 벡터와 영화 태그 벡터를 벡터화
-        List<String> allTags = Arrays.asList("코미디", "기술", "미스터리", "액션", /* 전체 태그 목록 */);
+    	List<String> allTags = Arrays.asList("코미디", "기술", "미스터리", "액션");
         int[] profileVectorArray = vectorize(profileVector, allTags);
         int[] movieVectorArray = vectorize(movieTags, allTags);
         
