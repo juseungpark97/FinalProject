@@ -38,100 +38,141 @@ import io.jsonwebtoken.Jwts;
 @CrossOrigin(origins = "http://localhost:3000")
 public class ProfileController {
 
-	@Autowired
-	private ProfileService profileService;
+    @Autowired
+    private ProfileService profileService;
 
-	@Autowired
-	private UserService userService;
+    @Autowired
+    private UserService userService;
 
-	private final SecretKey key;
+    private final SecretKey key;
 
-	@Autowired
-	public ProfileController(UserService userService) {
-		this.userService = userService;
-		this.key = userService.getKey(); // UserService로부터 SecretKey 주입
-	}
+    @Autowired
+    public ProfileController(UserService userService) {
+        this.userService = userService;
+        this.key = userService.getKey(); // UserService로부터 SecretKey 주입
+    }
 
-	@GetMapping("/user/{userNo}")
-	public ResponseEntity<List<Profile>> getProfilesByUserNo(@PathVariable Long userNo) {
-		List<Profile> profiles = profileService.getProfilesByUserNo(userNo);
-		return ResponseEntity.ok(profiles);
-	}
+    @GetMapping("/user/{userNo}")
+    public ResponseEntity<List<Profile>> getProfilesByUserNo(@PathVariable Long userNo) {
+        List<Profile> profiles = profileService.getProfilesByUserNo(userNo);
+        return ResponseEntity.ok(profiles);
+    }
 
-	@PostMapping("/create")
-	public ResponseEntity<?> createProfile(@RequestParam String profileName, @RequestParam MultipartFile profileImg,
-			@RequestHeader("Authorization") String token) {
-		try {
-			String jwt = token.substring(7);
-			Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
-			String email = claims.getSubject();
-			USERS user = userService.getUserByEmail(email);
-			if (user != null) {
-				String profileImgFilename = profileImg.getOriginalFilename(); // 실제로는 파일을 저장해야 합니다.
-				Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, profileImgFilename);
-				return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
-			} else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-			}
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating profile");
-		}
-	}
+    @PostMapping("/create")
+    public ResponseEntity<?> createProfile(@RequestParam String profileName, @RequestParam MultipartFile profileImg,
+                                           @RequestHeader("Authorization") String token) {
+        try {
+            String jwt = token.substring(7);
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
+            String email = claims.getSubject();
+            USERS user = userService.getUserByEmail(email);
+            if (user != null) {
+                String profileImgFilename = profileImg.getOriginalFilename(); // 실제로는 파일을 저장해야 합니다.
+                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, profileImgFilename);
+                return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating profile");
+        }
+    }
 
-	@PostMapping("/{profileNo}/select-image")
-	public ResponseEntity<String> selectProfileImage(@PathVariable Long profileNo, @RequestParam String imageName) {
-		try {
-			String profileImgPath = profileService.selectProfileImage(profileNo, imageName);
-			return ResponseEntity.ok(profileImgPath);
-		} catch (Exception e) {
-			return ResponseEntity.status(500).body(e.getMessage());
-		}
-	}
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadProfileImage(@RequestParam("profileImg") MultipartFile file,
+                                                @RequestParam("profileNo") Long profileNo) {
+        try {
+            String profileImgUrl = profileService.uploadProfileImage(file, profileNo);
+            return ResponseEntity.ok().body(Map.of("success", true, "profileImg", profileImgUrl));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 
-	@GetMapping("/available-images")
-	public ResponseEntity<List<String>> getAvailableImages() {
-		try {
-			List<String> imageNames = Files
-					.list(Paths.get("C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images"))
-					.map(path -> path.getFileName().toString()).collect(Collectors.toList());
-			return ResponseEntity.ok(imageNames);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return ResponseEntity.status(500).body(Collections.emptyList());
-		}
-	}
+    @PutMapping("/update-name")
+    public ResponseEntity<?> updateProfileName(@RequestBody Map<String, String> request) {
+        try {
+            Long profileNo = Long.parseLong(request.get("profileNo"));
+            String profileName = request.get("profileName");
+            profileService.updateProfileName(profileNo, profileName);
+            return ResponseEntity.ok().body(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 
-	@PutMapping("/update-profile")
-	public ResponseEntity<?> updateProfile(@RequestParam("profileNo") Long profileNo,
-			@RequestParam("profileName") String profileName,
-			@RequestParam(value = "profileImg", required = false) MultipartFile profileImg) {
-		try {
-			// 프로필 가져오기
-			Profile profile = profileService.getProfileById(profileNo);
-			if (profile == null) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
-			}
+    @PostMapping("/update-vector")
+    public ResponseEntity<?> updateProfileVector(@RequestBody Map<String, Object> request) {
+        try {
+            Long profileId = Long.parseLong(request.get("profileId").toString());
+            Long movieId = Long.parseLong(request.get("movieId").toString()); // movieId 추가
+            List<String> movieTags = (List<String>) request.get("movieTags");
 
-			// 프로필 이름 업데이트
-			profile.setProfileName(profileName);
+            // ProfileService의 메서드를 호출할 때 movieId도 함께 전달
+            profileService.updateProfileVector(profileId, movieId, movieTags);
 
-			// 프로필 이미지 업데이트
-			if (profileImg != null && !profileImg.isEmpty()) {
-				// 이미지 저장 로직 (이미지 경로 설정 및 저장)
-				String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
-				Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
-				Files.write(imagePath, profileImg.getBytes());
-				profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());
-			}
+            return ResponseEntity.ok().body(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 
-			// DB 업데이트
-			profileService.updateProfile(profile);
+    @PostMapping("/{profileNo}/select-image")
+    public ResponseEntity<String> selectProfileImage(@PathVariable Long profileNo, @RequestParam String imageName) {
+        try {
+            String profileImgPath = profileService.selectProfileImage(profileNo, imageName);
+            return ResponseEntity.ok(profileImgPath);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
 
-			return ResponseEntity
-					.ok(Map.of("success", true, "profileImg", profile.getProfileImg(), "profileName", profileName));
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("success", false, "message", e.getMessage()));
-		}
-	}
+    @GetMapping("/available-images")
+    public ResponseEntity<List<String>> getAvailableImages() {
+        try {
+            List<String> imageNames = Files
+                    .list(Paths.get("C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images"))
+                    .map(path -> path.getFileName().toString()).collect(Collectors.toList());
+            return ResponseEntity.ok(imageNames);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Collections.emptyList());
+        }
+    }
+
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@RequestParam("profileNo") Long profileNo,
+                                           @RequestParam("profileName") String profileName,
+                                           @RequestParam(value = "profileImg", required = false) MultipartFile profileImg) {
+        try {
+            // 프로필 가져오기
+            Profile profile = profileService.getProfileById(profileNo);
+            if (profile == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
+            }
+
+            // 프로필 이름 업데이트
+            profile.setProfileName(profileName);
+
+            // 프로필 이미지 업데이트
+            if (profileImg != null && !profileImg.isEmpty()) {
+                // 이미지 저장 로직 (이미지 경로 설정 및 저장)
+                String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+                Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
+                Files.write(imagePath, profileImg.getBytes());
+                profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());
+            }
+
+            // DB 업데이트
+            profileService.updateProfile(profile);
+
+            return ResponseEntity.ok(Map.of("success", true, "profileImg", profile.getProfileImg(), "profileName", profileName));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 }
