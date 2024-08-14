@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,6 +30,7 @@ import com.kh.last.repository.ProfileRepository; // 추가
 import com.kh.last.repository.WatchLogRepository;
 import com.kh.last.service.MovieService;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -147,9 +150,13 @@ public class MovieController {
     @GetMapping("/recent-movies")
     public ResponseEntity<List<Movie>> getRecentMovies(@RequestParam Long profileNo) {
         List<Movie> recentMovies = watchLogRepository.findRecentMoviesByProfile(profileNo);
+        
         if (recentMovies == null || recentMovies.isEmpty()) {
-            return ResponseEntity.notFound().build(); // 404 Not Found 응답
+            Logger logger = LoggerFactory.getLogger(MovieController.class);
+            logger.info("No recent movies found for profileNo: {}", profileNo); // 로그 출력
+            return ResponseEntity.ok(Collections.emptyList()); // 빈 목록 반환
         }
+
         return ResponseEntity.ok(recentMovies); // 200 OK 응답
     }
 
