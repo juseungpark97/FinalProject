@@ -24,8 +24,11 @@ public class USERS {
 
     @Column(name = "created_at", nullable = true)
     private LocalDateTime createdAt;
+    
+    @Column(name = "phone", nullable = true)
+    private String phone;
 
-    @Column(name = "status", nullable = true, length = 3)
+    @Column(name = "status", nullable = true, length = 30)
     private String status;
 
     @Column(name = "birthday", nullable = true, length = 100)

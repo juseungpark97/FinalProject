@@ -123,12 +123,12 @@ export const InputFields: React.FC<{ className?: string }> = ({ className = '' }
 
     try {
       const response = await axios.post('http://localhost:8088/api/users/register', {
-        userId: formData.ID,
         email: formData.ID,
         password: formData.PASSWORD,
         status: 'A',
         birthday: formData.BIRTHDATE,
         username: formData.NAME,
+        phone: formData.PHONE
       });
 
       console.log('User registered:', response.data);
@@ -231,7 +231,6 @@ export const InputFields: React.FC<{ className?: string }> = ({ className = '' }
           <b className="b">회원가입</b>
         </button>
       </div>
-      <img className="illustration-icon" loading="lazy" alt="" src="/vector.svg" />
     </form>
   );
 };

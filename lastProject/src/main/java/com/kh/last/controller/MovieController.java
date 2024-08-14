@@ -1,11 +1,16 @@
 package com.kh.last.controller;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,13 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.last.model.vo.Heart;
+import com.kh.last.model.vo.HeartId;
 import com.kh.last.model.vo.Movie;
 import com.kh.last.model.vo.Profile;
+import com.kh.last.model.vo.WatchLog;
 import com.kh.last.repository.HeartRepository; // 추가
 import com.kh.last.repository.MovieRepository;
 import com.kh.last.repository.ProfileRepository; // 추가
+import com.kh.last.repository.WatchLogRepository;
 import com.kh.last.service.MovieService;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -32,6 +42,7 @@ public class MovieController {
     private final MovieRepository movieRepository;
     private final HeartRepository heartRepository; // 추가
     private final ProfileRepository profileRepository; // 추가
+    private final WatchLogRepository watchLogRepository; // 추가
     
     @PostMapping("/upload")
     public Movie uploadMovie(
@@ -74,26 +85,99 @@ public class MovieController {
     }
     
     @PostMapping("/toggle-like")
-    public ResponseEntity<?> toggleLike(
-            @RequestParam("movieId") Long movieId,
-            @RequestParam("profileNo") Long profileNo) {
-        
-        // Profile 및 Movie를 찾거나 생성합니다.
+    public ResponseEntity<?> toggleLike(@RequestParam Long movieId, @RequestParam Long profileNo) {
+        System.out.println("MovieId: " + movieId);
+        System.out.println("ProfileNo: " + profileNo);
+
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id " + movieId));
-        
-        // 좋아요가 존재하는지 확인합니다.
-        Heart heart = heartRepository.findByProfileAndMovie(profile, movie);
-        if (heart != null) {
-            // 좋아요가 존재하면 삭제합니다.
-            heartRepository.delete(heart);
+
+        HeartId heartId = new HeartId(profile, movie);
+        Optional<Heart> heartOpt = heartRepository.findById(heartId);
+
+        if (heartOpt.isPresent()) {
+            heartRepository.delete(heartOpt.get());
         } else {
-            // 좋아요가 존재하지 않으면 추가합니다.
-            heartRepository.save(new Heart(profile, movie));
+            Heart heart = new Heart(profile, movie);
+            heartRepository.save(heart);
         }
-        
+
         return ResponseEntity.ok().build(); // 응답을 반환합니다.
     }
+    @Transactional
+    @PostMapping("/watchlog")
+    public ResponseEntity<Void> addWatchLog(
+            @RequestParam Long movieId,
+            @RequestParam Long profileNo,
+            @RequestParam Float progressTime) {  // 시청 시간을 추가로 받음
+
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id " + movieId));
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
+
+        // 기존 시청 로그 삭제 후 새로운 시청 로그 추가
+        watchLogRepository.deleteByProfileAndMovie(profile, movie);
+        WatchLog watchLog = new WatchLog(profile, movie, LocalDateTime.now(), progressTime);
+        watchLogRepository.save(watchLog);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @Transactional
+    @DeleteMapping("/watchlog")
+    public ResponseEntity<Void> deleteWatchLog(
+            @RequestParam Long movieId,
+            @RequestParam Long profileNo) {
+        try {
+            Movie movie = movieRepository.findById(movieId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id " + movieId));
+            Profile profile = profileRepository.findById(profileNo)
+                    .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
+
+            watchLogRepository.deleteByProfileAndMovie(profile, movie);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            // 예외 로그를 기록하고 500 오류를 반환합니다.
+            System.err.println("Error deleting watch log: " + e.getMessage());
+            e.printStackTrace(); // 스택 트레이스를 출력하여 문제를 파악합니다.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @GetMapping("/watchlog")
+    public ResponseEntity<Float> getWatchLog(
+            @RequestParam Long movieId,
+            @RequestParam Long profileNo) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id " + movieId));
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
+
+        Optional<WatchLog> watchLog = watchLogRepository.findByProfileAndMovie(profile, movie);
+        if (watchLog.isPresent()) {
+            return ResponseEntity.ok(watchLog.get().getProgressTime()); // 시청 시간 반환
+        } else {
+            return ResponseEntity.ok(0f); // 시청 기록이 없으면 0 반환
+        }
+    }
+
+    
+    @GetMapping("/recent-movies")
+    public ResponseEntity<List<Movie>> getRecentMovies(@RequestParam Long profileNo) {
+        List<Movie> recentMovies = watchLogRepository.findRecentMoviesByProfile(profileNo);
+        
+        if (recentMovies == null || recentMovies.isEmpty()) {
+            Logger logger = LoggerFactory.getLogger(MovieController.class);
+            logger.info("No recent movies found for profileNo: {}", profileNo); // 로그 출력
+            return ResponseEntity.ok(Collections.emptyList()); // 빈 목록 반환
+        }
+
+        return ResponseEntity.ok(recentMovies); // 200 OK 응답
+    }
+
+    
 }

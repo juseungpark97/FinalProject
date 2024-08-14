@@ -45,4 +45,16 @@ public class EmailVerificationController {
         int code = 100000 + random.nextInt(900000);
         return String.valueOf(code);
     }
+    
+    @PostMapping("/send-subscribe-success")
+    public void sendSubscribeSuccessEmail(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("구독 성공");
+        message.setText("CinemaCloud 구독이 성공적으로 완료되었습니다. 감사합니다!");
+
+        emailSender.send(message);
+    }
 }

@@ -5,34 +5,18 @@ import java.util.Objects;
 
 public class HeartId implements Serializable {
 
-    private Long profile;
-    private Long movie;
+    private Profile profile;
+    private Movie movie;
 
-    public HeartId() {
-    }
+    // default constructor
+    public HeartId() {}
 
-    public HeartId(Long profile, Long movie) {
+    public HeartId(Profile profile, Movie movie) {
         this.profile = profile;
         this.movie = movie;
     }
 
-    // Getters and setters
-    public Long getProfile() {
-        return profile;
-    }
-
-    public void setProfile(Long profile) {
-        this.profile = profile;
-    }
-
-    public Long getMovie() {
-        return movie;
-    }
-
-    public void setMovie(Long movie) {
-        this.movie = movie;
-    }
-
+    // equals() and hashCode() methods
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -45,4 +29,6 @@ public class HeartId implements Serializable {
     public int hashCode() {
         return Objects.hash(profile, movie);
     }
+
+    // getters and setters
 }

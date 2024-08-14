@@ -49,12 +49,19 @@ const ProfilePage: React.FC = () => {
         }
     }, [navigate]);
 
+    useEffect(() => {
+        // 프로필 선택 화면으로 돌아올 때 세션 스토리지에서 selectedProfile 정보 삭제
+        if (selectedMenu === 'select') {
+            sessionStorage.removeItem('selectedProfile');
+        }
+    }, [selectedMenu]);
+
     const handleProfileSelect = (profile: Profile) => {
         setSelectedProfile(profile);
         console.log('Selected profile:', profile);
 
-        // 선택된 프로필 정보를 localStorage에 저장
-        localStorage.setItem('selectedProfile', JSON.stringify(profile));
+        // 선택된 프로필 정보를 sessionStorage에 저장
+        sessionStorage.setItem('selectedProfile', JSON.stringify(profile));
 
         // home 페이지로 이동
         navigate('/home');

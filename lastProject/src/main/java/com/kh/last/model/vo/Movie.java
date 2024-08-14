@@ -1,11 +1,21 @@
 package com.kh.last.model.vo;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.util.List;
 
 @Entity
@@ -14,9 +24,9 @@ import java.util.List;
 @Data
 @SequenceGenerator(name = "movie_seq", sequenceName = "seq_movie_no", allocationSize = 1)
 public class Movie {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "movie_seq") /*통합시 주석 관리 해야함(주빈)*/
-    @SequenceGenerator(name = "movie_seq", sequenceName = "movie_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "movie_seq")
     private Long id;
 
     private String title;
@@ -28,13 +38,13 @@ public class Movie {
     private String genre;
 
     @Lob
-    private String tags;  // JSON 문자열 형태로 저장
-    
+    private String tags;
+
     @Transient
     private List<String> tagList;
 
     @Lob
-    private String cast;  // JSON 문자열 형태로 저장
+    private String cast;
 
     @Transient
     private List<String> castList;
@@ -78,5 +88,18 @@ public class Movie {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Movie movie = (Movie) o;
+        return id != null && id.equals(movie.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
     }
 }

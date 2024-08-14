@@ -32,6 +32,7 @@ interface Profile {
 const HomePage: React.FC = () => {
   const [movies, setMovies] = React.useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = React.useState<Movie[]>([]);
+  const [recentMovies, setRecentMovies] = React.useState<Movie[]>([]); // 최근 시청한 영화 상태
   const [isSearchVisible, setIsSearchVisible] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
@@ -47,6 +48,7 @@ const HomePage: React.FC = () => {
     '극단적', '아동'
   ];
 
+  // 전체 영화 데이터를 가져오는 API 호출
   React.useEffect(() => {
     axios.get('http://localhost:8088/api/movies')
       .then(response => {
@@ -63,6 +65,38 @@ const HomePage: React.FC = () => {
       });
   }, []);
 
+  // 최근 시청한 영화를 가져오는 API 호출
+  React.useEffect(() => {
+    const selectedProfile = sessionStorage.getItem('selectedProfile');
+    let profileNo = null;
+
+    if (selectedProfile !== null) {
+      const profile = JSON.parse(selectedProfile);
+      profileNo = profile.profileNo;
+
+      if (profileNo === undefined || profileNo === null) {
+        console.error("Invalid profileNo:", profileNo);
+        return;
+      }
+    } else {
+      console.error("Profile not found in sessionStorage");
+      return;
+    }
+
+    if (profileNo !== null) {
+      axios.get(`http://localhost:8088/api/movies/recent-movies?profileNo=${profileNo}`)
+        .then(response => {
+          setRecentMovies(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching recent movies:', error);
+        });
+    }
+  }, []);
+
+
+
+  // 검색어에 따라 영화 필터링
   React.useEffect(() => {
     filterMovies();
   }, [searchTerm, movies]);
@@ -188,11 +222,13 @@ const HomePage: React.FC = () => {
           </>
         ) : (
           <>
-            {renderSection('영화 이어보기', filteredMovies, 'section-1')}
+            {renderSection('최근 시청한 영상', recentMovies, 'recent-section')}
             <Frame />
-            {renderSection('시네마 클라우드 추천작', filteredMovies, 'section-2')}
+            {renderSection('영화 이어보기', filteredMovies, 'section-2')}
             <Frame />
-            {renderSection('밤늦게 즐기는 스릴러', filteredMovies, 'section-3')}
+            {renderSection('시네마 클라우드 추천작', filteredMovies, 'section-3')}
+            <Frame />
+            {renderSection('밤늦게 즐기는 스릴러', filteredMovies, 'section-4')}
           </>
         )}
       </section>

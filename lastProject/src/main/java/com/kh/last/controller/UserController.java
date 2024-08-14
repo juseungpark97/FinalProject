@@ -1,5 +1,8 @@
 package com.kh.last.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +55,9 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<USERS> createUser(@RequestBody UserCreateRequest request) {
         try {
-            USERS createdUser = userService.createUser(request.getEmail(), request.getPassword(),
-					request.getStatus(), request.getBirthday(), request.getUsername());
+
+            USERS createdUser = userService.createUser(request.getEmail(), request.getPassword(), request.getPhone(),
+                    request.getStatus(), request.getBirthday(), request.getUsername());
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,6 +113,28 @@ public class UserController {
 
         Subscription subscription = subscriptionService.subscribeUser(email, months);
         return ResponseEntity.ok(subscription);
+    }
+    
+    @GetMapping("/subscription-status")
+    public ResponseEntity<Map<String, Boolean>> getSubscriptionStatus(@RequestHeader("Authorization") String token) {
+        try {
+            // 토큰에서 이메일을 추출
+            String email = userService.getEmailFromToken(token);
+            
+            if (email == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 유효하지 않은 토큰일 경우 401 응답
+            }
+
+            // 사용자의 구독 상태 확인
+            boolean isSubscribed = subscriptionService.isUserSubscribed(email);
+
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("isSubscribed", isSubscribed);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 인증 실패 시 401 응답
+        }
     }
 }
 

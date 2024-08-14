@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Box, IconButton, Slider as MuiSlider, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -11,9 +11,10 @@ import Replay10Icon from '@mui/icons-material/Replay10';
 import Forward10Icon from '@mui/icons-material/Forward10';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
-import { CustomPrevArrow, CustomNextArrow } from './CustomArrows'; // 파일 경로에 맞게 import
+import { CustomPrevArrow, CustomNextArrow } from './CustomArrows';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './css/MovieDetailPage.module.css';
 import useRelatedMovies from '../../components/Movies/useRelatedMovies';
@@ -23,18 +24,20 @@ import VideoThumbnail from '../../../src/components/HomePage/VideoThumbnail';
 
 const MovieDetailPage: React.FC = () => {
   const { movieId } = useParams<{ movieId: string }>();
+  const navigate = useNavigate(); // useHistory 대신 useNavigate 사용
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedCast, setSelectedCast] = useState<string | null>(null);
-  const [liked, setLiked] = useState(false);  // 좋아요 상태를 관리합니다.
+  const [liked, setLiked] = useState(false);
   const { relatedMovies } = useRelatedMovies(selectedTag || '');
   const { moviesByCast } = useMoviesByCast(selectedCast || '');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
+  const backButtonRef = useRef<HTMLDivElement>(null);
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [previousVolume, setPreviousVolume] = useState(0);
@@ -48,7 +51,7 @@ const MovieDetailPage: React.FC = () => {
 
   interface LikeRequest {
     movieId: number;
-    profileNo: number;  // 실제 프로필 번호를 받기 위해 수정 필요
+    profileNo: number;
   }
 
   useEffect(() => {
@@ -81,11 +84,127 @@ const MovieDetailPage: React.FC = () => {
   }, [movie]);
 
   useEffect(() => {
+    const addWatchLog = async () => {
+      if (movieId) {
+        const storedProfile = sessionStorage.getItem('selectedProfile');
+        if (storedProfile) {
+          const profile = JSON.parse(storedProfile);
+          const profileNo = profile.profileNo;
+          const movieIdNumber = parseInt(movieId, 10);
+
+          const progressTime = 0.0; // 기본값으로 0.0을 설정
+
+          if (!isNaN(movieIdNumber)) {
+            try {
+              await axios.delete('http://localhost:8088/api/movies/watchlog', {
+                params: {
+                  movieId: movieIdNumber,
+                  profileNo
+                },
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              });
+
+              await axios.post('http://localhost:8088/api/movies/watchlog', null, {
+
+                params: {
+                  movieId: movieIdNumber,
+                  profileNo,
+                  progressTime: progressTime,
+                },
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              });
+            } catch (error) {
+              if (error instanceof Error) {
+                console.error('시청 로그 관리 중 오류 발생:', error.message);
+              } else {
+                console.error('예상치 못한 오류 발생:', error);
+              }
+            }
+          } else {
+            console.error('유효하지 않은 movieId:', movieId);
+          }
+        } else {
+          console.error('세션 스토리지에서 프로필 정보를 찾을 수 없습니다.');
+        }
+      } else {
+        console.error('유효하지 않은 movieId:', movieId);
+      }
+    };
+
+    addWatchLog();
+
+    return () => {
+      // Cleanup code if necessary
+    };
+  }, [movieId]);
+
+
+  useEffect(() => {
+    if (movieId) {
+      const storedProfile = sessionStorage.getItem('selectedProfile');
+      const profileNo = storedProfile ? JSON.parse(storedProfile).profileNo : null;
+
+      if (profileNo) {
+        axios.get('http://localhost:8088/api/movies/watchlog', {
+          params: { movieId: parseInt(movieId, 10), profileNo }
+        })
+          .then(response => {
+            if (videoRef.current && response.data !== 0) {
+              videoRef.current.currentTime = response.data; // 저장된 시청 시간으로 이동
+            }
+          })
+          .catch(error => {
+            console.error("Failed to fetch watch progress", error);
+          });
+      }
+    }
+  }, [movieId]);
+
+  // 뒤로가기 버튼
+  const handleBack = useCallback(() => {
+    const storedProfile = sessionStorage.getItem('selectedProfile');
+    const profileNo = storedProfile ? JSON.parse(storedProfile).profileNo : null;
+    if (movieId) {
+      const movieIdNumber = parseInt(movieId, 10);
+
+      if (videoRef.current && profileNo) {
+        const currentTime = videoRef.current.currentTime; // 현재 시청 시간
+
+        // 시청 시간을 서버에 저장
+        axios.post('http://localhost:8088/api/movies/watchlog', null, {
+          params: {
+            movieId: movieIdNumber,
+            profileNo,
+            progressTime: currentTime // 시청 시간 전송
+          },
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+          .then(() => {
+            navigate(-1); // 이전 페이지로 이동
+          })
+          .catch(error => {
+            console.error("Failed to save watch progress", error);
+          });
+      } else {
+        console.error("Profile number is missing. Unable to save watch progress.");
+      }
+    }
+  }, [navigate, movieId]);
+
+  useEffect(() => {
     // 좋아요 상태를 서버에서 가져오는 로직을 추가할 수 있습니다.
     // 예: axios.get(`http://localhost:8088/api/movies/${movieId}/like-status`)
     //   .then(response => setLiked(response.data.liked))
     //   .catch(error => console.error('Error fetching like status:', error));
   }, [movieId]);
+
+
 
   const handlePlayPause = useCallback(() => {
     setPlaying(prev => !prev);
@@ -219,12 +338,18 @@ const MovieDetailPage: React.FC = () => {
     if (controlsRef.current) {
       controlsRef.current.classList.add(styles.visible);
     }
+    if (backButtonRef.current) {
+      backButtonRef.current.classList.add(styles.visible);
+    }
     document.body.style.cursor = 'default';
   }, []);
 
   const hideControls = useCallback(() => {
     if (controlsRef.current) {
       controlsRef.current.classList.remove(styles.visible);
+    }
+    if (backButtonRef.current) {
+      backButtonRef.current.classList.remove(styles.visible);
     }
     document.body.style.cursor = 'none';
   }, []);
@@ -269,24 +394,46 @@ const MovieDetailPage: React.FC = () => {
   };
 
   const handleLikeClick = useCallback(() => {
-    if (movie) {
+    if (movie && movieId) {
       const newLikedStatus = !liked;
       setLiked(newLikedStatus);
-      // Call API to update like status
-      axios.post('http://localhost:8088/api/movies/toggle-like', {
-        movieId: movie.id,
-        profileNo: 123 // 여기에 실제 프로필 번호를 제공해야 합니다.
-      })
-      .then(response => {
-        // Optionally handle success response
-        console.log('Like status updated successfully');
-      })
-      .catch(error => {
-        // Optionally handle error response
-        console.error('Error updating like status:', error);
-      });
+
+      const storedProfile = sessionStorage.getItem('selectedProfile');
+
+      if (storedProfile) {
+        const profile = JSON.parse(storedProfile);
+        const profileNo = profile.profileNo;
+
+        const movieIdNumber = parseInt(movieId, 10);
+
+        if (!isNaN(movieIdNumber)) {
+          axios.post('http://localhost:8088/api/movies/toggle-like', null, {
+            params: {
+              movieId: movieIdNumber,
+              profileNo
+            },
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+            .then(response => {
+              console.log('Like status updated successfully');
+            })
+            .catch(error => {
+              console.error('Error updating like status:', error.response?.data || error.message);
+            });
+        } else {
+          console.error('movieId is not a valid number');
+        }
+      } else {
+        console.error('No profile information found in session storage');
+      }
+    } else {
+      console.error('movieId or movie is not available');
     }
-  }, [liked, movie]);
+  }, [movie, liked, movieId]);
+
+
 
   const getSliderSettings = (movieCount: number) => ({
     dots: false,
@@ -303,6 +450,12 @@ const MovieDetailPage: React.FC = () => {
 
   return (
     <Box className={styles.container} onMouseEnter={showControls} onMouseLeave={hideControls}>
+      <Box ref={backButtonRef} className={styles.backButton}>
+        <IconButton onClick={handleBack} className={styles.controlButton}>
+          <ArrowBackIcon style={{ color: 'white' }} />
+        </IconButton>
+      </Box>
+
       <Typography variant="h3" className={styles.title}>
         {movie?.title}
       </Typography>
@@ -383,14 +536,13 @@ const MovieDetailPage: React.FC = () => {
           </IconButton>
         </Box>
       </Box>
-      
-      {/* Move like button here */}
+
       <Box className={styles.likeButtonWrapper}>
         <IconButton onClick={handleLikeClick} className={styles.likeButton}>
-          {liked ? <ThumbUpIcon style={{color : 'white'}}/> : <ThumbUpOffAltIcon style={{color : 'white'}} />}
+          {liked ? <ThumbUpIcon style={{ color: 'white' }} /> : <ThumbUpOffAltIcon style={{ color: 'white' }} />}
         </IconButton>
       </Box>
-      
+
       <Typography variant="body1" className={styles.description}>
         {movie?.description}
       </Typography>

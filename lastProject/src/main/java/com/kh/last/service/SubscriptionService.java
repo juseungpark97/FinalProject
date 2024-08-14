@@ -37,13 +37,23 @@ public class SubscriptionService {
         ).isPresent();
     }
 
-    public Subscription subscribeUser(String email, int months) {
+    public synchronized Subscription subscribeUser(String email, int months) {
         USERS user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
-        Subscription subscription = subscriptionRepository.findByUserUserNo(user.getUserNo())
-                .orElse(new Subscription());
+        // 유저가 이미 활성 구독을 가지고 있는지 확인
+        Optional<Subscription> existingSubscription = subscriptionRepository.findByUserUserNoAndSubStatusAndEndDateAfter(
+                user.getUserNo(),
+                "ACTIVE",
+                new Date(System.currentTimeMillis())
+        );
 
+        if (existingSubscription.isPresent()) {
+            return existingSubscription.get();  // 기존 구독 반환
+        }
+
+        // 새로운 구독 생성
+        Subscription subscription = new Subscription();
         subscription.setUser(user);
         subscription.setStartDate(Date.valueOf(LocalDate.now()));
         subscription.setEndDate(Date.valueOf(LocalDate.now().plusMonths(months)));
@@ -53,6 +63,7 @@ public class SubscriptionService {
         System.out.println(months + " months subscription confirmed for user " + user.getEmail());
         return subscription;
     }
+
 
     public void activateSubscription(String email) {
         subscribeUser(email, 1);  // 기본적으로 1개월 구독으로 활성화

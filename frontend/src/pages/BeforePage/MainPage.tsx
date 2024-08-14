@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./css/MainPage.module.css";
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,33 @@ const Landing: FunctionComponent = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+
+  // 자동 로그인 및 구독 상태 확인 로직 추가
+  useEffect(() => {
+    const token = localStorage.getItem('authToken'); // 여기에서 'authToken'을 가져옵니다.
+    if (token) {
+      axios.get('http://localhost:8088/api/users/subscription-status', {
+        headers: { 'Authorization': `Bearer ${token}` } // 'Bearer'와 함께 토큰을 헤더에 추가
+      })
+        .then(response => {
+          const isSubscribed = response.data.isSubscribed;
+
+          if (isSubscribed) {
+            // 멀티 프로필 페이지로 이동하기 전에 세션 스토리지에 있는 프로필 정보 삭제
+            sessionStorage.removeItem('selectedProfile');
+            navigate('/profiles'); // 구독자라면 프로필 페이지로 이동
+          } else {
+            navigate('/subscribe'); // 구독자가 아니라면 구독 페이지로 이동
+          }
+        })
+        .catch(error => {
+          console.error('구독 상태 확인 중 오류가 발생했습니다:', error);
+          setError('구독 상태 확인 중 오류가 발생했습니다.');
+          localStorage.removeItem('authToken'); // 문제가 발생하면 토큰 삭제
+          sessionStorage.clear();
+        });
+    }
+  }, [navigate]);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);

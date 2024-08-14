@@ -54,7 +54,6 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ video }) => {
     useEffect(() => {
         const videoElement = videoRef.current;
         if (videoElement) {
-            console.log("Video URL:", video.url);
             videoElement.addEventListener('loadeddata', handleLoadedData);
             videoElement.addEventListener('error', handleError);
             videoElement.load();
