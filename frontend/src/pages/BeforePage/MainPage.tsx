@@ -60,6 +60,11 @@ const Landing: FunctionComponent = () => {
     window.location.href = "http://localhost:8088/oauth2/authorization/google";
   };
 
+  const handleKakaoLogin = () => {
+    // 백엔드의 카카오 OAuth 인증 요청 URI로 리디렉션
+    window.location.href = "http://localhost:8088/oauth2/authorization/kakao";
+  };
+
   return (
     <div className={styles.landing}>
       <div className={styles.background}></div>
@@ -85,6 +90,9 @@ const Landing: FunctionComponent = () => {
         </div>
         <button className={styles.googleLoginButton} onClick={handleGoogleLogin}>
           Google 로그인하기
+        </button>
+        <button className={styles.kakaoLoginButton} onClick={handleKakaoLogin}>
+          카카오 로그인하기
         </button>
       </section>
     </div>

@@ -11,6 +11,7 @@ public class LastProjectApplication {
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
+        // 기존 환경 변수 설정
         System.setProperty("DB_URL", dotenv.get("DB_URL"));
         System.setProperty("DB_USERNAME", dotenv.get("DB_USERNAME"));
         System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
@@ -30,6 +31,10 @@ public class LastProjectApplication {
         System.setProperty("SMTP_PORT", dotenv.get("SMTP_PORT"));
         System.setProperty("SMTP_USERNAME", dotenv.get("SMTP_USERNAME"));
         System.setProperty("SMTP_PASSWORD", dotenv.get("SMTP_PASSWORD"));
+
+        // 카카오 OAuth2 설정 추가
+        System.setProperty("KAKAO_CLIENT_ID", dotenv.get("KAKAO_CLIENT_ID"));
+        System.setProperty("KAKAO_REDIRECT_URI", dotenv.get("KAKAO_REDIRECT_URI"));
 
         SpringApplication.run(LastProjectApplication.class, args);
     }

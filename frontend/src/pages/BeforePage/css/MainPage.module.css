@@ -9,7 +9,23 @@
   background-position: center;
   opacity: 0.8;
 }
+.kakaoLoginButton {
+  background-color: #fee500; /* 카카오 색상 */
+  border: none;
+  color: black;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
 
+.kakaoLoginButton:hover {
+  background-color: #f7e800; /* 버튼 호버 색상 */
+}
 .backgroundOverlay {
   position: absolute;
   top: 0;
