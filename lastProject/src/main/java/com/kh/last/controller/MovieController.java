@@ -110,21 +110,22 @@ public class MovieController {
     @PostMapping("/watchlog")
     public ResponseEntity<Void> addWatchLog(
             @RequestParam Long movieId,
-            @RequestParam Long profileNo) {
+            @RequestParam Long profileNo,
+            @RequestParam Float progressTime) {  // 시청 시간을 추가로 받음
+
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id " + movieId));
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
 
-        // 최근 시청 로그 삭제
+        // 기존 시청 로그 삭제 후 새로운 시청 로그 추가
         watchLogRepository.deleteByProfileAndMovie(profile, movie);
-
-        // 새로운 시청 로그 추가
-        WatchLog watchLog = new WatchLog(profile, movie, LocalDateTime.now());
+        WatchLog watchLog = new WatchLog(profile, movie, LocalDateTime.now(), progressTime);
         watchLogRepository.save(watchLog);
 
         return ResponseEntity.ok().build();
     }
+
 
     @Transactional
     @DeleteMapping("/watchlog")
@@ -146,6 +147,24 @@ public class MovieController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    @GetMapping("/watchlog")
+    public ResponseEntity<Float> getWatchLog(
+            @RequestParam Long movieId,
+            @RequestParam Long profileNo) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id " + movieId));
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
+
+        Optional<WatchLog> watchLog = watchLogRepository.findByProfileAndMovie(profile, movie);
+        if (watchLog.isPresent()) {
+            return ResponseEntity.ok(watchLog.get().getProgressTime()); // 시청 시간 반환
+        } else {
+            return ResponseEntity.ok(0f); // 시청 기록이 없으면 0 반환
+        }
+    }
+
     
     @GetMapping("/recent-movies")
     public ResponseEntity<List<Movie>> getRecentMovies(@RequestParam Long profileNo) {

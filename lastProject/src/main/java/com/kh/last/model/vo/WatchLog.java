@@ -22,12 +22,16 @@ public class WatchLog {
     @Column(name = "viewed_at", nullable = false)
     private LocalDateTime viewedAt;
 
+    @Column(name = "progress_time", nullable = true) // 시청 시간을 저장하는 컬럼 추가
+    private float progressTime;
+
     public WatchLog() {
     }
 
-    public WatchLog(Profile profile, Movie movie, LocalDateTime viewedAt) {
+    public WatchLog(Profile profile, Movie movie, LocalDateTime viewedAt, float progressTime) {
         this.profile = profile;
         this.movie = movie;
         this.viewedAt = viewedAt;
+        this.progressTime = progressTime; // 시청 시간을 초기화
     }
 }
