@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kh.last.model.dto.WatchLogRequest;
 import com.kh.last.model.vo.Heart;
 import com.kh.last.model.vo.HeartId;
 import com.kh.last.model.vo.Movie;
@@ -106,6 +108,29 @@ public class MovieController {
     @Transactional
     @PostMapping("/watchlog")
     public ResponseEntity<Void> addWatchLog(
+            @RequestBody WatchLogRequest watchLogRequest) { // WatchLogRequest 객체로 수신
+        Long movieId = watchLogRequest.getMovieId();
+        Long profileNo = watchLogRequest.getProfileNo();
+        Float progressTime = watchLogRequest.getProgressTime();
+
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id " + movieId));
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
+
+        watchLogRepository.deleteByProfileAndMovie(profile, movie);
+
+        WatchLog watchLog = new WatchLog(profile, movie, LocalDateTime.now(), progressTime);
+        watchLogRepository.save(watchLog);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // WatchLogRequest 클래스는 movieId, profileNo, progressTime을 포함합니다.
+
+    
+    @GetMapping("/watchlog")
+    public ResponseEntity<Float> getWatchLog(
             @RequestParam Long movieId,
             @RequestParam Long profileNo) {
         Movie movie = movieRepository.findById(movieId)
@@ -113,14 +138,12 @@ public class MovieController {
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
 
-        // 최근 시청 로그 삭제
-        watchLogRepository.deleteByProfileAndMovie(profile, movie);
-
-        // 새로운 시청 로그 추가
-        WatchLog watchLog = new WatchLog(profile, movie, LocalDateTime.now());
-        watchLogRepository.save(watchLog);
-
-        return ResponseEntity.ok().build();
+        Optional<WatchLog> watchLog = watchLogRepository.findByProfileAndMovie(profile, movie);
+        if (watchLog.isPresent()) {
+            return ResponseEntity.ok(watchLog.get().getProgressTime());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Transactional

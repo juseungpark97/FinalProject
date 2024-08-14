@@ -138,9 +138,57 @@ const MovieDetailPage: React.FC = () => {
     };
   }, [movieId]);
 
+
+  // 뒤로가기 버튼
+  // 수정된 handleBack 함수
   const handleBack = useCallback(() => {
-    navigate(-1); // 이전 페이지로 이동
-  }, [navigate]);
+    const storedProfile = sessionStorage.getItem('selectedProfile');
+    const profileNo = storedProfile ? JSON.parse(storedProfile).profileNo : null;
+
+    if (videoRef.current && profileNo) {
+      const currentTime = videoRef.current.currentTime; // 현재 시청 시간
+
+      // 시청 시간을 서버에 저장
+      axios.post('http://localhost:8088/api/movies/watchlog', {
+        movieId,
+        profileNo,
+        progressTime: currentTime, // progressTime을 포함하여 전송
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }).then(() => {
+        navigate(-1); // 이전 페이지로 이동
+      }).catch(error => {
+        console.error("Failed to save watch progress", error);
+      });
+    } else {
+      console.error("Profile number is missing. Unable to save watch progress.");
+    }
+  }, [navigate, movieId]);
+
+
+
+  useEffect(() => {
+    if (movieId) {
+      const storedProfile = sessionStorage.getItem('selectedProfile');
+      const profileNo = storedProfile ? JSON.parse(storedProfile).profileNo : null;
+
+      if (profileNo) {
+        axios.get('http://localhost:8088/api/movies/watchlog', {
+          params: { movieId, profileNo }
+        }).then(response => {
+          if (videoRef.current && response.data.progressTime) {
+            videoRef.current.currentTime = response.data.progressTime; // 저장된 시청 시간으로 이동
+          }
+        }).catch(error => {
+          console.error("Failed to fetch watch progress", error);
+        });
+      }
+    }
+  }, [movieId]);
+
+
 
   useEffect(() => {
     // 좋아요 상태를 서버에서 가져오는 로직을 추가할 수 있습니다.
@@ -148,6 +196,7 @@ const MovieDetailPage: React.FC = () => {
     //   .then(response => setLiked(response.data.liked))
     //   .catch(error => console.error('Error fetching like status:', error));
   }, [movieId]);
+
 
 
 
