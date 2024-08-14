@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Box, IconButton, Slider as MuiSlider, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -11,9 +11,10 @@ import Replay10Icon from '@mui/icons-material/Replay10';
 import Forward10Icon from '@mui/icons-material/Forward10';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
-import { CustomPrevArrow, CustomNextArrow } from './CustomArrows'; // 파일 경로에 맞게 import
+import { CustomPrevArrow, CustomNextArrow } from './CustomArrows';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './css/MovieDetailPage.module.css';
 import useRelatedMovies from '../../components/Movies/useRelatedMovies';
@@ -23,18 +24,20 @@ import VideoThumbnail from '../../../src/components/HomePage/VideoThumbnail';
 
 const MovieDetailPage: React.FC = () => {
   const { movieId } = useParams<{ movieId: string }>();
+  const navigate = useNavigate(); // useHistory 대신 useNavigate 사용
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedCast, setSelectedCast] = useState<string | null>(null);
-  const [liked, setLiked] = useState(false);  // 좋아요 상태를 관리합니다.
+  const [liked, setLiked] = useState(false);
   const { relatedMovies } = useRelatedMovies(selectedTag || '');
   const { moviesByCast } = useMoviesByCast(selectedCast || '');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
+  const backButtonRef = useRef<HTMLDivElement>(null);
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [previousVolume, setPreviousVolume] = useState(0);
@@ -48,7 +51,7 @@ const MovieDetailPage: React.FC = () => {
 
   interface LikeRequest {
     movieId: number;
-    profileNo: number;  // 실제 프로필 번호를 받기 위해 수정 필요
+    profileNo: number;
   }
 
   useEffect(() => {
@@ -91,7 +94,6 @@ const MovieDetailPage: React.FC = () => {
 
           if (!isNaN(movieIdNumber)) {
             try {
-              // 기존 시청 로그를 삭제합니다.
               await axios.delete('http://localhost:8088/api/movies/watchlog', {
                 params: {
                   movieId: movieIdNumber,
@@ -102,7 +104,6 @@ const MovieDetailPage: React.FC = () => {
                 }
               });
 
-              // 새로운 시청 로그를 추가합니다.
               await axios.post('http://localhost:8088/api/movies/watchlog', null, {
                 params: {
                   movieId: movieIdNumber,
@@ -130,17 +131,16 @@ const MovieDetailPage: React.FC = () => {
       }
     };
 
-    // 비동기 함수 호출
     addWatchLog();
 
-    // 정리 작업 (필요한 경우)
     return () => {
-      // 예: 정리 작업 코드 추가
+      // Cleanup code if necessary
     };
   }, [movieId]);
 
-
-
+  const handleBack = useCallback(() => {
+    navigate(-1); // 이전 페이지로 이동
+  }, [navigate]);
 
   useEffect(() => {
     // 좋아요 상태를 서버에서 가져오는 로직을 추가할 수 있습니다.
@@ -148,6 +148,8 @@ const MovieDetailPage: React.FC = () => {
     //   .then(response => setLiked(response.data.liked))
     //   .catch(error => console.error('Error fetching like status:', error));
   }, [movieId]);
+
+
 
   const handlePlayPause = useCallback(() => {
     setPlaying(prev => !prev);
@@ -281,12 +283,18 @@ const MovieDetailPage: React.FC = () => {
     if (controlsRef.current) {
       controlsRef.current.classList.add(styles.visible);
     }
+    if (backButtonRef.current) {
+      backButtonRef.current.classList.add(styles.visible);
+    }
     document.body.style.cursor = 'default';
   }, []);
 
   const hideControls = useCallback(() => {
     if (controlsRef.current) {
       controlsRef.current.classList.remove(styles.visible);
+    }
+    if (backButtonRef.current) {
+      backButtonRef.current.classList.remove(styles.visible);
     }
     document.body.style.cursor = 'none';
   }, []);
@@ -341,11 +349,9 @@ const MovieDetailPage: React.FC = () => {
         const profile = JSON.parse(storedProfile);
         const profileNo = profile.profileNo;
 
-        // movieId를 숫자로 변환합니다.
         const movieIdNumber = parseInt(movieId, 10);
 
         if (!isNaN(movieIdNumber)) {
-          console.log('Sending request with movieId:', movieIdNumber, 'profileNo:', profileNo);
           axios.post('http://localhost:8088/api/movies/toggle-like', null, {
             params: {
               movieId: movieIdNumber,
@@ -374,9 +380,6 @@ const MovieDetailPage: React.FC = () => {
 
 
 
-
-
-
   const getSliderSettings = (movieCount: number) => ({
     dots: false,
     infinite: movieCount > 2,
@@ -392,6 +395,12 @@ const MovieDetailPage: React.FC = () => {
 
   return (
     <Box className={styles.container} onMouseEnter={showControls} onMouseLeave={hideControls}>
+      <Box ref={backButtonRef} className={styles.backButton}>
+        <IconButton onClick={handleBack} className={styles.controlButton}>
+          <ArrowBackIcon style={{ color: 'white' }} />
+        </IconButton>
+      </Box>
+
       <Typography variant="h3" className={styles.title}>
         {movie?.title}
       </Typography>
@@ -473,7 +482,6 @@ const MovieDetailPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Move like button here */}
       <Box className={styles.likeButtonWrapper}>
         <IconButton onClick={handleLikeClick} className={styles.likeButton}>
           {liked ? <ThumbUpIcon style={{ color: 'white' }} /> : <ThumbUpOffAltIcon style={{ color: 'white' }} />}
