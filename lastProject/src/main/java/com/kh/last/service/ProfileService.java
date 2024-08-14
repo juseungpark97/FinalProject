@@ -14,8 +14,6 @@ import com.kh.last.model.vo.USERS;
 import com.kh.last.repository.ProfileRepository;
 import com.kh.last.repository.UserRepository;
 
-import io.jsonwebtoken.io.IOException;
-
 @Service
 public class ProfileService {
 	@Autowired
@@ -38,30 +36,30 @@ public class ProfileService {
 		return profileRepository.save(profile);
 	}
 
-	public String uploadProfileImage(MultipartFile file, Long profileNo) throws IOException {
-		// 파일을 서버에 저장
-		String fileName = "profile_" + profileNo + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
-		Path path = Paths.get("uploads/" + fileName);
-		try {
-			Files.write(path, file.getBytes());
-		} catch (java.io.IOException e) {
-			e.printStackTrace();
+	public String selectProfileImage(Long profileNo, String selectedImageName) {
+		// 지정된 디렉토리에서 이미지 선택
+		String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+		Path imagePath = Paths.get(directory, selectedImageName);
+
+		if (!Files.exists(imagePath)) {
+			throw new RuntimeException("Selected image not found in the directory");
 		}
 
 		// 데이터베이스에서 프로필을 찾아 이미지 경로 업데이트
 		Profile profile = profileRepository.findById(profileNo)
 				.orElseThrow(() -> new RuntimeException("Profile not found"));
-		profile.setProfileImg("/uploads/" + fileName);
+		profile.setProfileImg("/profile-images/" + selectedImageName);
 		profileRepository.save(profile);
 
 		return profile.getProfileImg();
 	}
 
-	// 닉네임 변경
-	public void updateProfileName(Long profileNo, String profileName) {
-		Profile profile = profileRepository.findById(profileNo)
-				.orElseThrow(() -> new RuntimeException("Profile not found"));
-		profile.setProfileName(profileName);
+	public Profile getProfileById(Long profileNo) {
+		return profileRepository.findById(profileNo).orElseThrow(() -> new RuntimeException("Profile not found"));
+	}
+
+	public void updateProfile(Profile profile) {
 		profileRepository.save(profile);
 	}
+
 }

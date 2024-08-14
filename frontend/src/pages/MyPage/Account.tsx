@@ -46,7 +46,7 @@ const Account: React.FC = () => {
 
   return (
     <div className={styles.account}>
-      <Header />
+      <Header selectedProfile={profile} setSelectedProfile={setProfile} />
       <div className={styles.mainContainer}>
         <div className={styles.sidebar}>
           <CinemaCloudButtonContainer onMenuClick={setSelectedMenu} />
