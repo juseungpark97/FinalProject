@@ -28,15 +28,19 @@ public class MovieService {
 
     public Movie uploadMovie(MultipartFile file, MultipartFile thumbnail, String title, String director, String cast,
             int releaseYear, String synopsis, float rating, String tags) throws IOException {
-        String videoKey = file.getOriginalFilename();
-        String thumbnailKey = thumbnail.getOriginalFilename();
+        // S3 키에 폴더 경로를 포함시킴
+        String videoKey = "movies/" + file.getOriginalFilename();
+        String thumbnailKey = "thumbnail/" + thumbnail.getOriginalFilename();
 
+        // S3에 파일 업로드
         amazonS3.putObject(new PutObjectRequest(awsS3BucketName, videoKey, file.getInputStream(), null));
         amazonS3.putObject(new PutObjectRequest(awsS3BucketName, thumbnailKey, thumbnail.getInputStream(), null));
 
+        // S3 URL 생성
         String videoUrl = amazonS3.getUrl(awsS3BucketName, videoKey).toString();
         String thumbnailUrl = amazonS3.getUrl(awsS3BucketName, thumbnailKey).toString();
         
+        // Movie 객체 생성 및 설정
         Movie movie = new Movie();
         movie.setTitle(title);
         movie.setDirector(director);
@@ -50,6 +54,7 @@ public class MovieService {
         movie.setTagList(Arrays.asList(tags.split(",")));
         movie.setCastList(Arrays.asList(cast.split(",")));
 
+        // Movie 객체를 저장하고 반환
         return movieRepository.save(movie);
     }
 
