@@ -38,7 +38,7 @@ public class ProfileService {
 
 	public String selectProfileImage(Long profileNo, String selectedImageName) {
 		// 지정된 디렉토리에서 이미지 선택
-		String directory = "C:/Users/user1/Desktop/ll/FinalProject/lastProject/profile-images";
+		String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
 		Path imagePath = Paths.get(directory, selectedImageName);
 
 		if (!Files.exists(imagePath)) {
@@ -54,29 +54,12 @@ public class ProfileService {
 		return profile.getProfileImg();
 	}
 
-	// 닉네임 변경
-	public void updateProfileName(Long profileNo, String profileName) {
-		Profile profile = profileRepository.findById(profileNo)
-				.orElseThrow(() -> new RuntimeException("Profile not found"));
-		profile.setProfileName(profileName);
+	public Profile getProfileById(Long profileNo) {
+		return profileRepository.findById(profileNo).orElseThrow(() -> new RuntimeException("Profile not found"));
+	}
+
+	public void updateProfile(Profile profile) {
 		profileRepository.save(profile);
 	}
 
-	public String updateProfileImage(Long profileNo, MultipartFile profileImg) throws java.io.IOException {
-		Profile profile = profileRepository.findById(profileNo)
-				.orElseThrow(() -> new RuntimeException("Profile not found"));
-
-		// 이미지 저장 경로 설정
-		String directory = "C:/Users/user1/Desktop/ll/FinalProject/lastProject/profile-images";
-		Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
-
-		// 이미지 저장
-		Files.write(imagePath, profileImg.getBytes());
-
-		// 프로필에 새로운 이미지 경로 설정 및 저장
-		profile.setProfileImg(profileImg.getOriginalFilename());
-		profileRepository.save(profile);
-
-		return profileImg.getOriginalFilename();
-	}
 }

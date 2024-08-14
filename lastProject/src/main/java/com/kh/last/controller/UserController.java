@@ -53,7 +53,7 @@ public class UserController {
     public ResponseEntity<USERS> createUser(@RequestBody UserCreateRequest request) {
         try {
             USERS createdUser = userService.createUser(request.getEmail(), request.getPassword(),
-                    request.getStatus(), request.getBirthday(), request.getUsername());
+					request.getStatus(), request.getBirthday(), request.getUsername());
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
         } catch (Exception e) {
             e.printStackTrace();

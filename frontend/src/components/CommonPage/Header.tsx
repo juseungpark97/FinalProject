@@ -6,6 +6,8 @@ import styles from './css/Header.module.css';
 export type HeaderProps = {
   className?: string;
   onSearchClick?: () => void;
+  selectedProfile: Profile | null;  // 기존 상태를 props로 받도록 수정
+  setSelectedProfile: (profile: Profile | null) => void;  // 기존 상태 업데이트 함수를 props로 받도록 수정
 };
 
 interface Profile {
@@ -14,8 +16,7 @@ interface Profile {
   profileName: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick }) => {
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selectedProfile, setSelectedProfile }) => {
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
@@ -46,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick }) => {
           .catch(error => console.error("Error fetching user data", error));
       }
     }
-  }, []);
+  }, [setSelectedProfile]);
 
   const decodeJWT = (token: string) => {
     try {
@@ -66,7 +67,6 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick }) => {
   };
 
   const handleProfileChange = () => {
-    // 프로필 선택 화면으로 리디렉션
     navigate('/profiles');
   };
 
@@ -74,6 +74,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick }) => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
     localStorage.removeItem('selectedProfile');
+    setSelectedProfile(null);
     navigate('/login');
   };
 

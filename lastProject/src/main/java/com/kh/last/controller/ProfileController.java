@@ -2,6 +2,7 @@ package com.kh.last.controller;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -88,12 +88,11 @@ public class ProfileController {
 		}
 	}
 
-
-
 	@GetMapping("/available-images")
 	public ResponseEntity<List<String>> getAvailableImages() {
 		try {
-			List<String> imageNames = Files.list(Paths.get("src/main/resources/static/profile-images"))
+			List<String> imageNames = Files
+					.list(Paths.get("C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images"))
 					.map(path -> path.getFileName().toString()).collect(Collectors.toList());
 			return ResponseEntity.ok(imageNames);
 		} catch (IOException e) {
@@ -101,26 +100,38 @@ public class ProfileController {
 			return ResponseEntity.status(500).body(Collections.emptyList());
 		}
 	}
-    @PutMapping("/update-image")
-    public ResponseEntity<?> updateProfileImage(@RequestParam("profileNo") Long profileNo,
-                                                @RequestParam("profileImg") MultipartFile profileImg) {
-        try {
-            String updatedImagePath = profileService.updateProfileImage(profileNo, profileImg);
-            return ResponseEntity.ok().body(Map.of("profileImg", updatedImagePath));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
-        }
-    }
 
-    @PutMapping("/update-name")
-    public ResponseEntity<?> updateProfileName(@RequestBody Map<String, String> request) {
-        try {
-            Long profileNo = Long.parseLong(request.get("profileNo"));
-            String profileName = request.get("profileName");
-            profileService.updateProfileName(profileNo, profileName);
-            return ResponseEntity.ok().body(Map.of("success", true));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
-        }
-    }
+	@PutMapping("/update-profile")
+	public ResponseEntity<?> updateProfile(@RequestParam("profileNo") Long profileNo,
+			@RequestParam("profileName") String profileName,
+			@RequestParam(value = "profileImg", required = false) MultipartFile profileImg) {
+		try {
+			// 프로필 가져오기
+			Profile profile = profileService.getProfileById(profileNo);
+			if (profile == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
+			}
+
+			// 프로필 이름 업데이트
+			profile.setProfileName(profileName);
+
+			// 프로필 이미지 업데이트
+			if (profileImg != null && !profileImg.isEmpty()) {
+				// 이미지 저장 로직 (이미지 경로 설정 및 저장)
+				String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+				Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
+				Files.write(imagePath, profileImg.getBytes());
+				profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());
+			}
+
+			// DB 업데이트
+			profileService.updateProfile(profile);
+
+			return ResponseEntity
+					.ok(Map.of("success", true, "profileImg", profile.getProfileImg(), "profileName", profileName));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("success", false, "message", e.getMessage()));
+		}
+	}
 }

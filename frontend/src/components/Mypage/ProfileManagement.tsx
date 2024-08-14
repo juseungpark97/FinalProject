@@ -11,6 +11,7 @@ interface ProfileManagementProps {
         profileName: string;
         profileNo: number;
     };
+    onProfileUpdate: (updatedProfile: { profileImg: string; profileName: string }) => void; // 여기에 추가
 }
 
 const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, profile }) => {
@@ -26,43 +27,33 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
 
     const handleProfileUpdate = async () => {
         try {
-            let updatedProfile = { ...selectedProfile, profileName: newProfileName };
+            const formData = new FormData();
+            formData.append('profileNo', String(selectedProfile.profileNo));
+            formData.append('profileName', newProfileName);
 
-            // 이미지 업데이트
+            // 이미지가 선택되었을 경우에만 추가
             if (newProfileImage) {
-                const formData = new FormData();
-                formData.append('profileImg', newProfileImage);
-                formData.append('profileNo', String(selectedProfile.profileNo));
-
-                const imageResponse = await axios.post('/api/profiles/update-image', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-
-                if (imageResponse.status === 200 && imageResponse.data.profileImg) {
-                    updatedProfile.profileImg = imageResponse.data.profileImg;
-                } else {
-                    console.error('Failed to update image:', imageResponse.data);
-                }
+                const imageBlob = await fetch(newProfileImage).then(r => r.blob());
+                formData.append('profileImg', imageBlob, newProfileImage.split('/').pop());  // 이미지 이름만 추출하여 파일 이름으로 사용
             }
 
-            // 닉네임 업데이트
-            const nameResponse = await axios.put('/api/profiles/update-name', {
-                profileNo: selectedProfile.profileNo,
-                profileName: newProfileName,
+            const response = await axios.put('http://localhost:8088/api/profiles/update-profile', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             });
 
-            if (nameResponse.status === 200) {
-                setSelectedProfile(updatedProfile);
+            if (response.status === 200 && response.data.success) {
+                setSelectedProfile({
+                    ...selectedProfile,
+                    profileName: response.data.profileName,
+                    profileImg: response.data.profileImg
+                });
                 setIsModalOpen(false);
+                alert('프로필 변경이 완료되었습니다.');  // 여기에 alert 추가
             } else {
-                console.error('Failed to update name:', nameResponse.data);
+                console.error('Failed to update profile:', response.data);
             }
-
-            // 상태 업데이트
-            setSelectedProfile(updatedProfile);
-            setIsModalOpen(false);
         } catch (error) {
             console.error('Error updating profile:', error);
         }
@@ -92,7 +83,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                 <div className={styles.profileSection}>
                     <div className={styles.profileImageContainer}>
                         <img
-                            src={previewImage || (selectedProfile.profileImg ? `http://localhost:8088/profile-images/${selectedProfile.profileImg}` : "/profile.png")}
+                            src={previewImage || (selectedProfile.profileImg)}
                             alt="Profile"
                             className={styles.profileImage}
                             onClick={openModal}
