@@ -13,7 +13,7 @@ const Account: React.FC = () => {
   const [profile, setProfile] = useState<{ profileImg: string; profileName: string; profileNo: number } | null>(null);
 
   useEffect(() => {
-    const storedProfile = localStorage.getItem('selectedProfile');
+    const storedProfile = sessionStorage.getItem('selectedProfile');
     if (storedProfile) {
       setProfile(JSON.parse(storedProfile));
     }
@@ -23,7 +23,7 @@ const Account: React.FC = () => {
     if (profile) {
       const updated = { ...profile, ...updatedProfile };
       setProfile(updated);
-      localStorage.setItem('selectedProfile', JSON.stringify(updated));
+      sessionStorage.setItem('selectedProfile', JSON.stringify(updated));
     }
   };
 
