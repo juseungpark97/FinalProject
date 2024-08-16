@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,7 @@ import com.kh.last.service.VisitService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -134,6 +136,24 @@ public class UserController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 인증 실패 시 401 응답
+        }
+    }
+    
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token) {
+        try {
+            String email = userService.getEmailFromToken(token);
+            if (email == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token or user not found");
+            }
+
+            // 계정 비활성화 (status를 'D'로 변경)
+            userService.deactivateUser(email);
+            return ResponseEntity.ok("User account deactivated successfully");
+        } catch (Exception e) {
+            // 오류 로그 출력
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during deactivation");
         }
     }
 }

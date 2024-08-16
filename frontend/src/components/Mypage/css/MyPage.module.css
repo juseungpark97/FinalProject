@@ -177,3 +177,30 @@
 .cancelButton:hover {
     background-color: #5e0808;
 }
+
+.deleteButton {
+    background-color: #f44336;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 200px;
+}
+
+.deleteButton:hover {
+    background-color: #d32f2f;
+}
+
+.deleteButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.4);
+}
+
+.deleteButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.last.model.vo.Movie;
 import com.kh.last.model.vo.Profile;
@@ -41,12 +42,31 @@ public class ProfileService {
     }
 
     public Profile createProfile(Long userNo, String profileName, String profileImg) {
-        USERS user = userRepository.findById(userNo).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        USERS user = userRepository.findById(userNo)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        
+        // 사용자별 첫 번째 프로필은 'M', 그 외 프로필은 'S'로 설정
+        String profileMain = profileRepository.countByUserNo(user) == 0 ? "M" : "S";
+        
         Profile profile = new Profile();
         profile.setUserNo(user);
         profile.setProfileName(profileName);
         profile.setProfileImg(profileImg);
+        profile.setProfileMain(profileMain);
+        
         return profileRepository.save(profile);
+    }
+
+    
+    public void deleteProfile(Long profileNo) {
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        if ("M".equals(profile.getProfileMain())) {
+            throw new RuntimeException("Main profile cannot be deleted");
+        }
+
+        profileRepository.delete(profile);
     }
 
     public String selectProfileImage(Long profileNo, String selectedImageName) {

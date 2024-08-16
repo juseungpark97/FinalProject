@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import ProfileImageSelectorModal from '../CommonPage/ProfileImageSelectorModal'; // 모달 컴포넌트 임포트
 import styles from '../../components/BeforePage/css/ProfileCreate.module.css';
-
-interface Profile {
-    profileNo: number;
-    profileImg: string;
-    profileName: string;
-}
+import { Profile } from '../../types/Profile';
 
 interface ProfileCreateProps {
     onProfileCreated: (newProfile: Profile) => void;
@@ -62,7 +57,7 @@ const ProfileCreate: React.FC<ProfileCreateProps> = ({ onProfileCreated, onCance
     };
 
     const handleSelectImage = (imageName: string) => {
-        const fileUrl = `http://localhost:8088/profile-images/${imageName}`;
+        const fileUrl = `profile-images/${imageName}`;
         fetch(fileUrl)
             .then(response => response.blob())
             .then(blob => {

@@ -30,6 +30,9 @@ public class Profile {
     // 프로필 벡터 필드 추가
     @Column(name = "profile_vector", length = 4000)
     private String profileVector; // 사용자의 선호도를 벡터로 저장
+    
+    @Column(name = "profile_main", nullable = false, length = 1)
+    private String profileMain; // 'M' for Main, 'S' for Sub
 
     @Override
     public boolean equals(Object o) {

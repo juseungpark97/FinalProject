@@ -10,8 +10,9 @@ interface ProfileManagementProps {
         profileImg: string;
         profileName: string;
         profileNo: number;
+        profileMain: string; // profileMain 속성 추가
     };
-    onProfileUpdate: (updatedProfile: { profileImg: string; profileName: string }) => void; // 여기에 추가
+    onProfileUpdate: (updatedProfile: { profileImg: string; profileName: string }) => void;
 }
 
 const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, profile, onProfileUpdate }) => {
@@ -50,7 +51,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                 };
 
                 setSelectedProfile(updatedProfile);
-                onProfileUpdate(updatedProfile); // 부모 컴포넌트 또는 Header에 업데이트를 전달
+                onProfileUpdate(updatedProfile);
                 setIsModalOpen(false);
                 alert('프로필 변경이 완료되었습니다.');
             } else {
@@ -123,18 +124,20 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                         <li><a href="/watch-history">시청 기록 <span className={styles.arrow}>&gt;</span></a></li>
                         <li><a href="/payment-info">결제정보 <span className={styles.arrow}>&gt;</span></a></li>
                         <li><a href="/privacy-policy">개인정보 및 데이터 설정 <span className={styles.arrow}>&gt;</span></a></li>
-                        <li>
-                            <a
-                                href="#"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onMenuClick('accountDelete');
-                                }}
-                                className={styles.link}
-                            >
-                                회원 탈퇴 <span className={styles.arrow}>&gt;</span>
-                            </a>
-                        </li>
+                        {selectedProfile.profileMain !== 'S' && (
+                            <li>
+                                <a
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onMenuClick('accountDelete');
+                                    }}
+                                    className={styles.link}
+                                >
+                                    회원 탈퇴 <span className={styles.arrow}>&gt;</span>
+                                </a>
+                            </li>
+                        )}
                     </ul>
                 </div>
             </div>

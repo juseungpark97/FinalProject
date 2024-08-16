@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +34,6 @@ import com.kh.last.service.UserService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/profiles")
@@ -79,31 +79,6 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating profile");
         }
     }
-
-//    @PostMapping("/upload")
-//    public ResponseEntity<?> uploadProfileImage(@RequestParam("profileImg") MultipartFile file,
-//                                                @RequestParam("profileNo") Long profileNo) {
-//        try {
-//            String profileImgUrl = profileService.uploadProfileImage(file, profileNo);
-//            return ResponseEntity.ok().body(Map.of("success", true, "profileImg", profileImgUrl));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(Map.of("success", false, "message", e.getMessage()));
-//        }
-//    }
-
-//    @PutMapping("/update-name")
-//    public ResponseEntity<?> updateProfileName(@RequestBody Map<String, String> request) {
-//        try {
-//            Long profileNo = Long.parseLong(request.get("profileNo"));
-//            String profileName = request.get("profileName");
-//            profileService.updateProfileName(profileNo, profileName);
-//            return ResponseEntity.ok().body(Map.of("success", true));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(Map.of("success", false, "message", e.getMessage()));
-//        }
-//    }
 
     @PostMapping("/update-vector")
     public ResponseEntity<?> updateProfileVector(@RequestBody Map<String, Object> request) {
@@ -175,6 +150,18 @@ public class ProfileController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+    
+    @DeleteMapping("/{profileNo}")
+    public ResponseEntity<?> deleteProfile(@PathVariable Long profileNo) {
+        try {
+            profileService.deleteProfile(profileNo);
+            return ResponseEntity.ok().body(Map.of("success", true, "message", "Profile deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Error deleting profile"));
         }
     }
 }

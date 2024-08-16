@@ -9,4 +9,6 @@ import com.kh.last.model.vo.USERS;
 
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
     List<Profile> findByUserNo(USERS user);
+    
+    long countByUserNo(USERS userNo);
 }
