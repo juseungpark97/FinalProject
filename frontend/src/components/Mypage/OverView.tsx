@@ -5,7 +5,7 @@ import styles from './css/MyPage.module.css';
 interface Subscription {
     startDate: string;
     endDate: string;
-    subStatus: string;
+    subStatus: string;  // 구독 상태를 나타내는 필드 추가
 }
 
 const OverView: React.FC = () => {
@@ -19,7 +19,7 @@ const OverView: React.FC = () => {
             return;
         }
 
-        axios.get('http://localhost:8088/api/subscription', {
+        axios.get('http://localhost:8088/api/myPage/subscription-date', {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -46,16 +46,25 @@ const OverView: React.FC = () => {
                 <h1>개요</h1>
                 <h3>멤버십 결제일</h3>
                 <div className={styles.quickLinks}>
-                    {subscription && (
+
+                    {subscription ? (
                         <ul>
-                            <li>구독 시작일: {new Date(subscription.startDate).toLocaleDateString()}</li>
-                            <li>구독 마감일: {new Date(subscription.endDate).toLocaleDateString()}</li>
+                            <li>구독 시작일 : {new Date(subscription.startDate).toLocaleDateString()}
+                                <br></br>
+                                구독 마감일 : {new Date(subscription.endDate).toLocaleDateString()}</li>
+                            <li>
+                                구독 상태 :
+                                <span className={subscription.subStatus === "ACTIVE" ? styles.statusActiveText : styles.statusInactiveText}>
+                                    {subscription.subStatus === "ACTIVE" ? " 활성화" : " 비활성화"}
+                                </span> {/* 구독 상태 표시 */}
+                            </li>
                             {daysLeft !== null && (
-                                <li>구독 만료까지 남은 일수: {daysLeft}일</li>
+                                <li>구독 만료까지 남은 일수 : {daysLeft}일</li>
                             )}
                         </ul>
+                    ) : (
+                        <p>구독 정보를 불러오는 중...</p>
                     )}
-                    {!subscription && <p>구독 정보를 불러오는 중...</p>}
                 </div>
             </div>
         </div>

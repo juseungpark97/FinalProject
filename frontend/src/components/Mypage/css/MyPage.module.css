@@ -204,3 +204,14 @@
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+.statusActiveText {
+    color: lightgreen;
+    font-weight: bold;
+
+}
+
+.statusInactiveText {
+    color: gray;
+    font-weight: bold;
+}

@@ -127,7 +127,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                         {selectedProfile.profileMain !== 'S' && (
                             <li>
                                 <a
-                                    href="#"
+                                    href=""
                                     onClick={(e) => {
                                         e.preventDefault();
                                         onMenuClick('accountDelete');
