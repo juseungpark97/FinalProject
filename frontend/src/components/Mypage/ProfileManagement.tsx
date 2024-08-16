@@ -14,11 +14,11 @@ interface ProfileManagementProps {
     onProfileUpdate: (updatedProfile: { profileImg: string; profileName: string }) => void; // 여기에 추가
 }
 
-const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, profile }) => {
+const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, profile, onProfileUpdate }) => {
     const [selectedProfile, setSelectedProfile] = useState(profile);
     const [newProfileName, setNewProfileName] = useState<string>(profile.profileName);
-    const [newProfileImage, setNewProfileImage] = useState<string | null>(null); // 새로운 프로필 이미지 상태
-    const [previewImage, setPreviewImage] = useState<string | null>(null); // 미리보기 이미지 URL 상태
+    const [newProfileImage, setNewProfileImage] = useState<string | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     useEffect(() => {
@@ -31,10 +31,9 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
             formData.append('profileNo', String(selectedProfile.profileNo));
             formData.append('profileName', newProfileName);
 
-            // 이미지가 선택되었을 경우에만 추가
             if (newProfileImage) {
                 const imageBlob = await fetch(newProfileImage).then(r => r.blob());
-                formData.append('profileImg', imageBlob, newProfileImage.split('/').pop());  // 이미지 이름만 추출하여 파일 이름으로 사용
+                formData.append('profileImg', imageBlob, newProfileImage.split('/').pop());
             }
 
             const response = await axios.put('http://localhost:8088/api/profiles/update-profile', formData, {
@@ -44,13 +43,16 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
             });
 
             if (response.status === 200 && response.data.success) {
-                setSelectedProfile({
+                const updatedProfile = {
                     ...selectedProfile,
                     profileName: response.data.profileName,
                     profileImg: response.data.profileImg
-                });
+                };
+
+                setSelectedProfile(updatedProfile);
+                onProfileUpdate(updatedProfile); // 부모 컴포넌트 또는 Header에 업데이트를 전달
                 setIsModalOpen(false);
-                alert('프로필 변경이 완료되었습니다.');  // 여기에 alert 추가
+                alert('프로필 변경이 완료되었습니다.');
             } else {
                 console.error('Failed to update profile:', response.data);
             }
@@ -71,7 +73,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
     const handleSelectImage = (imageName: string) => {
         const imageUrl = `http://localhost:8088/profile-images/${imageName}`;
         setPreviewImage(imageUrl);
-        setNewProfileImage(imageName); // 새로운 프로필 이미지 이름을 상태로 설정
+        setNewProfileImage(imageName);
         setIsModalOpen(false);
     };
 
@@ -107,7 +109,6 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                 </div>
             </div>
 
-            {/* 프로필 이미지 선택 모달 */}
             <ProfileImageSelectorModal
                 isOpen={isModalOpen}
                 onClose={closeModal}
