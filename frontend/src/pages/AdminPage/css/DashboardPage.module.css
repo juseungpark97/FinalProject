@@ -191,7 +191,7 @@ h2 {
   text-align: center;
   font-size: 24px;
   color: #2c3e50;
-  margin-right: 650px;
+  margin-right: 600px;
 }
 
 .headerContainer {
@@ -373,18 +373,29 @@ h2 {
 
 .ChattingTitle {
   font-size: 24px;
-  text-align: center;
-  margin-bottom: 50px;
+  text-align: left;
+}
+
+.filterContainer {
+  display: flex;
+  gap: 10px;
+}
+
+.filterContainer span {
+  cursor: pointer;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.filterContainer .activeFilter {
+  font-weight: bold;
+  color: #e74c3c;
 }
 
 .ChattingGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  /* 가로로 5개의 박스를 배치 */
-  grid-template-rows: repeat(2, auto);
-  /* 세로로 2개의 행 */
   gap: 80px;
-  /* 카드 간격 */
   height: 60%;
   margin-bottom: 200px;
 }
@@ -394,14 +405,11 @@ h2 {
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: left;
-  /* 가로로 중앙 정렬 */
   height: 200px;
-  /* 카드가 그리드 셀 전체를 채우도록 설정 */
 }
 
 .ChattingCardTitle {
@@ -424,8 +432,6 @@ h2 {
   padding: 10px;
   border-radius: 4px;
   cursor: pointer;
-  margin-top: 10px;
-  /* 버튼을 다른 요소들과 분리 */
 }
 
 .ChattingCardButton:hover {
@@ -572,4 +578,58 @@ h2 {
   font-weight: bold;
   margin-bottom: 20px;
   text-align: center;
+}
+
+.newMessageIndicator {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: red;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.myMessage {
+  display: flex;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+}
+
+.theirMessage {
+  display: flex;
+  justify-content: flex-start; /* 왼쪽 정렬 */
+}
+
+.messageBubble {
+  padding: 8px 12px;
+  border-radius: 18px;
+  max-width: 60%;
+  word-wrap: break-word;
+  margin-bottom: 4px;
+}
+
+.myMessage .messageBubble {
+  background-color: #ffd966;
+  color: #000;
+  align-self: flex-end; /* 오른쪽 말풍선 */
+}
+
+.theirMessage .messageBubble {
+  background-color: #ffffff;
+  border: solid rgb(221, 221, 221) 1px; /* 경계선 추가 */
+  align-self: flex-start; /* 왼쪽 말풍선 */
+}
+
+
+.chatDate {
+  font-size: 0.8em;
+  color: #888;
+  margin: 0 8px;
 }

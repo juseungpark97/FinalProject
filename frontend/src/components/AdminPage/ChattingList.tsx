@@ -1,67 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../../pages/AdminPage/css/DashboardPage.module.css';
-import Pagination from './Pagination';  // 외부 컴포넌트로 분리된 Pagination을 import
+import Pagination from './Pagination';
 import { Chatting } from './Chatting';
+import axios from 'axios';
+import { format } from 'date-fns';
 
 interface ChatItem {
-    id: number;
-    username: string;
-    date: string;
-    content: string;
+    chatRoomId: number;
+    profileName: string;
+    recentChat: string;
+    createDate: Date;
+    hasNewMessage: boolean;
+    exitRoom: string;
 }
 
-const data: ChatItem[] = [
-    { id: 1, username: "user1", date: "2022.01.01", content: "user1님의 채팅" },
-    { id: 2, username: "user2", date: "2022.01.02", content: "user2님의 채팅" },
-    { id: 3, username: "user3", date: "2022.01.03", content: "user3님의 채팅" },
-    { id: 4, username: "user4", date: "2022.01.04", content: "user4님의 채팅" },
-    { id: 5, username: "user5", date: "2022.01.05", content: "user5님의 채팅" },
-    { id: 6, username: "user6", date: "2022.01.06", content: "user6님의 채팅" },
-    { id: 7, username: "user7", date: "2022.01.07", content: "user7님의 채팅" },
-    { id: 8, username: "user8", date: "2022.01.08", content: "user8님의 채팅" },
-    { id: 9, username: "user9", date: "2022.01.09", content: "user9님의 채팅" },
-    { id: 10, username: "user10", date: "2022.01.10", content: "user10님의 채팅" },
-    { id: 11, username: "user11", date: "2022.01.11", content: "user11님의 채팅" },
-    { id: 12, username: "user12", date: "2022.01.12", content: "user12님의 채팅" },
-    // 추가 데이터...
-];
-
-export default function ChattingList() {
+const ChattingList: React.FC = () => {
+    const [data, setData] = useState<ChatItem[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isModalOpen, setModalOpen] = useState<boolean>(false);
-    const [currentChat, setCurrentChat] = useState<string>('');
+    const [currentChat, setCurrentChat] = useState<ChatItem | null>(null);
+    const [filter, setFilter] = useState<'open' | 'closed'>('open'); // 추가된 필터 상태
     const itemsPerPage = 10;
+
+    useEffect(() => {
+        // 필터에 따라 채팅 목록 API 호출
+        const fetchChatData = async () => {
+            const exitRoomValue = filter === 'open' ? 'N' : 'Y';
+            try {
+                const response = await axios.get('http://localhost:8088/api/chat/admin/list', {
+                    params: { exitRoom: exitRoomValue }
+                });
+                const modifiedData = response.data.map((item: ChatItem) => ({
+                    ...item,
+                    recentChat: item.recentChat ?? '' // recentChat이 null이면 빈 문자열로 설정
+                }));
+                setData(modifiedData);
+                console.log(`열린 채팅 데이터: ${filter === 'open' ? JSON.stringify(modifiedData) : '[]'}`);
+                console.log(`닫힌 채팅 데이터: ${filter === 'closed' ? JSON.stringify(modifiedData) : '[]'}`);
+            } catch (error) {
+                console.error('Error fetching chat list:', error);
+            }
+        };
+
+        fetchChatData();
+    }, [filter]); // filter 상태가 변경될 때마다 API 호출
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+    // 페이지네이션을 위한 현재 아이템
     const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-    const openModal = (chatContent: string) => {
-        setCurrentChat(chatContent);
+    const openModal = (chatItem: ChatItem) => {
+        setCurrentChat(chatItem);
         setModalOpen(true);
     };
 
     const closeModal = () => {
         setModalOpen(false);
-        setCurrentChat('');
+        setCurrentChat(null);
     };
 
     return (
         <div className={styles.ChattingContainer}>
-            <h1 className={styles.ChattingTitle}>1대1 문의</h1>
+            <div className={styles.headerContainer}>
+                <h1 className={styles.ChattingTitle}>1대1 문의</h1>
+                <div className={styles.filterContainer}>
+                    <span
+                        className={filter === 'open' ? styles.activeFilter : ''}
+                        onClick={() => setFilter('open')}
+                    >
+                        열린채팅보기
+                    </span>
+                    &nbsp;|&nbsp;
+                    <span
+                        className={filter === 'closed' ? styles.activeFilter : ''}
+                        onClick={() => setFilter('closed')}
+                    >
+                        닫힌채팅보기
+                    </span>
+                </div>
+            </div>
             <div className={styles.ChattingGrid}>
                 {currentItems.map((item) => (
-                    <div key={item.id} className={styles.ChattingCard}>
-                        <div className={styles.ChattingCardTitle}>{item.content}</div>
-                        <div className={styles.ChattingCardDate}>{item.date}</div>
-                        <input type="text" className={styles.lastChat} value={'최근 한 채팅'} disabled />
+                    <div key={item.chatRoomId} className={styles.ChattingCard} style={{ position: 'relative' }}>
+                        <div className={styles.ChattingCardTitle}>
+                            {item.profileName}님의 채팅
+                            {item.hasNewMessage && (
+                                <span className={styles.newMessageIndicator}>!</span>
+                            )}
+                        </div>
+                        <div className={styles.ChattingCardDate}>{format(new Date(item.createDate), 'yyyy-MM-dd HH:mm')}</div>
+                        <input type='text' className={styles.lastChat} value={item.recentChat} disabled />
                         <button
                             className={styles.ChattingCardButton}
-                            onClick={() => openModal(item.content)}
+                            onClick={() => openModal(item)}
                         >
-                            답변하기
+                            {item.exitRoom === 'Y' ? '답변보기' : '답변하기'}
                         </button>
                     </div>
                 ))}
@@ -72,7 +109,16 @@ export default function ChattingList() {
                 paginate={paginate}
                 currentPage={currentPage}
             />
-            <Chatting isOpen={isModalOpen} onClose={closeModal} chatContent={currentChat} state={'admin'} />
+            {currentChat && (
+                <Chatting
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    chatRoomId={currentChat.chatRoomId}
+                    isReadOnly={currentChat.exitRoom === 'Y'}
+                />
+            )}
         </div>
     );
 }
+
+export default ChattingList;
