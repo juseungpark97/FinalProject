@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.USERS;
@@ -75,7 +76,7 @@ public class ProfileController {
                 // 파일 저장 로직 추가
                 String profileImgFilename = profileImg.getOriginalFilename();
                 if (profileImgFilename != null && !profileImgFilename.isEmpty()) {
-                    Path path = Paths.get("C:/finalProject/FinalProject/frontend/public/profile-images/" + profileImgFilename);
+                    Path path = Paths.get("C:/Users/hyejin/desktop/FinalProject/frontend/public/profile-images/" + profileImgFilename);
                     Files.copy(profileImg.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
                 }
                 
@@ -155,7 +156,7 @@ public class ProfileController {
     public ResponseEntity<List<String>> getAvailableImages() {
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/finalProject/FinalProject/frontend/public/profile-images"))
+                    .list(Paths.get("C:/Users/hyejin/desktop/FinalProject/frontend/public/profile-images"))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {
@@ -181,7 +182,7 @@ public class ProfileController {
             // 프로필 이미지 업데이트
             if (profileImg != null && !profileImg.isEmpty()) {
                 // 이미지 저장 로직 (이미지 경로 설정 및 저장)
-                String directory = "C:/finalProject/FinalProject/frontend/public/profile-images";
+                String directory = "C:/Users/hyejin/desktop/FinalProject/frontend/public/profile-images";
                 Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
                 Files.write(imagePath, profileImg.getBytes());
                 profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());
