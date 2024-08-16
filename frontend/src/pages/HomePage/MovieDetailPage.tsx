@@ -84,7 +84,7 @@ const MovieDetailPage: React.FC = () => {
   }, [movie]);
 
   useEffect(() => {
-    const addWatchLog = async () => {
+    const addOrUpdateWatchLog = async () => {
       if (movieId) {
         const storedProfile = sessionStorage.getItem('selectedProfile');
         if (storedProfile) {
@@ -96,18 +96,8 @@ const MovieDetailPage: React.FC = () => {
 
           if (!isNaN(movieIdNumber)) {
             try {
-              await axios.delete('http://localhost:8088/api/movies/watchlog', {
-                params: {
-                  movieId: movieIdNumber,
-                  profileNo
-                },
-                headers: {
-                  'Content-Type': 'application/json'
-                }
-              });
-
+              // 기존의 삭제 작업을 제거하고, 바로 삽입 또는 업데이트 작업만 수행합니다.
               await axios.post('http://localhost:8088/api/movies/watchlog', null, {
-
                 params: {
                   movieId: movieIdNumber,
                   profileNo,
@@ -135,12 +125,13 @@ const MovieDetailPage: React.FC = () => {
       }
     };
 
-    addWatchLog();
+    addOrUpdateWatchLog();
 
     return () => {
       // Cleanup code if necessary
     };
   }, [movieId]);
+
 
 
   useEffect(() => {

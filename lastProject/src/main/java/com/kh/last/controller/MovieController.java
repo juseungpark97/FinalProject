@@ -108,7 +108,7 @@ public class MovieController {
     }
     @Transactional
     @PostMapping("/watchlog")
-    public ResponseEntity<Void> addWatchLog(
+    public ResponseEntity<Void> addOrUpdateWatchLog(
             @RequestParam Long movieId,
             @RequestParam Long profileNo,
             @RequestParam Float progressTime) {  // 시청 시간을 추가로 받음
@@ -118,35 +118,16 @@ public class MovieController {
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
 
-        // 기존 시청 로그 삭제 후 새로운 시청 로그 추가
-        watchLogRepository.deleteByProfileAndMovie(profile, movie);
-        WatchLog watchLog = new WatchLog(profile, movie, LocalDateTime.now(), progressTime);
+        Optional<WatchLog> existingLog = watchLogRepository.findByProfileAndMovie(profile, movie);
+
+        WatchLog watchLog = existingLog.orElseGet(() -> new WatchLog(profile, movie, LocalDateTime.now(), progressTime));
+        watchLog.setProgressTime(progressTime);
+        watchLog.setViewedAt(LocalDateTime.now()); // 업데이트된 시간으로 갱신
         watchLogRepository.save(watchLog);
 
         return ResponseEntity.ok().build();
     }
 
-
-    @Transactional
-    @DeleteMapping("/watchlog")
-    public ResponseEntity<Void> deleteWatchLog(
-            @RequestParam Long movieId,
-            @RequestParam Long profileNo) {
-        try {
-            Movie movie = movieRepository.findById(movieId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Movie not found with id " + movieId));
-            Profile profile = profileRepository.findById(profileNo)
-                    .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id " + profileNo));
-
-            watchLogRepository.deleteByProfileAndMovie(profile, movie);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            // 예외 로그를 기록하고 500 오류를 반환합니다.
-            System.err.println("Error deleting watch log: " + e.getMessage());
-            e.printStackTrace(); // 스택 트레이스를 출력하여 문제를 파악합니다.
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
     
     @GetMapping("/watchlog")
     public ResponseEntity<Float> getWatchLog(

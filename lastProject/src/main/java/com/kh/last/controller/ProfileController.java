@@ -33,6 +33,7 @@ import com.kh.last.service.UserService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/profiles")
@@ -79,30 +80,30 @@ public class ProfileController {
         }
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<?> uploadProfileImage(@RequestParam("profileImg") MultipartFile file,
-                                                @RequestParam("profileNo") Long profileNo) {
-        try {
-            String profileImgUrl = profileService.uploadProfileImage(file, profileNo);
-            return ResponseEntity.ok().body(Map.of("success", true, "profileImg", profileImgUrl));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "message", e.getMessage()));
-        }
-    }
+//    @PostMapping("/upload")
+//    public ResponseEntity<?> uploadProfileImage(@RequestParam("profileImg") MultipartFile file,
+//                                                @RequestParam("profileNo") Long profileNo) {
+//        try {
+//            String profileImgUrl = profileService.uploadProfileImage(file, profileNo);
+//            return ResponseEntity.ok().body(Map.of("success", true, "profileImg", profileImgUrl));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(Map.of("success", false, "message", e.getMessage()));
+//        }
+//    }
 
-    @PutMapping("/update-name")
-    public ResponseEntity<?> updateProfileName(@RequestBody Map<String, String> request) {
-        try {
-            Long profileNo = Long.parseLong(request.get("profileNo"));
-            String profileName = request.get("profileName");
-            profileService.updateProfileName(profileNo, profileName);
-            return ResponseEntity.ok().body(Map.of("success", true));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "message", e.getMessage()));
-        }
-    }
+//    @PutMapping("/update-name")
+//    public ResponseEntity<?> updateProfileName(@RequestBody Map<String, String> request) {
+//        try {
+//            Long profileNo = Long.parseLong(request.get("profileNo"));
+//            String profileName = request.get("profileName");
+//            profileService.updateProfileName(profileNo, profileName);
+//            return ResponseEntity.ok().body(Map.of("success", true));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(Map.of("success", false, "message", e.getMessage()));
+//        }
+//    }
 
     @PostMapping("/update-vector")
     public ResponseEntity<?> updateProfileVector(@RequestBody Map<String, Object> request) {

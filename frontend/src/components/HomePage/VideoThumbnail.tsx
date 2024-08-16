@@ -1,6 +1,4 @@
-// VideoThumbnail.tsx
-
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './css/VideoThumbnail.module.css';
 
@@ -14,7 +12,7 @@ interface VideoThumbnailProps {
     };
 }
 
-const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ video }) => {
+const VideoThumbnail: React.FC<VideoThumbnailProps> = memo(({ video }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isHovered, setIsHovered] = useState(false);
     const [isVideoError, setIsVideoError] = useState(false);
@@ -51,16 +49,17 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ video }) => {
         navigate(`/movie/${video.id}`);
     };
 
+    // 비디오를 화면에 나타나기 전에 미리 로드
     useEffect(() => {
-        const videoElement = videoRef.current;
-        if (videoElement) {
-            videoElement.addEventListener('loadeddata', handleLoadedData);
-            videoElement.addEventListener('error', handleError);
-            videoElement.load();
+        if (videoRef.current) {
+            videoRef.current.preload = 'auto'; // 비디오를 미리 로드하도록 설정
+            videoRef.current.addEventListener('loadeddata', handleLoadedData);
+            videoRef.current.addEventListener('error', handleError);
+            videoRef.current.load(); // 비디오 로드 트리거
 
             return () => {
-                videoElement.removeEventListener('loadeddata', handleLoadedData);
-                videoElement.removeEventListener('error', handleError);
+                videoRef.current?.removeEventListener('loadeddata', handleLoadedData);
+                videoRef.current?.removeEventListener('error', handleError);
             };
         }
     }, [video.url]);
@@ -93,6 +92,6 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ video }) => {
             )}
         </div>
     );
-};
+});
 
 export default VideoThumbnail;
