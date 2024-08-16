@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
     }
 
     // 2. 사용자 인증 정보를 가져옵니다.
-    const token = sessionStorage.getItem('authToken'); // sessionStorage 사용
+    const token = localStorage.getItem('authToken'); // sessionStorage 사용
     if (token) {
       const decodedUser = decodeJWT(token);
       setUser(decodedUser);
