@@ -12,7 +12,6 @@ const HelpButtonContainer: React.FC<Props> = ({ onMenuClick }) => {
   const pathToMenuMap: Record<string, string> = {
     '/faq': 'faq',
     '/question': 'question'
-
   };
 
   useEffect(() => {
@@ -45,7 +44,7 @@ const HelpButtonContainer: React.FC<Props> = ({ onMenuClick }) => {
         <li>
           <div className='question'>
             <button
-              onClick={() => { onMenuClick('question'); setActiveMenu('question'); }}
+              onClick={() => {setActiveMenu('question');  onMenuClick('question');  }}
               className={`${styles.menuItem} ${activeMenu === 'question' ? styles.active : ''}`}
             >
               <img src="myPage2.png" alt="1:1문의" className={styles.icon} />

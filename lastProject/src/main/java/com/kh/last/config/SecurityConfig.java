@@ -16,7 +16,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
-            .authorizeHttpRequests(authorize -> authorize
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+            .authorizeHttpRequests(authorize -> authorize          
                     .requestMatchers("/paypal/success", "/paypal/cancel").permitAll() // 성공 및 취소 URL 접근 허용
                     .anyRequest().permitAll() // 모든 요청에 대해 인증 필요 없음
             )
