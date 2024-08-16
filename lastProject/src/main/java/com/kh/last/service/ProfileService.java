@@ -111,34 +111,37 @@ public class ProfileService {
     
     @Transactional
     public void updateProfileVector(Long profileId, Long movieId, Map<String, Integer> movieTags) {
-        // 프로필 찾기
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
 
-        // 영화 찾기
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid movie ID"));
-        
-        // 시청 로그가 없는 경우 새로 추가
+
         boolean hasWatched = watchLogRepository.findByProfileAndMovie(profile, movie).isPresent();
+
         if (!hasWatched) {
             WatchLog watchLog = new WatchLog(profile, movie, java.time.LocalDateTime.now(), 0);
             watchLogRepository.save(watchLog);
         }
 
-        // 기존 벡터를 완전히 대체하는 방식으로 업데이트
+        Map<String, Integer> vectorMap = parseProfileVector(profile.getProfileVector());
+
+        for (Map.Entry<String, Integer> entry : movieTags.entrySet()) {
+            vectorMap.put(entry.getKey(), vectorMap.getOrDefault(entry.getKey(), 0) + entry.getValue());
+        }
+
         try {
-            // 새로운 태그 정보를 사용해 프로필 벡터를 업데이트
-            String updatedVector = new ObjectMapper().writeValueAsString(movieTags);
-            System.out.println(updatedVector);
+            String updatedVector = new ObjectMapper().writeValueAsString(vectorMap);
             profile.setProfileVector(updatedVector);
-            
-            // 엔티티 저장
+            System.out.println("Updated vector before saving: " + profile.getProfileVector());
             profileRepository.save(profile);
+            System.out.println("Profile successfully updated!");
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error converting vector to JSON", e);
         }
     }
+
+
 
 
     private Map<String, Integer> parseProfileVector(String profileVector) {

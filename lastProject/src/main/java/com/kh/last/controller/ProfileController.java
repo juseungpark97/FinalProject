@@ -136,7 +136,7 @@ public class ProfileController {
     public ResponseEntity<List<String>> getAvailableImages() {
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images"))
+                    .list(Paths.get("C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images"))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {
@@ -162,7 +162,7 @@ public class ProfileController {
             // 프로필 이미지 업데이트
             if (profileImg != null && !profileImg.isEmpty()) {
                 // 이미지 저장 로직 (이미지 경로 설정 및 저장)
-                String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+                String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
                 Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
                 Files.write(imagePath, profileImg.getBytes());
                 profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());

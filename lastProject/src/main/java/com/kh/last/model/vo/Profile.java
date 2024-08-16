@@ -58,6 +58,11 @@ public class Profile {
         }
     }
 
+    public void updateVectorList(Map<String, Integer> newVectorList) {
+        this.vectorList = newVectorList;
+        prePersist(); // 변경 사항을 반영하여 JSON 문자열 업데이트
+    }
+
     private Map<String, Integer> parseJsonArray(String jsonArray) {
         try {
             ObjectMapper mapper = new ObjectMapper();
