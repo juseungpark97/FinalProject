@@ -9,36 +9,9 @@ import Question from '../../components/Mypage/Question';
 
 import axios from 'axios';
 
-interface FaqType {
-  id: number;
-  question: string;
-  answer: string;
-  insertDate: string; // LocalDate를 문자열로 처리
-}
-
 
 const HelpPage: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState<string>('faq');
-
-
-  const [faqList, setFaqList] = useState<FaqType[]>([]);
-
-  useEffect(() => {
-    const getFAQ = async () => {
-        try {
-            const response = await axios.get<FaqType[]>('http://localhost:8088/dashboard/getFaq');
-            // 변환된 날짜 문자열로 처리
-            const updatedData = response.data.map(item => ({
-                ...item,
-                insertDate: item.insertDate.toString() // 날짜를 문자열로 변환
-            }));
-            setFaqList(updatedData);
-        } catch (error) {
-            console.error("Failed to get FAQ", error);
-        }
-    };
-    getFAQ();
-}, []);
 
   return (
     <div className={styles.account}>
@@ -49,7 +22,7 @@ const HelpPage: React.FC = () => {
         </div>
         <div className={styles.content}>
 
-          {selectedMenu === 'faq' && <Faq faqList={faqList} />}
+          {selectedMenu === 'faq' && <Faq />}
           {selectedMenu === 'question' && <Question />}
 
 

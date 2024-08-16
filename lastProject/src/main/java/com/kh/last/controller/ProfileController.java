@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,21 +63,30 @@ public class ProfileController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createProfile(@RequestParam String profileName, @RequestParam MultipartFile profileImg,
-                                           @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> createProfile(@RequestParam String profileName, 
+                                            @RequestParam MultipartFile profileImg,
+                                            @RequestHeader("Authorization") String token) {
         try {
             String jwt = token.substring(7);
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                String profileImgFilename = profileImg.getOriginalFilename(); // 실제로는 파일을 저장해야 합니다.
+                // 파일 저장 로직 추가
+                String profileImgFilename = profileImg.getOriginalFilename();
+                if (profileImgFilename != null && !profileImgFilename.isEmpty()) {
+                    Path path = Paths.get("C:/finalProject/FinalProject/frontend/public/profile-images/" + profileImgFilename);
+                    Files.copy(profileImg.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                }
+                
+                // 프로필 생성
                 Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, profileImgFilename);
                 return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
         } catch (Exception e) {
+            e.printStackTrace(); // 로그에 스택 트레이스 출력
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating profile");
         }
     }

@@ -1,19 +1,141 @@
-.myPage {
+/* 전체 페이지 레이아웃 */
+.profileManagementPage {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 20px;
-
-    overflow: hidden; /* 페이지 전체에서 스크롤을 숨깁니다 */
-
+    height: 80vh; /* 페이지 전체 높이에서 가운데 정렬 */
+    justify-content: center; /* 세로 방향으로 가운데 정렬 */
+    padding: 20px;
 }
 
-.content {
-    padding-left: 20px;
+/* 헤더 스타일 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 600px; /* 헤더가 너무 넓어지지 않도록 제한 */
+    margin-bottom: 0px;
+}
 
+.endChatButton {
+    background-color: #f44336;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.endChatButton:hover {
+    background-color: #d32f2f;
+}
+
+/* 채팅 컨테이너 */
+.chatContainer {
     display: flex;
     flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    border: solid rgb(221, 221, 221) 1px;
+    height: 80%; /* 높이 설정 */
+    width: 40%;
+    max-width: 800px; /* 채팅 박스의 최대 너비 설정 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과 추가 */
 }
 
+/* 채팅 박스 */
+.chatBox {
+    display: flex;
+    flex-direction: column;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+/* 채팅 메시지 내용 */
+.chatContent {
+    display: flex;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #333;
+}
+
+/* 사용자 메시지와 다른 사용자 메시지 구분 */
+.myMessage {
+    flex-direction: row-reverse;
+}
+
+.theirMessage {
+    flex-direction: row;
+}
+
+/* 메시지 말풍선 */
+.messageBubble {
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 60%;
+    word-wrap: break-word;
+    margin-bottom: 4px;
+}
+
+.myMessage .messageBubble {
+    background-color: #ffd966;
+    color: #000;
+}
+
+.theirMessage .messageBubble {
+    background-color: #ffffff;
+    border: solid rgb(221, 221, 221) 1px; /* 경계선 추가 */
+}
+
+/* 메시지 날짜 */
+.chatDate {
+    font-size: 0.8em;
+    color: #888;
+    margin: 0 8px;
+}
+
+/* 채팅 입력 컨테이너 */
+.chatInputContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 채팅 입력창 */
+.chatInput {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+    border: solid rgb(221, 221, 221) 1px;
+    background-color: white;
+    color: black;
+    height: 20px;
+}
+
+/* 전송 버튼 */
+.sendButton {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.sendButton:hover {
+    background-color: #0056b3;
+}
+
+/* 추가 스타일 */
 .profileSection,
 .quickLinks {
     background-color: #ffffff;
@@ -23,7 +145,6 @@
 
     overflow-y: auto; /* quickLinks에 스크롤을 적용 */
     max-height: 60vh; /* 높이를 제한하여 스크롤이 발생하도록 설정 */
-
 }
 
 .profileSection {
@@ -67,7 +188,6 @@
     gap: 20px;
 
     overflow-y: auto; /* quickLinks에 스크롤을 적용 */
-
 }
 
 .quickLinks ul {
@@ -110,7 +230,6 @@
 .arrow {
     font-size: 16px;
     color: #000;
-
 }
 
 .answer {
@@ -133,113 +252,4 @@
 
 .answer p {
     margin: 0;
-}
-
-.profileManagementPage {
-    display: flex;
-    flex-direction: column;
-    align-items: center;  /* 가로 방향으로 가운데 정렬 */
-    gap: 20px;
-    height: 80vh; /* 페이지 전체 높이에서 가운데 정렬 */
-}
-
-.content {
-    padding-left: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-.chatContainer {
-    display: flex;
-    flex-direction: column;
-    background-color: #ffffff;
-    border-radius: 10px;
-    padding: 20px;
-    border: solid rgb(221, 221, 221) 1px;
-    height: 80%; /* 높이 설정 */
-    width: 40%;
-    max-width: 800px; /* 채팅 박스의 최대 너비 설정 */
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과 추가 */
-}
-
-.chatBox {
-    display: flex;
-    flex-direction: column;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    padding: 20px;
-    height: 100%;
-    overflow-y: auto;
-    margin-bottom: 10px;
-}
-
-.chatContent {
-    flex: 1;
-    margin-bottom: 20px;
-    font-size: 16px;
-    color: #333;
-}
-
-.chatInputContainer {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.chatInput {
-    flex: 1;
-    padding: 10px;
-    border-radius: 5px;
-    border: solid rgb(221, 221, 221) 1px;
-    background-color: white;
-    color: black;
-    font-size: 16px;
-}
-
-.sendButton {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.sendButton:hover {
-    background-color: #0056b3;
-}
-
-.profileManagementPage {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    height: 80vh; /* 페이지 전체 높이에서 가운데 정렬 */
-    justify-content: center; /* 세로 방향으로 가운데 정렬 */
-    padding: 20px;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 600px; /* 헤더가 너무 넓어지지 않도록 제한 */
-    margin-bottom: 0px;
-}
-
-.endChatButton {
-    background-color: #f44336;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.endChatButton:hover {
-    background-color: #d32f2f;
-
 }
