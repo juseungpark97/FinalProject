@@ -6,8 +6,8 @@ import styles from './css/Header.module.css';
 export type HeaderProps = {
   className?: string;
   onSearchClick?: () => void;
-  selectedProfile: Profile | null;
-  setSelectedProfile: (profile: Profile | null) => void;
+  selectedProfile: Profile | null;  // 기존 상태를 props로 받도록 수정
+  setSelectedProfile: (profile: Profile | null) => void;  // 기존 상태 업데이트 함수를 props로 받도록 수정
 };
 
 interface Profile {
@@ -21,45 +21,33 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Header selectedProfile:', selectedProfile);
-  }, [selectedProfile]);
-
-  useEffect(() => {
-    // 1. sessionStorage에서 selectedProfile을 먼저 가져옵니다.
-    const selectedProfileData = sessionStorage.getItem('selectedProfile');
-    console.log('Session storage selectedProfile at the start:', selectedProfileData);
-
-    if (selectedProfileData) {
-      const profile = JSON.parse(selectedProfileData);
-      setSelectedProfile(profile);
-      console.log('Profile loaded in Header from sessionStorage:', profile);
-    } else {
-      console.warn('Profile not found in sessionStorage');
-    }
-
-    // 2. 사용자 인증 정보를 가져옵니다.
-    const token = sessionStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
     if (token) {
       const decodedUser = decodeJWT(token);
       setUser(decodedUser);
 
-      axios.get('/api/users/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(response => {
-          setUser(response.data);
-          console.log('User data loaded:', response.data);
+      if (decodedUser) {
+        axios.get('/api/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
-        .catch(error => {
-          console.error("Error fetching user data", error);
-        });
-    } else {
-      console.warn('No authToken found in sessionStorage');
-    }
+          .then(response => {
+            setUser(response.data);
 
-  }, []);
+            // 선택된 프로필 정보를 세션 저장소에서 가져옴
+            const selectedProfileData = sessionStorage.getItem('selectedProfile');
+            if (selectedProfileData) {
+              const profile = JSON.parse(selectedProfileData);
+              setSelectedProfile(profile);
+            } else {
+              setSelectedProfile(null); // 기본 프로필 이미지를 사용할 경우
+            }
+          })
+          .catch(error => console.error("Error fetching user data", error));
+      }
+    }
+  }, [setSelectedProfile]);
 
   const decodeJWT = (token: string) => {
     try {
@@ -83,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('authToken');
+    localStorage.removeItem('authToken');
     setSelectedProfile(null);
     sessionStorage.removeItem('selectedProfile');
     navigate('/login');
@@ -91,8 +79,8 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
 
   useEffect(() => {
     if (selectedProfile) {
+      // 선택된 프로필을 세션 저장소에 저장
       sessionStorage.setItem('selectedProfile', JSON.stringify(selectedProfile));
-      console.log('Profile saved to sessionStorage:', selectedProfile);
     }
   }, [selectedProfile]);
 
@@ -144,12 +132,11 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
               </div>
               <div className={`${styles.profileNav} ${styles.iconButton}`}>
                 <div className={styles.clickableDiv}>
-                  {/* 프로필 이미지 및 이름 표시 */}
                   <img
                     className={styles.profileBackgroundIcon}
                     loading="lazy"
                     alt="Profile"
-                    src={selectedProfile?.profileImg || '/profile.png'}  // profileImg가 제대로 설정되어 있는지 확인
+                    src={selectedProfile?.profileImg || '/profile.png'}
                   />
                   <img
                     className={styles.antDesigncaretDownFilledIcon}

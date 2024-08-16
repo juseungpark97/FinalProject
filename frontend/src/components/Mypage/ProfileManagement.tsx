@@ -14,7 +14,7 @@ interface ProfileManagementProps {
     onProfileUpdate: (updatedProfile: { profileImg: string; profileName: string }) => void; // 여기에 추가
 }
 
-const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, profile, onProfileUpdate }) => { // 수정된 부분
+const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, profile }) => {
     const [selectedProfile, setSelectedProfile] = useState(profile);
     const [newProfileName, setNewProfileName] = useState<string>(profile.profileName);
     const [newProfileImage, setNewProfileImage] = useState<string | null>(null); // 새로운 프로필 이미지 상태
@@ -24,7 +24,6 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
     useEffect(() => {
         setSelectedProfile(profile);
     }, [profile]);
-
 
     const handleProfileUpdate = async () => {
         try {
@@ -45,21 +44,13 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
             });
 
             if (response.status === 200 && response.data.success) {
-                const updatedProfile = {
-                    profileName: response.data.profileName,
-                    profileImg: response.data.profileImg,
-                };
-
                 setSelectedProfile({
                     ...selectedProfile,
-                    ...updatedProfile,
+                    profileName: response.data.profileName,
+                    profileImg: response.data.profileImg
                 });
-
-                // 부모 컴포넌트에 업데이트된 프로필 정보 전달
-                onProfileUpdate(updatedProfile);
-
                 setIsModalOpen(false);
-                alert('프로필 변경이 완료되었습니다.');
+                alert('프로필 변경이 완료되었습니다.');  // 여기에 alert 추가
             } else {
                 console.error('Failed to update profile:', response.data);
             }
