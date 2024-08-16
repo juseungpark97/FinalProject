@@ -199,11 +199,15 @@ const MovieDetailPage: React.FC = () => {
   useEffect(() => {
     const updateProfileVector = async (profileNo: number, movieId: number, movieTags: string[]) => {
       try {
+        // 태그 배열을 JSON 형식으로 변환
+        const tagsJson = JSON.stringify(movieTags);
+    
         await axios.post('http://localhost:8088/api/profiles/update-vector', {
           profileId: profileNo,
-          movieId: movieId, // movieId 추가
-          movieTags: movieTags,
+          movieId: movieId,
+          movieTags: tagsJson, // JSON 형식으로 전송
         });
+    
         console.log('Profile vector updated successfully');
       } catch (error) {
         console.error('Error updating profile vector:', error);

@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
   const profileNo = selectedProfile?.profileNo || null;
-  const { movies, filteredMovies, recentMovies, filterMovies } = useMovies(profileNo);
+  const { movies, filteredMovies, recentMovies, recommendedMovies, filterMovies } = useMovies(profileNo); // 추천 영화 상태 추가
 
   const predefinedTags = useMemo(() => [
     '드라마', '로맨스', '코미디', '스릴러', '미스터리', '호러', '액션', 'SF', '판타지',
@@ -68,7 +68,7 @@ const HomePage: React.FC = () => {
             <Frame />
             <SliderSection title="영화 이어보기" movies={filteredMovies} />
             <Frame />
-            <SliderSection title="시네마 클라우드 추천작" movies={filteredMovies} />
+            <SliderSection title="시네마 클라우드 추천작" movies={recommendedMovies} />
             <Frame />
             <SliderSection title="밤늦게 즐기는 스릴러" movies={filteredMovies} />
           </>

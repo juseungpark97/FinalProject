@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.USERS;
 import com.kh.last.service.ProfileService;
@@ -34,6 +35,7 @@ import com.kh.last.service.UserService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @RestController
 @RequestMapping("/api/profiles")
@@ -118,11 +120,19 @@ public class ProfileController {
     public ResponseEntity<?> updateProfileVector(@RequestBody Map<String, Object> request) {
         try {
             Long profileId = Long.parseLong(request.get("profileId").toString());
-            Long movieId = Long.parseLong(request.get("movieId").toString()); // movieId 추가
-            List<String> movieTags = (List<String>) request.get("movieTags");
+            Long movieId = Long.parseLong(request.get("movieId").toString());
+            String movieTagsJson = request.get("movieTags").toString();
 
-            // ProfileService의 메서드를 호출할 때 movieId도 함께 전달
-            profileService.updateProfileVector(profileId, movieId, movieTags);
+            // JSON 문자열을 List<String>으로 변환
+            ObjectMapper mapper = new ObjectMapper();
+            List<String> movieTags = mapper.readValue(movieTagsJson, new TypeReference<List<String>>() {});
+
+            // movieTags를 Map<String, Integer>로 변환
+            Map<String, Integer> movieTagsMap = movieTags.stream()
+                    .collect(Collectors.toMap(tag -> tag, tag -> 1, (a, b) -> a));
+
+            // ProfileService의 메서드를 호출할 때 movieTagsMap을 전달
+            profileService.updateProfileVector(profileId, movieId, movieTagsMap);
 
             return ResponseEntity.ok().body(Map.of("success", true));
         } catch (Exception e) {
