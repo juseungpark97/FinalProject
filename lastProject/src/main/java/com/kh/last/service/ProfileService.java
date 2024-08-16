@@ -23,6 +23,8 @@ import com.kh.last.repository.ProfileRepository;
 import com.kh.last.repository.UserRepository;
 import com.kh.last.repository.WatchLogRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,13 +45,18 @@ public class ProfileService {
     @Autowired
     private WatchLogRepository watchLogRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public List<Profile> getProfilesByUserNo(Long userNo) {
-        USERS user = userRepository.findById(userNo).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        USERS user = userRepository.findById(userNo)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
         return profileRepository.findByUserNo(user);
     }
 
     public Profile createProfile(Long userNo, String profileName, String profileImg) {
-        USERS user = userRepository.findById(userNo).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        USERS user = userRepository.findById(userNo)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
         Profile profile = new Profile();
         profile.setUserNo(user);
         profile.setProfileName(profileName);
@@ -58,7 +65,6 @@ public class ProfileService {
     }
 
     public String selectProfileImage(Long profileNo, String selectedImageName) {
-        // 지정된 디렉토리에서 이미지 선택
         String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
         Path imagePath = Paths.get(directory, selectedImageName);
 
@@ -66,7 +72,6 @@ public class ProfileService {
             throw new RuntimeException("Selected image not found in the directory");
         }
 
-        // 데이터베이스에서 프로필을 찾아 이미지 경로 업데이트
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
         profile.setProfileImg("/profile-images/" + selectedImageName);
@@ -75,16 +80,15 @@ public class ProfileService {
         return profile.getProfileImg();
     }
 
-
     public Profile getProfileById(Long profileNo) {
-        return profileRepository.findById(profileNo).orElseThrow(() -> new RuntimeException("Profile not found"));
+        return profileRepository.findById(profileNo)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
     }
 
     public void updateProfile(Profile profile) {
         profileRepository.save(profile);
     }
 
-    // 새로운 메서드 추가: 프로필 이미지 업로드
     public String uploadProfileImage(MultipartFile file, Long profileNo) throws Exception {
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
@@ -100,7 +104,6 @@ public class ProfileService {
         return profileImgUrl;
     }
 
-    // 새로운 메서드 추가: 프로필 이름 업데이트
     public void updateProfileName(Long profileNo, String profileName) {
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
@@ -108,7 +111,6 @@ public class ProfileService {
         profileRepository.save(profile);
     }
 
-    
     @Transactional
     public void updateProfileVector(Long profileId, Long movieId, Map<String, Integer> movieTags) {
         Profile profile = profileRepository.findById(profileId)
@@ -132,27 +134,26 @@ public class ProfileService {
 
         try {
             String updatedVector = new ObjectMapper().writeValueAsString(vectorMap);
-            profile.setProfileVector(updatedVector);
-            System.out.println("Updated vector before saving: " + profile.getProfileVector());
+            profile.updateVectorList(vectorMap); // Use updateVectorList to ensure profileVector is updated
             profileRepository.save(profile);
-            System.out.println("Profile successfully updated!");
+
+            entityManager.flush(); // Force flush to ensure the change is written to the database
+            entityManager.clear(); // Clear the persistence context to avoid caching issues
         } catch (JsonProcessingException e) {
+            log.error("Error converting vector to JSON", e);
             throw new RuntimeException("Error converting vector to JSON", e);
         }
     }
 
-
-
-
     private Map<String, Integer> parseProfileVector(String profileVector) {
         if (profileVector == null || profileVector.isEmpty()) {
-            return new HashMap<>(); // 빈 맵 반환
+            return new HashMap<>();
         }
         try {
             return new ObjectMapper().readValue(profileVector, new TypeReference<Map<String, Integer>>() {});
         } catch (JsonProcessingException e) {
+            log.error("Error parsing profile vector", e);
             throw new RuntimeException("Error parsing profile vector", e);
         }
     }
-
 }

@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Movie;
@@ -21,9 +21,12 @@ import com.kh.last.repository.ProfileRepository;
 @Service
 public class RecommendationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(RecommendationService.class);
+    @Autowired
+    private ProfileRepository profileRepository;
 
-    // 고정된 태그 리스트
+    @Autowired
+    private MovieRepository movieRepository;
+
     private static final List<String> ALL_TAGS = Arrays.asList(
         "드라마", "로맨스", "코미디", "스릴러", "미스터리", "호러", "액션", "SF", "판타지",
         "다큐멘터리", "어드벤처", "우화", "다문화", "가족", "음악", "해적", "심리적", "비극적",
@@ -34,93 +37,95 @@ public class RecommendationService {
         "극단적", "아동"
     );
 
-    @Autowired
-    private ProfileRepository profileRepository;
-
-    @Autowired
-    private MovieRepository movieRepository;
-
     public List<Movie> getRecommendations(Long profileId) {
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
 
-        // 프로필 벡터 생성
-        int[] profileVector = createVectorFromTags(profile.getProfileVector());
-
-        logger.info("Profile vector array: {}", Arrays.toString(profileVector));
+        Map<String, Integer> profileTags = parseJsonToMap(profile.getProfileVector());
 
         List<Movie> recommendations = new ArrayList<>();
-
         for (Movie movie : movieRepository.findAll()) {
-            // 영화 벡터 생성
-            int[] movieVector = createVectorFromTags(movie.getTags());
-
-            logger.info("Processing movie: {}", movie.getTitle());
-            logger.info("Movie vector array: {}", Arrays.toString(movieVector));
-
-            double similarity = calculateCosineSimilarity(profileVector, movieVector);
-
-            logger.info("Calculated similarity: {} for movie: {}", similarity, movie.getTitle());
-
-            if (similarity > 0.7) { // 임계치 설정
+            List<String> movieTags = parseJsonToList(movie.getTags());
+            double similarity = calculateCosineSimilarity(profileTags, movieTags);
+            if (similarity > 0.1) {  // 임계치 예시
                 recommendations.add(movie);
             }
         }
-
-        logger.info("Final recommendations: {}", recommendations.stream().map(Movie::getTitle).collect(Collectors.toList()));
         return recommendations;
     }
 
-    private int[] createVectorFromTags(String tagsString) {
-        int[] vector = new int[ALL_TAGS.size()];
-        ObjectMapper mapper = new ObjectMapper();
+    private double calculateCosineSimilarity(Map<String, Integer> profileTags, List<String> movieTags) {
+        int[] profileVector = createVectorFromTags(profileTags);
+        int[] movieVector = createVectorFromTags(movieTags);
 
-        try {
-            if (tagsString.trim().startsWith("{")) {
-                // 프로필 태그: Map<String, Integer>로 처리
-                Map<String, Integer> tags = mapper.readValue(tagsString, new TypeReference<Map<String, Integer>>() {});
-                for (int i = 0; i < ALL_TAGS.size(); i++) {
-                    vector[i] = tags.getOrDefault(ALL_TAGS.get(i), 0);
-                }
-            } else if (tagsString.trim().startsWith("[")) {
-                // 영화 태그: List<String>으로 처리
-                List<String> tags = mapper.readValue(tagsString, new TypeReference<List<String>>() {});
-                for (int i = 0; i < ALL_TAGS.size(); i++) {
-                    vector[i] = tags.contains(ALL_TAGS.get(i)) ? 1 : 0;
-                }
-            } else {
-                logger.error("Unexpected tags format: {}", tagsString);
-            }
-        } catch (Exception e) {
-            logger.error("Error processing tagsString: {}", tagsString, e);
+        double dotProduct = 0.0;
+        double profileMagnitude = 0.0;
+        double movieMagnitude = 0.0;
+
+        // Compute dot product and magnitudes
+        for (int i = 0; i < profileVector.length; i++) {
+            dotProduct += profileVector[i] * movieVector[i];
+            profileMagnitude += Math.pow(profileVector[i], 2);
+            movieMagnitude += Math.pow(movieVector[i], 2);
         }
 
-        return vector;
+        profileMagnitude = Math.sqrt(profileMagnitude);
+        movieMagnitude = Math.sqrt(movieMagnitude);
+
+        // Debugging output
+        System.out.println("Dot Product: " + dotProduct);
+        System.out.println("Profile Magnitude: " + profileMagnitude);
+        System.out.println("Movie Magnitude: " + movieMagnitude);
+
+        if (profileMagnitude == 0 || movieMagnitude == 0) {
+            System.out.println("One of the vectors has zero magnitude, returning similarity of 0.0");
+            return 0.0;  // Avoid division by zero
+        }
+
+        double similarity = dotProduct / (profileMagnitude * movieMagnitude);
+        System.out.println("Raw Cosine Similarity: " + similarity);
+
+        // Ensure similarity is within [0, 1]
+        double clampedSimilarity = Math.min(Math.max(similarity, 0.0), 1.0);
+        System.out.println("Clamped Cosine Similarity: " + clampedSimilarity);
+        
+        return clampedSimilarity;
     }
 
 
-
-
-
-    // 코사인 유사도 계산 함수
-    private double calculateCosineSimilarity(int[] vector1, int[] vector2) {
-        double dotProduct = 0.0;
-        double magnitude1 = 0.0;
-        double magnitude2 = 0.0;
-
-        for (int i = 0; i < vector1.length; i++) {
-            dotProduct += vector1[i] * vector2[i];
-            magnitude1 += Math.pow(vector1[i], 2);
-            magnitude2 += Math.pow(vector2[i], 2);
+    private int[] createVectorFromTags(Map<String, Integer> tags) {
+        int[] vector = new int[ALL_TAGS.size()];
+        for (int i = 0; i < ALL_TAGS.size(); i++) {
+            vector[i] = tags.getOrDefault(ALL_TAGS.get(i), 0);
         }
+        return vector;
+    }
 
-        magnitude1 = Math.sqrt(magnitude1);
-        magnitude2 = Math.sqrt(magnitude2);
-
-        if (magnitude1 == 0 || magnitude2 == 0) {
-            return 0.0;
+    private int[] createVectorFromTags(List<String> tags) {
+        int[] vector = new int[ALL_TAGS.size()];
+        for (int i = 0; i < ALL_TAGS.size(); i++) {
+            vector[i] = tags.contains(ALL_TAGS.get(i)) ? 1 : 0;
         }
+        return vector;
+    }
 
-        return dotProduct / (magnitude1 * magnitude2);
+    private Map<String, Integer> parseJsonToMap(String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(json, new TypeReference<Map<String, Integer>>() {});
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return new HashMap<>();  // Return empty map on error
+        }
+    }
+
+    private List<String> parseJsonToList(String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(json, new TypeReference<List<String>>() {});
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return new ArrayList<>();  // Return empty list on error
+        }
     }
 }

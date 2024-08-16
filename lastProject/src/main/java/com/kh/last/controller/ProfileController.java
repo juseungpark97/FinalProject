@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.USERS;
 import com.kh.last.service.ProfileService;
@@ -33,6 +34,7 @@ import com.kh.last.service.UserService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @RestController
 @RequestMapping("/api/profiles")
@@ -109,10 +111,18 @@ public class ProfileController {
         try {
             Long profileId = Long.parseLong(request.get("profileId").toString());
             Long movieId = Long.parseLong(request.get("movieId").toString());
-            Map<String, Integer> movieTags = (Map<String, Integer>) request.get("movieTags");
+            String movieTagsJson = request.get("movieTags").toString();
 
-            // ProfileService의 메서드를 호출할 때 movieTags도 함께 전달
-            profileService.updateProfileVector(profileId, movieId, movieTags);
+            // JSON 문자열을 List<String>으로 변환
+            ObjectMapper mapper = new ObjectMapper();
+            List<String> movieTags = mapper.readValue(movieTagsJson, new TypeReference<List<String>>() {});
+
+            // movieTags를 Map<String, Integer>로 변환
+            Map<String, Integer> movieTagsMap = movieTags.stream()
+                    .collect(Collectors.toMap(tag -> tag, tag -> 1, (a, b) -> a));
+
+            // ProfileService의 메서드를 호출할 때 movieTagsMap을 전달
+            profileService.updateProfileVector(profileId, movieId, movieTagsMap);
 
             return ResponseEntity.ok().body(Map.of("success", true));
         } catch (Exception e) {
@@ -120,7 +130,6 @@ public class ProfileController {
                     .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
-
 
     @PostMapping("/{profileNo}/select-image")
     public ResponseEntity<String> selectProfileImage(@PathVariable Long profileNo, @RequestParam String imageName) {
@@ -136,7 +145,7 @@ public class ProfileController {
     public ResponseEntity<List<String>> getAvailableImages() {
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images"))
+                    .list(Paths.get("C:/finalProject/FinalProject/frontend/public/profile-images"))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {
@@ -162,7 +171,7 @@ public class ProfileController {
             // 프로필 이미지 업데이트
             if (profileImg != null && !profileImg.isEmpty()) {
                 // 이미지 저장 로직 (이미지 경로 설정 및 저장)
-                String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
+                String directory = "C:/finalProject/FinalProject/frontend/public/profile-images";
                 Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
                 Files.write(imagePath, profileImg.getBytes());
                 profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());
