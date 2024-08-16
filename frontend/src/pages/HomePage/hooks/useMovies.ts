@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchMovies, fetchRecentMovies } from '../services/api';
+import { fetchMovies, fetchRecentMovies, fetchRecommendedMovies } from '../services/api';
 import { Movie } from '../services/interfaces';
 
 export const useMovies = (profileNo: number | null) => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [recentMovies, setRecentMovies] = useState<Movie[]>([]);
+  const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]); // 추천 영화 상태 추가
 
   useEffect(() => {
     const loadMovies = async () => {
@@ -22,7 +23,12 @@ export const useMovies = (profileNo: number | null) => {
         const recentMoviesData = await fetchRecentMovies(profileNo);
         setRecentMovies(recentMoviesData);
       };
+      const loadRecommendedMovies = async () => { // 추천 영화 로드 함수 추가
+        const recommendedMoviesData = await fetchRecommendedMovies(profileNo);
+        setRecommendedMovies(recommendedMoviesData);
+      };
       loadRecentMovies();
+      loadRecommendedMovies(); // 추천 영화 로드
     }
   }, [profileNo]);
 
@@ -36,5 +42,5 @@ export const useMovies = (profileNo: number | null) => {
     setFilteredMovies(filtered);
   }, [movies]);
 
-  return { movies, filteredMovies, recentMovies, filterMovies };
+  return { movies, filteredMovies, recentMovies, recommendedMovies, filterMovies };
 };

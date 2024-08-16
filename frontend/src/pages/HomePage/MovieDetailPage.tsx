@@ -201,9 +201,10 @@ const MovieDetailPage: React.FC = () => {
       try {
         await axios.post('http://localhost:8088/api/profiles/update-vector', {
           profileId: profileNo,
-          movieId: movieId, // movieId 추가
-          movieTags: movieTags,
+          movieId: movieId,
+          movieTags: movieTags, // 이 부분은 자동으로 JSON으로 변환됨
         });
+
         console.log('Profile vector updated successfully');
       } catch (error) {
         console.error('Error updating profile vector:', error);

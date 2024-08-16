@@ -109,10 +109,10 @@ public class ProfileController {
     public ResponseEntity<?> updateProfileVector(@RequestBody Map<String, Object> request) {
         try {
             Long profileId = Long.parseLong(request.get("profileId").toString());
-            Long movieId = Long.parseLong(request.get("movieId").toString()); // movieId 추가
-            List<String> movieTags = (List<String>) request.get("movieTags");
+            Long movieId = Long.parseLong(request.get("movieId").toString());
+            Map<String, Integer> movieTags = (Map<String, Integer>) request.get("movieTags");
 
-            // ProfileService의 메서드를 호출할 때 movieId도 함께 전달
+            // ProfileService의 메서드를 호출할 때 movieTags도 함께 전달
             profileService.updateProfileVector(profileId, movieId, movieTags);
 
             return ResponseEntity.ok().body(Map.of("success", true));
@@ -121,6 +121,7 @@ public class ProfileController {
                     .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
 
     @PostMapping("/{profileNo}/select-image")
     public ResponseEntity<String> selectProfileImage(@PathVariable Long profileNo, @RequestParam String imageName) {
