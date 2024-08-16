@@ -1,6 +1,6 @@
 package com.kh.last.model.vo;
 
-import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +41,7 @@ public class Profile {
     private String profileVector; // 사용자의 선호도를 JSON 문자열로 저장
 
     @Transient
-    private List<Integer> vectorList;
+    private Map<String, Integer> vectorList;
 
     @PostLoad
     private void postLoad() {
@@ -58,17 +58,17 @@ public class Profile {
         }
     }
 
-    private List<Integer> parseJsonArray(String jsonArray) {
+    private Map<String, Integer> parseJsonArray(String jsonArray) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(jsonArray, new TypeReference<List<Integer>>(){});
+            return mapper.readValue(jsonArray, new TypeReference<Map<String, Integer>>() {});
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private String stringifyJsonArray(List<Integer> jsonArray) {
+    private String stringifyJsonArray(Map<String, Integer> jsonArray) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.writeValueAsString(jsonArray);
@@ -78,4 +78,3 @@ public class Profile {
         }
     }
 }
-

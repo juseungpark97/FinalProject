@@ -199,10 +199,16 @@ const MovieDetailPage: React.FC = () => {
   useEffect(() => {
     const updateProfileVector = async (profileNo: number, movieId: number, movieTags: string[]) => {
       try {
+        // 태그 배열을 Map<String, Integer> 형식으로 변환
+        const tagsMap = movieTags.reduce((acc, tag) => {
+          acc[tag] = (acc[tag] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>); // Record<string, number> 타입 사용
+
         await axios.post('http://localhost:8088/api/profiles/update-vector', {
           profileId: profileNo,
           movieId: movieId,
-          movieTags: movieTags, // 이 부분은 자동으로 JSON으로 변환됨
+          movieTags: tagsMap, // 변환된 Map 형식 전송
         });
 
         console.log('Profile vector updated successfully');
@@ -210,6 +216,7 @@ const MovieDetailPage: React.FC = () => {
         console.error('Error updating profile vector:', error);
       }
     };
+
 
     if (movieId) {
       const movieIdNumber = parseInt(movieId, 10);

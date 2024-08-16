@@ -62,7 +62,7 @@ public class RecommendationService {
 
             logger.info("Calculated similarity: {} for movie: {}", similarity, movie.getTitle());
 
-            if (similarity > 0.1) { // 임계치 설정
+            if (similarity > 0.7) { // 임계치 설정
                 recommendations.add(movie);
             }
         }
@@ -73,29 +73,33 @@ public class RecommendationService {
 
     private int[] createVectorFromTags(String tagsString) {
         int[] vector = new int[ALL_TAGS.size()];
-        
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            List<String> tags = mapper.readValue(tagsString, new TypeReference<List<String>>() {});
-            
-            // 태그 데이터를 Map으로 변환
-            Map<String, Integer> tagFrequency = tags.stream()
-                .collect(Collectors.toMap(
-                    tag -> tag, 
-                    tag -> 1, 
-                    Integer::sum
-                ));
+        ObjectMapper mapper = new ObjectMapper();
 
-            // 고정된 태그 리스트 순서에 맞게 벡터 값을 채움
-            for (int i = 0; i < ALL_TAGS.size(); i++) {
-                vector[i] = tagFrequency.getOrDefault(ALL_TAGS.get(i), 0);
+        try {
+            if (tagsString.trim().startsWith("{")) {
+                // 프로필 태그: Map<String, Integer>로 처리
+                Map<String, Integer> tags = mapper.readValue(tagsString, new TypeReference<Map<String, Integer>>() {});
+                for (int i = 0; i < ALL_TAGS.size(); i++) {
+                    vector[i] = tags.getOrDefault(ALL_TAGS.get(i), 0);
+                }
+            } else if (tagsString.trim().startsWith("[")) {
+                // 영화 태그: List<String>으로 처리
+                List<String> tags = mapper.readValue(tagsString, new TypeReference<List<String>>() {});
+                for (int i = 0; i < ALL_TAGS.size(); i++) {
+                    vector[i] = tags.contains(ALL_TAGS.get(i)) ? 1 : 0;
+                }
+            } else {
+                logger.error("Unexpected tags format: {}", tagsString);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error processing tagsString: {}", tagsString, e);
         }
 
         return vector;
     }
+
+
+
 
 
     // 코사인 유사도 계산 함수

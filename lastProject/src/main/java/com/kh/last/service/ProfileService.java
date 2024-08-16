@@ -23,7 +23,12 @@ import com.kh.last.repository.ProfileRepository;
 import com.kh.last.repository.UserRepository;
 import com.kh.last.repository.WatchLogRepository;
 
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
+@Transactional
 public class ProfileService {
 
     @Autowired
@@ -103,31 +108,32 @@ public class ProfileService {
         profileRepository.save(profile);
     }
 
+    
+    @Transactional
     public void updateProfileVector(Long profileId, Long movieId, Map<String, Integer> movieTags) {
+        // 프로필 찾기
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
 
+        // 영화 찾기
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid movie ID"));
-
+        
+        // 시청 로그가 없는 경우 새로 추가
         boolean hasWatched = watchLogRepository.findByProfileAndMovie(profile, movie).isPresent();
-		/*
-		 * if (hasWatched) { return; }
-		 */
-
-        WatchLog watchLog = new WatchLog(profile, movie, java.time.LocalDateTime.now(), 0);
-        watchLogRepository.save(watchLog);
-
-        Map<String, Integer> vectorMap = parseProfileVector(profile.getProfileVector());
-
-        // 기존 벡터에 새로운 태그 정보 추가
-        for (Map.Entry<String, Integer> entry : movieTags.entrySet()) {
-            vectorMap.put(entry.getKey(), vectorMap.getOrDefault(entry.getKey(), 0) + entry.getValue());
+        if (!hasWatched) {
+            WatchLog watchLog = new WatchLog(profile, movie, java.time.LocalDateTime.now(), 0);
+            watchLogRepository.save(watchLog);
         }
 
+        // 기존 벡터를 완전히 대체하는 방식으로 업데이트
         try {
-            String updatedVector = new ObjectMapper().writeValueAsString(vectorMap);
+            // 새로운 태그 정보를 사용해 프로필 벡터를 업데이트
+            String updatedVector = new ObjectMapper().writeValueAsString(movieTags);
+            System.out.println(updatedVector);
             profile.setProfileVector(updatedVector);
+            
+            // 엔티티 저장
             profileRepository.save(profile);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error converting vector to JSON", e);

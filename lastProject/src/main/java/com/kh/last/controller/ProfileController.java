@@ -33,7 +33,6 @@ import com.kh.last.service.UserService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/profiles")
