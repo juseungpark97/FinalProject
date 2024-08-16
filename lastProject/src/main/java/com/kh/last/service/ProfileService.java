@@ -22,64 +22,88 @@ import com.kh.last.repository.WatchLogRepository;
 
 @Service
 public class ProfileService {
-	@Autowired
-	private ProfileRepository profileRepository;
 
-	@Autowired
-	private UserRepository userRepository;
-	
-	 @Autowired
-	 private MovieRepository movieRepository;
+    @Autowired
+    private ProfileRepository profileRepository;
 
-	
-	@Autowired
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MovieRepository movieRepository;
+
+    @Autowired
     private WatchLogRepository watchLogRepository;
-	
-	public List<Profile> getProfilesByUserNo(Long userNo) {
-		USERS user = userRepository.findById(userNo).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-		return profileRepository.findByUserNo(user);
-	}
 
-	public Profile createProfile(Long userNo, String profileName, String profileImg) {
-		USERS user = userRepository.findById(userNo).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-		Profile profile = new Profile();
-		profile.setUserNo(user);
-		profile.setProfileName(profileName);
-		profile.setProfileImg(profileImg);
-		return profileRepository.save(profile);
-	}
+    public List<Profile> getProfilesByUserNo(Long userNo) {
+        USERS user = userRepository.findById(userNo).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        return profileRepository.findByUserNo(user);
+    }
 
-	public String selectProfileImage(Long profileNo, String selectedImageName) {
-		// 지정된 디렉토리에서 이미지 선택
-		String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
-		Path imagePath = Paths.get(directory, selectedImageName);
+    public Profile createProfile(Long userNo, String profileName, String profileImg) {
+        USERS user = userRepository.findById(userNo).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        Profile profile = new Profile();
+        profile.setUserNo(user);
+        profile.setProfileName(profileName);
+        profile.setProfileImg(profileImg);
+        return profileRepository.save(profile);
+    }
 
-		if (!Files.exists(imagePath)) {
-			throw new RuntimeException("Selected image not found in the directory");
-		}
+    public String selectProfileImage(Long profileNo, String selectedImageName) {
+        // 지정된 디렉토리에서 이미지 선택
+        String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+        Path imagePath = Paths.get(directory, selectedImageName);
 
-		// 데이터베이스에서 프로필을 찾아 이미지 경로 업데이트
-		Profile profile = profileRepository.findById(profileNo)
-				.orElseThrow(() -> new RuntimeException("Profile not found"));
-		profile.setProfileImg("/profile-images/" + selectedImageName);
-		profileRepository.save(profile);
+        if (!Files.exists(imagePath)) {
+            throw new RuntimeException("Selected image not found in the directory");
+        }
 
-		return profile.getProfileImg();
-	}
+        // 데이터베이스에서 프로필을 찾아 이미지 경로 업데이트
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+        profile.setProfileImg("/profile-images/" + selectedImageName);
+        profileRepository.save(profile);
 
-	public Profile getProfileById(Long profileNo) {
-		return profileRepository.findById(profileNo).orElseThrow(() -> new RuntimeException("Profile not found"));
-	}
+        return profile.getProfileImg();
+    }
 
-	public void updateProfile(Profile profile) {
-		profileRepository.save(profile);
-	}
-	
-	// 프로필 벡터 업데이트
+    public Profile getProfileById(Long profileNo) {
+        return profileRepository.findById(profileNo).orElseThrow(() -> new RuntimeException("Profile not found"));
+    }
+
+    public void updateProfile(Profile profile) {
+        profileRepository.save(profile);
+    }
+
+    // 새로운 메서드 추가: 프로필 이미지 업로드
+    public String uploadProfileImage(MultipartFile file, Long profileNo) throws Exception {
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
+
+        String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+        Path imagePath = Paths.get(directory, file.getOriginalFilename());
+        Files.write(imagePath, file.getBytes());
+
+        String profileImgUrl = "/profile-images/" + file.getOriginalFilename();
+        profile.setProfileImg(profileImgUrl);
+        profileRepository.save(profile);
+
+        return profileImgUrl;
+    }
+
+    // 새로운 메서드 추가: 프로필 이름 업데이트
+    public void updateProfileName(Long profileNo, String profileName) {
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
+        profile.setProfileName(profileName);
+        profileRepository.save(profile);
+    }
+
+    // 프로필 벡터 업데이트
     public void updateProfileVector(Long profileId, Long movieId, List<String> movieTags) {
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
-        
+
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid movie ID"));
 
