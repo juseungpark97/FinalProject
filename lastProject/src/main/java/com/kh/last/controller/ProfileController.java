@@ -51,7 +51,7 @@ public class ProfileController {
 		this.userService = userService;
 		this.key = userService.getKey(); // UserService로부터 SecretKey 주입
 	}
-
+	
 	@GetMapping("/user/{userNo}")
 	public ResponseEntity<List<Profile>> getProfilesByUserNo(@PathVariable Long userNo) {
 		List<Profile> profiles = profileService.getProfilesByUserNo(userNo);
