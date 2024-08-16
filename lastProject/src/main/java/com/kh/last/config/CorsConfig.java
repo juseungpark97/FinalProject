@@ -20,7 +20,9 @@ public class CorsConfig {
                         		"http://localhost:5174",
                         		"http://localhost:3006", 
                         		"http://localhost:3004",
-                        		"http://localhost:5173") // 프론트엔드 URL
+                        		"http://localhost:5173",
+                        		"http://localhost:3002",
+                        		"http://localhost:3003") // 프론트엔드 URL
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true);
             }
