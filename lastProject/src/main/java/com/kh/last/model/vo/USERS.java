@@ -18,7 +18,7 @@ public class USERS {
     @Column(name = "email", nullable = false, length = 255, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = true, length = 255) // 비밀번호는 null 가능
+    @Column(name = "password", nullable = false, length = 255) // 비밀번호를 필수로 설정
     private String password;
 
     @Column(name = "role", nullable = true, length = 50)
@@ -36,7 +36,7 @@ public class USERS {
     @Column(name = "birthday", nullable = true, length = 100)
     private String birthday;
 
-    @Column(name = "username", nullable = false, length = 100) // nickname을 username으로 저장
+    @Column(name = "username", nullable = true, length = 100) // nickname을 username으로 저장
     private String username;
 
     @PrePersist
@@ -44,12 +44,8 @@ public class USERS {
         this.createdAt = LocalDateTime.now();
     }
 
-    public USERS(String email, String username) {
+    public USERS(String email, String password) {
         this.email = email;
-        this.username = username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+        this.password = password;
     }
 }

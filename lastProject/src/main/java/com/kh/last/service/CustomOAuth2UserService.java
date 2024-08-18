@@ -2,11 +2,11 @@ package com.kh.last.service;
 
 import java.util.Map;
 
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,32 +25,27 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
-        // DefaultOAuth2UserService를 통해 사용자 정보를 가져옵니다.
-        OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
-        OAuth2User oAuth2User = delegate.loadUser(userRequest);
+        // 사용자 정보를 가져오는 로직을 직접 구현
+        OAuth2User oAuth2User = new DefaultOAuth2UserService().loadUser(userRequest);
 
         // 카카오에서 제공하는 사용자 정보 추출
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-
-        String email = (String) kakaoAccount.get("email");
-        String nickname = (String) profile.get("nickname");
+        String kakaoId = String.valueOf(attributes.get("id")); // 카카오 고유 ID 가져오기
 
         // USERS 엔티티 저장 또는 업데이트
-        USERS user = saveOrUpdateUser(email, nickname);
+        USERS user = saveOrUpdateUser(kakaoId);
 
         // 새로운 DefaultOAuth2User로 사용자 정보 반환
-        return new DefaultOAuth2User(oAuth2User.getAuthorities(), attributes, "email");
+        return new DefaultOAuth2User(oAuth2User.getAuthorities(), attributes, "id");
     }
 
-    private USERS saveOrUpdateUser(String email, String nickname) {
-        USERS user = userRepository.findByEmail(email)
+    private USERS saveOrUpdateUser(String kakaoId) {
+        USERS user = userRepository.findByEmail(kakaoId)
                 .map(existingUser -> {
-                    existingUser.setUsername(nickname); // 프로필 업데이트
+                    // 필요시 추가 업데이트 작업
                     return existingUser;
                 })
-                .orElse(new USERS(email, nickname)); // 신규 사용자 생성
+                .orElse(new USERS(kakaoId, kakaoId)); // 신규 사용자 생성
 
         return userRepository.save(user);
     }
