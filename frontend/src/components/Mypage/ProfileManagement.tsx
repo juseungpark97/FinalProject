@@ -73,6 +73,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
 
     const handleSelectImage = (imageName: string) => {
         const imageUrl = `http://localhost:8088/profile-images/${imageName}`;
+        console.log("Selected Image URL: ", imageUrl); // 디버그용
         setPreviewImage(imageUrl);
         setNewProfileImage(imageName);
         setIsModalOpen(false);
@@ -86,7 +87,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                 <div className={styles.profileSection}>
                     <div className={styles.profileImageContainer}>
                         <img
-                            src={previewImage || (selectedProfile.profileImg)}
+                            src={previewImage || `http://localhost:8088${selectedProfile.profileImg}`}
                             alt="Profile"
                             className={styles.profileImage}
                             onClick={openModal}
@@ -104,8 +105,13 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                                 className={styles.nameInput}
                             />
                         </div>
-                        <a href="#" onClick={handleProfileUpdate} className={styles.link}>프로필 저장</a>
-                        <a href="/password-change" className={styles.link}>비밀번호 변경</a>
+                        <button onClick={handleProfileUpdate} className={styles.link}>프로필 저장</button><br></br>
+                        {/* profileMain이 'M'일 경우에만 비밀번호 변경 버튼 표시 */}
+                        {selectedProfile.profileMain === 'M' && (
+                            <button onClick={() => onMenuClick('passwordChange')} className={styles.link}>
+                                비밀번호 변경
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -132,7 +138,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                                         e.preventDefault();
                                         onMenuClick('accountDelete');
                                     }}
-                                    className={styles.link}
+                                    className={styles.menuLink}
                                 >
                                     회원 탈퇴 <span className={styles.arrow}>&gt;</span>
                                 </a>

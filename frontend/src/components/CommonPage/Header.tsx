@@ -15,9 +15,6 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log('Header selectedProfile:', selectedProfile);
-  }, [selectedProfile]);
 
   useEffect(() => {
     const selectedProfileData = sessionStorage.getItem('selectedProfile');
@@ -134,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
                     className={styles.profileBackgroundIcon}
                     loading="lazy"
                     alt="Profile"
-                    src={selectedProfile?.profileImg || '/profile.png'}
+                    src={selectedProfile?.profileImg ? `http://localhost:8088${selectedProfile.profileImg}` : '/profile.png'}
                   />
                   <img
                     className={styles.antDesigncaretDownFilledIcon}

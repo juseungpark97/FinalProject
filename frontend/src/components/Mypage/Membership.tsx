@@ -45,6 +45,10 @@ const Membership: React.FC = () => {
         setShowCancel(true); // 멤버십 해지 페이지를 보여줌
     };
 
+    const handleCancel = () => {
+        setShowCancel(false); // 멤버십 해지 취소 시 원래 페이지로 돌아옴
+    };
+
     return (
         <div className={styles.myPage}>
             {!showCancel ? (
@@ -77,24 +81,36 @@ const Membership: React.FC = () => {
                         <h3>결제 정보</h3>
                         <div className={styles.quickLinks}>
                             <ul>
-                                <li>다음 결제일</li>
-                                <li><a href="/">결제 수단 관리</a></li>
-                                <li><a href="/">결제 내역 확인</a></li>
                                 <li>
-                                    <a
-                                        href="#"
+                                    <button
+                                        onClick={() => window.location.href = '/'}
+                                        className={styles.menuLink}
+                                    >
+                                        결제 수단 관리 <span className={styles.arrow}>&gt;</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={() => window.location.href = '/'}
+                                        className={styles.menuLink}
+                                    >
+                                        결제 내역 확인 <span className={styles.arrow}>&gt;</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
                                         onClick={handleMembershipCancelClick}
-                                        className={styles.link}
+                                        className={styles.menuLink}
                                     >
                                         멤버십 해지 <span className={styles.arrow}>&gt;</span>
-                                    </a>
+                                    </button>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </>
             ) : (
-                <MembershipCancel /> // 멤버십 해지 컴포넌트를 표시
+                <MembershipCancel onCancel={handleCancel} /> // 멤버십 해지 컴포넌트에 onCancel 전달
             )}
         </div>
     );

@@ -13,7 +13,7 @@ const CinemaCloudButtonContainer: React.FC<Props> = ({ onMenuClick, profileMain 
 
   // 경로와 메뉴의 매핑을 명시적으로 타입 지정
   const pathToMenuMap: Record<string, string> = {
-    '/home': 'overview',
+    '/overview': 'overview',
     '/profile': 'profile',
     '/membership': 'membership',
     '/security': 'security',

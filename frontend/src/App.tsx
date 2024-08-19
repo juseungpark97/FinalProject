@@ -91,9 +91,6 @@ function App() {
         <Route path="/profiles" element={<Profiles />} />
         <Route path="/Findidpage" element={<Findidpage />} />
         <Route path="/Findpwdpage" element={<Findpwpage />} />
-        <Route path="/membershipCancel" element={<MembershipCancel />} />
-
-
         <Route path="/subscribe/success" element={<SubscribeSuccess />} /> {/* 구독 성공 페이지 경로 추가 */}
       </Routes>
     </GoogleOAuthProvider>

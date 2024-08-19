@@ -69,8 +69,16 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                String profileImgFilename = profileImg.getOriginalFilename(); // 실제로는 파일을 저장해야 합니다.
-                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, profileImgFilename);
+                // 이미지 저장 로직
+                String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+                String profileImgFilename = profileImg.getOriginalFilename();
+                Path imagePath = Paths.get(directory, profileImgFilename);
+                Files.write(imagePath, profileImg.getBytes());
+
+                // 이미지 경로를 '/profile-images/파일명' 형식으로 저장
+                String imagePathToStore = "/profile-images/" + profileImgFilename;
+                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, imagePathToStore);
+
                 return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");

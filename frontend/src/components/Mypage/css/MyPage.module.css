@@ -54,13 +54,17 @@
 }
 
 .link {
-    display: block;
+    background: transparent;
+    border: none;
     color: #007bff;
+    padding-top: 10px;
+    cursor: pointer;
+    font-size: 16px;
     text-decoration: none;
-    margin-top: 5px;
 }
 
 .link:hover {
+    color: #0056b3;
     text-decoration: underline;
 }
 
@@ -89,7 +93,7 @@
 
 .quickLinks li:not(:last-child) {
     border-bottom: solid rgb(228, 228, 228) 1px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .quickLinks li :empty {
@@ -102,16 +106,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.quickLinks a:hover {
-    color: #000;
-    font-weight: bold;
-}
-
-.arrow {
-    font-size: 16px;
-    color: #000;
 }
 
 .modalOverlay {
@@ -160,14 +154,17 @@
 }
 
 .cancelButton {
-    margin-top: 10px;
-    background-color: #f44336;
+    background-color: #d6a060;
     color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    width: 30%;
+    font-size: 16px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 200px;
+    margin-left: 20px;
 }
 
 .updateButton:hover {
@@ -175,7 +172,7 @@
 }
 
 .cancelButton:hover {
-    background-color: #5e0808;
+    background-color: #ad8350;
 }
 
 .deleteButton {
@@ -214,4 +211,36 @@
 .statusInactiveText {
     color: gray;
     font-weight: bold;
+}
+
+.menuLink {
+    background: transparent;
+    border: none;
+    padding-top: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+    color: #707070;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-bottom: 10px;
+    width: 100%;
+    text-align: left;
+}
+
+.menuLink:hover {
+    color: #000;
+    font-weight: bold;
+}
+
+.menuLink:not(:last-child) {
+    border-bottom: solid rgb(228, 228, 228) 1px;
+    margin-bottom: 20px;
+}
+
+.arrow {
+    font-size: 16px;
+    color: #000;
 }
