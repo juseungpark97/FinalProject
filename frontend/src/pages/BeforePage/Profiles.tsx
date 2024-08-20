@@ -20,32 +20,47 @@ const ProfilePage: React.FC = () => {
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (token) {
-            axios.get('http://localhost:8088/api/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
+            // 구독 상태를 먼저 확인
+            axios.get('http://localhost:8088/api/users/subscription-status', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
                 .then(response => {
-                    const userNo = response.data.userNo;
-                    axios.get(`http://localhost:8088/api/profiles/user/${userNo}`, { headers: { 'Authorization': `Bearer ${token}` } })
-                        .then(response => {
-                            if (Array.isArray(response.data)) {
-                                setProfiles(response.data);
-                                if (response.data.length > 0) {
-                                    setSelectedMenu('select');
-                                }
-                            } else {
-                                console.error('프로필 데이터가 배열이 아닙니다:', response.data);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('프로필 조회 중 오류 발생:', error);
-                        });
+                    const isSubscribed = response.data.isSubscribed;
+
+                    if (!isSubscribed) {
+                        navigate('/subscribe'); // 구독자가 아니라면 구독 페이지로 리디렉션
+                    } else {
+                        // 구독자라면 프로필 정보를 가져옴
+                        axios.get('http://localhost:8088/api/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
+                            .then(response => {
+                                const userNo = response.data.userNo;
+                                axios.get(`http://localhost:8088/api/profiles/user/${userNo}`, { headers: { 'Authorization': `Bearer ${token}` } })
+                                    .then(response => {
+                                        if (Array.isArray(response.data)) {
+                                            setProfiles(response.data);
+                                            if (response.data.length > 0) {
+                                                setSelectedMenu('select');
+                                            }
+                                        } else {
+                                            console.error('프로필 데이터가 배열이 아닙니다:', response.data);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('프로필 조회 중 오류 발생:', error);
+                                    });
+                            })
+                            .catch(error => {
+                                console.error('사용자 정보 조회 중 오류 발생:', error);
+                            });
+                    }
                 })
                 .catch(error => {
-                    console.error('사용자 정보 조회 중 오류 발생:', error);
-                    if (error.response && error.response.status === 403) {
-                        navigate('/subscribe');  // 구독이 필요하면 구독 페이지로 리디렉션
-                    }
+                    console.error('구독 상태 조회 중 오류 발생:', error);
+                    localStorage.removeItem('authToken'); // 문제가 발생하면 토큰 삭제
+                    navigate('/login'); // 인증 문제가 있으면 로그인 페이지로 리디렉션
                 });
         } else {
-            console.error('토큰이 없습니다');
+            navigate('/login'); // 토큰이 없으면 로그인 페이지로 리디렉션
         }
     }, [navigate]);
 

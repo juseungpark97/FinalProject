@@ -27,8 +27,6 @@ const Landing: FunctionComponent = () => {
           }
         })
         .catch(error => {
-          console.error('구독 상태 확인 중 오류가 발생했습니다:', error);
-          setError('구독 상태 확인 중 오류가 발생했습니다.');
           localStorage.removeItem('authToken'); // 문제가 발생하면 토큰 삭제
           sessionStorage.clear();
         });
@@ -60,10 +58,21 @@ const Landing: FunctionComponent = () => {
     window.location.href = "http://localhost:8088/oauth2/authorization/google";
   };
 
+  // 로그인 페이지로 이동하는 함수 추가
+  const handleLoginClick = () => {
+    navigate('/login'); // 로그인 페이지로 이동
+  };
+
   return (
     <div className={styles.landing}>
       <div className={styles.background}></div>
       <img className={styles.logo} alt="Logo" src="/logo-text-2@2x.png" />
+
+      {/* 로그인 버튼을 오른쪽 상단에 추가 */}
+      <button className={styles.loginButton} onClick={handleLoginClick}>
+        로그인
+      </button>
+
       <section className={styles.landingInner}>
         <h1 className={styles.title}>영화, 시리즈 등을 무제한으로</h1>
         <h2 className={styles.subtitle}>어디서나 자유롭게 시청하세요. 해지는 언제든 가능합니다.</h2>
