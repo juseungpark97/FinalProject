@@ -76,3 +76,7 @@
 ## 사용 외부서버
 
 - **Amazon S3:** Amazon S3(Amazon Simple Storage Service)는 확장 가능하고 빠른 웹 기반 클라우드 스토리지 서비스입니다.
+
+- **Amazon EC2:**
+
+- **Amazon RDS:**
