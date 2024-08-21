@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { GoogleOAuthProvider } from '@react-oauth/google'; // 구글 인증관련
 import Signin from "./pages/BeforePage/SignInPage";
 import Landing from "./pages/BeforePage/MainPage";
@@ -15,18 +15,13 @@ import HelpPage from "./pages/MyPage/Help";
 import Profiles from "./pages/BeforePage/Profiles";
 import SubscribeSuccess from "./pages/HomePage/SubscribeSuccess";
 import Findidpage from "./pages/BeforePage/findidpage";
+import findpwpage from "./pages/BeforePage/findpwpage";
 import Findpwpage from "./pages/BeforePage/findpwpage";
+"./pages/BeforePage/findpwpage";
 
 function App() {
   const location = useLocation();
   const pathname = location.pathname;
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    // 로그인 상태 확인 (토큰이 있는지 확인)
-    const token = localStorage.getItem('authToken');
-    setIsAuthenticated(!!token); // 토큰이 있으면 true, 없으면 false
-  }, [pathname]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -53,7 +48,7 @@ function App() {
       case "/dashboard/1on1chat":
         title = "Dashboard";
         metaDescription = "This is the dashboard page description.";
-        break;
+        break; // 'break' 추가
       case "/upload":
         title = "Upload Movie";
         metaDescription = "Upload a new movie.";
@@ -81,94 +76,23 @@ function App() {
   return (
     <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
       <Routes>
-        {/* 로그인되지 않은 사용자만 접근 가능한 페이지들 */}
-        <Route
-          path="/signin"
-          element={
-            !isAuthenticated ? <Signin /> : <Navigate to="/profiles" replace />
-          }
-        />
-        <Route
-          path="/"
-          element={
-            !isAuthenticated ? <Landing /> : <Navigate to="/profiles" replace />
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            !isAuthenticated ? <LoginPage /> : <Navigate to="/profiles" replace />
-          }
-        />
-        <Route
-          path="/passwordlogin"
-          element={
-            !isAuthenticated ? <PwLogin /> : <Navigate to="/profiles" replace />
-          }
-        />
-        <Route
-          path="/findidpage"
-          element={
-            !isAuthenticated ? <Findidpage /> : <Navigate to="/profiles" replace />
-          }
-        />
-        <Route
-          path="/findpwpage"
-          element={
-            !isAuthenticated ? <Findpwpage /> : <Navigate to="/profiles" replace />
-          }
-        />
-
-        {/* 로그인된 사용자만 접근 가능한 페이지들 */}
-        <Route
-          path="/home"
-          element={
-            isAuthenticated ? <HomePage /> : <Navigate to="/" replace />
-          }
-        />
-        <Route
-          path="/account"
-          element={
-            isAuthenticated ? <Account /> : <Navigate to="/" replace />
-          }
-        />
-        <Route
-          path="/help"
-          element={
-            isAuthenticated ? <HelpPage /> : <Navigate to="/" replace />
-          }
-        />
-        <Route
-          path="/subscribe"
-          element={
-            isAuthenticated ? <SubscribePage /> : <Navigate to="/" replace />
-          }
-        />
-        <Route
-          path="/profiles"
-          element={
-            isAuthenticated ? <Profiles /> : <Navigate to="/" replace />
-          }
-        />
-        <Route
-          path="/subscribe/success"
-          element={
-            isAuthenticated ? <SubscribeSuccess /> : <Navigate to="/" replace />
-          }
-        />
-        <Route
-          path="/movie/:movieId"
-          element={
-            isAuthenticated ? <MovieDetailPage /> : <Navigate to="/" replace />
-          }
-        />
-
-        {/* 로그인 여부와 상관없이 접근 가능한 페이지들 */}
+        <Route path="/signin" element={<Signin />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/dashboard/*" element={<DashboardPage />} />
         <Route path="/upload" element={<UploadMovie />} />
+        <Route path="/movie/:movieId" element={<MovieDetailPage />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/help" element={<HelpPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/subscribe" element={<SubscribePage />} />
+        <Route path="/passwordlogin" element={<PwLogin />} />
+        <Route path="/profiles" element={<Profiles />} />
+        <Route path="/Findidpage" element={<Findidpage />} />
+        <Route path="/Findpwdpage" element={<Findpwpage />} />
 
-        {/* 잘못된 URL 접근 시 기본 리디렉션 */}
-        <Route path="*" element={<Navigate to={isAuthenticated ? "/profiles" : "/"} replace />} />
+
+        <Route path="/subscribe/success" element={<SubscribeSuccess />} /> {/* 구독 성공 페이지 경로 추가 */}
       </Routes>
     </GoogleOAuthProvider>
   );
