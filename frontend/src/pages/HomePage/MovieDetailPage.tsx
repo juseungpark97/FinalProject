@@ -60,6 +60,7 @@ const MovieDetailPage: React.FC = () => {
       if (!isNaN(movieIdNumber)) {
         axios.get(`http://localhost:8088/api/movies/${movieIdNumber}`)
           .then(response => {
+            console.log(response.data);
             setMovie(response.data);
             setLoading(false);
           })
@@ -514,10 +515,15 @@ const MovieDetailPage: React.FC = () => {
           onTimeUpdate={handleProgress}
           onLoadedMetadata={handleDuration}
           onEnded={handleEnded}
-          onPlay={() => setPlaying(true)} // 이 부분을 추가합니다.
-          onPause={() => setPlaying(false)} // 일관성을 위해 onPause 핸들러도 추가합니다.
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onCanPlay={() => {
+            videoRef.current?.play(); // 비디오가 재생 가능할 때 자동 재생
+          }}
           autoPlay
+          preload="auto" // 비디오를 미리 로드하도록 설정
         />
+
         <Box className={styles.controls} ref={controlsRef}>
           <IconButton onClick={handlePlayPause} className={styles.controlButton} sx={{ color: 'white' }}>
             {playing ? <PauseIcon /> : <PlayArrowIcon />}
