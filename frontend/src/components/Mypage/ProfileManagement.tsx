@@ -28,34 +28,30 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
 
     const handleProfileUpdate = async () => {
         try {
-            const formData = new FormData();
-            formData.append('profileNo', String(selectedProfile.profileNo));
-            formData.append('profileName', newProfileName);
+            if (newProfileImage) {  // newProfileImage가 null이 아닌지 확인
+                const formData = new FormData();
+                formData.append('imageName', newProfileImage);  // null이 아닐 때만 추가
 
-            if (newProfileImage) {
-                const imageBlob = await fetch(newProfileImage).then(r => r.blob());
-                formData.append('profileImg', imageBlob, newProfileImage.split('/').pop());
-            }
+                const response = await axios.put(`http://localhost:8088/api/profiles/${selectedProfile.profileNo}/update-image`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
 
-            const response = await axios.put('http://localhost:8088/api/profiles/update-profile', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+                if (response.status === 200 && response.data.success) {
+                    const updatedProfile = {
+                        ...selectedProfile,
+                        profileImg: response.data.profileImg
+                    };
 
-            if (response.status === 200 && response.data.success) {
-                const updatedProfile = {
-                    ...selectedProfile,
-                    profileName: response.data.profileName,
-                    profileImg: response.data.profileImg
-                };
-
-                setSelectedProfile(updatedProfile);
-                onProfileUpdate(updatedProfile);
-                setIsModalOpen(false);
-                alert('프로필 변경이 완료되었습니다.');
+                    setSelectedProfile(updatedProfile);
+                    onProfileUpdate(updatedProfile);
+                    alert('프로필 이미지가 변경되었습니다.');
+                } else {
+                    console.error('Failed to update profile:', response.data);
+                }
             } else {
-                console.error('Failed to update profile:', response.data);
+                console.error('No new profile image provided.');
             }
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -72,7 +68,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
     };
 
     const handleSelectImage = (imageName: string) => {
-        const imageUrl = `http://localhost:8088/profile-images/${imageName}`;
+        const imageUrl = `/profile-images/${imageName}`;
         console.log("Selected Image URL: ", imageUrl); // 디버그용
         setPreviewImage(imageUrl);
         setNewProfileImage(imageName);
@@ -87,7 +83,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                 <div className={styles.profileSection}>
                     <div className={styles.profileImageContainer}>
                         <img
-                            src={previewImage || `http://localhost:8088${selectedProfile.profileImg}`}
+                            src={previewImage || (selectedProfile.profileImg)}
                             alt="Profile"
                             className={styles.profileImage}
                             onClick={openModal}

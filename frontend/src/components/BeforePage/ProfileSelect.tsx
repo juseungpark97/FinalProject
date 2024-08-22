@@ -27,7 +27,7 @@ const ProfileSelect: React.FC<ProfileSelectProps> = ({ profiles, onProfileSelect
             <div className={styles.profiles}>
                 {sortedProfiles.map(profile => (
                     <div key={profile.profileNo} className={styles.profile}>
-                        <img src={`http://localhost:8088${profile.profileImg}`}
+                        <img src={(profile.profileImg)}
                             alt={profile.profileName}
                             className={styles.profileImage}
                             onClick={() => onProfileSelect(profile)}

@@ -131,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
                     className={styles.profileBackgroundIcon}
                     loading="lazy"
                     alt="Profile"
-                    src={selectedProfile?.profileImg ? `http://localhost:8088${selectedProfile.profileImg}` : '/profile.png'}
+                    src={selectedProfile?.profileImg ? (selectedProfile.profileImg) : '/profile.png'}
                   />
                   <img
                     className={styles.antDesigncaretDownFilledIcon}

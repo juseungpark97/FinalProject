@@ -128,36 +128,25 @@ public class ProfileController {
         }
     }
 
-    @PutMapping("/update-profile")
-    public ResponseEntity<?> updateProfile(@RequestParam("profileNo") Long profileNo,
-                                           @RequestParam("profileName") String profileName,
-                                           @RequestParam(value = "profileImg", required = false) MultipartFile profileImg) {
+    @PutMapping("/{profileNo}/update-image")
+    public ResponseEntity<?> updateProfileImage(@PathVariable Long profileNo, @RequestParam("imageName") String imageName) {
         try {
-            // 프로필 가져오기
+            // 데이터베이스에서 프로필 정보 가져오기
             Profile profile = profileService.getProfileById(profileNo);
             if (profile == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
             }
-
-            // 프로필 이름 업데이트
-            profile.setProfileName(profileName);
-
-            // 프로필 이미지 업데이트
-            if (profileImg != null && !profileImg.isEmpty()) {
-                // 이미지 저장 로직 (이미지 경로 설정 및 저장)
-                String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
-                Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
-                Files.write(imagePath, profileImg.getBytes());
-                profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());
-            }
+            
+            // 프로필 이미지 경로 업데이트
+            String imagePath = "/profile-images/" + imageName;
+            profile.setProfileImg(imagePath);
 
             // DB 업데이트
             profileService.updateProfile(profile);
 
-            return ResponseEntity.ok(Map.of("success", true, "profileImg", profile.getProfileImg(), "profileName", profileName));
+            return ResponseEntity.ok(Map.of("success", true, "profileImg", profile.getProfileImg()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
         }
     }
     
