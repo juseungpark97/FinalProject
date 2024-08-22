@@ -17,6 +17,7 @@ import SubscribeSuccess from "./pages/HomePage/SubscribeSuccess";
 import Findidpage from "./pages/BeforePage/findidpage";
 import findpwpage from "./pages/BeforePage/findpwpage";
 import Findpwpage from "./pages/BeforePage/findpwpage";
+import MembershipCancel from "./components/Mypage/MembershipCancel";
 "./pages/BeforePage/findpwpage";
 
 function App() {

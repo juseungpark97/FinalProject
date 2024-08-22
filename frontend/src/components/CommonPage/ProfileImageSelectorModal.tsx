@@ -50,7 +50,7 @@ const ProfileImageSelectorModal: React.FC<ProfileImageSelectorModalProps> = ({ i
                             images.map((image, index) => (
                                 <img
                                     key={index}
-                                    src={`http://localhost:8088/profile-images/${image}`}
+                                    src={`/profile-images/${image}`}
                                     alt={`Profile option ${index + 1}`}
                                     className={styles.imageOption}
                                     onClick={() => onSelect(image)}
