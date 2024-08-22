@@ -201,13 +201,13 @@ const MovieDetailPage: React.FC = () => {
       try {
         // 태그 배열을 JSON 형식으로 변환
         const tagsJson = JSON.stringify(movieTags);
-    
+
         await axios.post('http://localhost:8088/api/profiles/update-vector', {
           profileId: profileNo,
           movieId: movieId,
           movieTags: tagsJson, // JSON 형식으로 전송
         });
-    
+
         console.log('Profile vector updated successfully');
       } catch (error) {
         console.error('Error updating profile vector:', error);
@@ -514,6 +514,8 @@ const MovieDetailPage: React.FC = () => {
           onTimeUpdate={handleProgress}
           onLoadedMetadata={handleDuration}
           onEnded={handleEnded}
+          onPlay={() => setPlaying(true)} // 이 부분을 추가합니다.
+          onPause={() => setPlaying(false)} // 일관성을 위해 onPause 핸들러도 추가합니다.
           autoPlay
         />
         <Box className={styles.controls} ref={controlsRef}>
