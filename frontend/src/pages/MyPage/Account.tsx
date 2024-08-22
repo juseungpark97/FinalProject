@@ -7,10 +7,14 @@ import Membership from '../../../src/components/Mypage/Membership';
 import Security from '../../../src/components/Mypage/Security';
 import ProfileManagement from '../../../src/components/Mypage/ProfileManagement';
 import AccountDelete from '../../../src/components/Mypage/AccountDelete';
+import { Profile } from '../../types/Profile';
+import PasswordChange from '../../components/Mypage/PasswordChange';
+import ProfileLock from '../../components/Mypage/ProfileLock';
+
 
 const Account: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState<string>('overview');
-  const [profile, setProfile] = useState<{ profileImg: string; profileName: string; profileNo: number } | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     const storedProfile = sessionStorage.getItem('selectedProfile');
@@ -27,29 +31,12 @@ const Account: React.FC = () => {
     }
   };
 
-  const decodeJWT = (token: string) => {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-      return JSON.parse(jsonPayload);
-    } catch (error) {
-      console.error('Failed to decode token:', error);
-      return null;
-    }
-  };
-
   return (
     <div className={styles.account}>
       <Header selectedProfile={profile} setSelectedProfile={setProfile} />
       <div className={styles.mainContainer}>
         <div className={styles.sidebar}>
-          <CinemaCloudButtonContainer onMenuClick={setSelectedMenu} />
+          <CinemaCloudButtonContainer onMenuClick={setSelectedMenu} profileMain={profile?.profileMain || 'S'} />
         </div>
         <div className={styles.content}>
           {selectedMenu === 'profile' && profile && (
@@ -58,7 +45,12 @@ const Account: React.FC = () => {
           {selectedMenu === 'overview' && <OverView />}
           {selectedMenu === 'membership' && <Membership />}
           {selectedMenu === 'security' && <Security />}
-          {selectedMenu === 'accountDelete' && <AccountDelete />}
+          {selectedMenu === 'passwordChange' && <PasswordChange />}
+          {selectedMenu === 'accountDelete' && profile?.profileMain === 'M' && <AccountDelete />}
+          {selectedMenu === 'profileLock' && profile && (
+            <ProfileLock profileId={profile.profileNo} />
+          )}
+
         </div>
       </div>
     </div>

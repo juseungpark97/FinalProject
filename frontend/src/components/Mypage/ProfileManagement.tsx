@@ -10,8 +10,9 @@ interface ProfileManagementProps {
         profileImg: string;
         profileName: string;
         profileNo: number;
+        profileMain: string; // profileMain 속성 추가
     };
-    onProfileUpdate: (updatedProfile: { profileImg: string; profileName: string }) => void; // 여기에 추가
+    onProfileUpdate: (updatedProfile: { profileImg: string; profileName: string }) => void;
 }
 
 const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, profile, onProfileUpdate }) => {
@@ -27,34 +28,30 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
 
     const handleProfileUpdate = async () => {
         try {
-            const formData = new FormData();
-            formData.append('profileNo', String(selectedProfile.profileNo));
-            formData.append('profileName', newProfileName);
+            if (newProfileImage) {  // newProfileImage가 null이 아닌지 확인
+                const formData = new FormData();
+                formData.append('imageName', newProfileImage);  // null이 아닐 때만 추가
 
-            if (newProfileImage) {
-                const imageBlob = await fetch(newProfileImage).then(r => r.blob());
-                formData.append('profileImg', imageBlob, newProfileImage.split('/').pop());
-            }
+                const response = await axios.put(`http://localhost:8088/api/profiles/${selectedProfile.profileNo}/update-image`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
 
-            const response = await axios.put('http://localhost:8088/api/profiles/update-profile', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+                if (response.status === 200 && response.data.success) {
+                    const updatedProfile = {
+                        ...selectedProfile,
+                        profileImg: response.data.profileImg
+                    };
 
-            if (response.status === 200 && response.data.success) {
-                const updatedProfile = {
-                    ...selectedProfile,
-                    profileName: response.data.profileName,
-                    profileImg: response.data.profileImg
-                };
-
-                setSelectedProfile(updatedProfile);
-                onProfileUpdate(updatedProfile); // 부모 컴포넌트 또는 Header에 업데이트를 전달
-                setIsModalOpen(false);
-                alert('프로필 변경이 완료되었습니다.');
+                    setSelectedProfile(updatedProfile);
+                    onProfileUpdate(updatedProfile);
+                    alert('프로필 이미지가 변경되었습니다.');
+                } else {
+                    console.error('Failed to update profile:', response.data);
+                }
             } else {
-                console.error('Failed to update profile:', response.data);
+                console.error('No new profile image provided.');
             }
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -71,11 +68,13 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
     };
 
     const handleSelectImage = (imageName: string) => {
-        const imageUrl = `http://localhost:8088/profile-images/${imageName}`;
+        const imageUrl = `/profile-images/${imageName}`;
+        console.log("Selected Image URL: ", imageUrl); // 디버그용
         setPreviewImage(imageUrl);
         setNewProfileImage(imageName);
         setIsModalOpen(false);
     };
+
 
     return (
         <div className={styles.profileManagementPage}>
@@ -103,8 +102,13 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                                 className={styles.nameInput}
                             />
                         </div>
-                        <a href="#" onClick={handleProfileUpdate} className={styles.link}>프로필 저장</a>
-                        <a href="/password-change" className={styles.link}>비밀번호 변경</a>
+                        <button onClick={handleProfileUpdate} className={styles.link}>프로필 저장</button><br></br>
+                        {/* profileMain이 'M'일 경우에만 비밀번호 변경 버튼 표시 */}
+                        {selectedProfile.profileMain === 'M' && (
+                            <button onClick={() => onMenuClick('passwordChange')} className={styles.link}>
+                                비밀번호 변경
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -119,22 +123,47 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                 <h3>프로필 설정</h3>
                 <div className={styles.quickLinks}>
                     <ul>
-                        <li><a href="/watch-settings">시청 제한 <span className={styles.arrow}>&gt;</span></a></li>
-                        <li><a href="/watch-history">시청 기록 <span className={styles.arrow}>&gt;</span></a></li>
-                        <li><a href="/payment-info">결제정보 <span className={styles.arrow}>&gt;</span></a></li>
-                        <li><a href="/privacy-policy">개인정보 및 데이터 설정 <span className={styles.arrow}>&gt;</span></a></li>
+                        <li>
+                            <button onClick={() => window.location.href = '/watch-settings'} className={styles.menuLink}>
+                                시청 제한 <span className={styles.arrow}>&gt;</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={() => window.location.href = '/watch-history'} className={styles.menuLink}>
+                                시청 기록 <span className={styles.arrow}>&gt;</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={() => window.location.href = '/payment-info'} className={styles.menuLink}>
+                                결제정보 <span className={styles.arrow}>&gt;</span>
+                            </button>
+                        </li>
                         <li>
                             <a
-                                href="#"
+                                href=""
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    onMenuClick('accountDelete');
+                                    onMenuClick('profileLock');
                                 }}
-                                className={styles.link}
+                                className={styles.menuLink}
                             >
-                                회원 탈퇴 <span className={styles.arrow}>&gt;</span>
+                                프로필 잠금 <span className={styles.arrow}>&gt;</span>
                             </a>
                         </li>
+                        {selectedProfile.profileMain !== 'S' && (
+                            <li>
+                                <a
+                                    href=""
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onMenuClick('accountDelete');
+                                    }}
+                                    className={styles.menuLink}
+                                >
+                                    회원 탈퇴 <span className={styles.arrow}>&gt;</span>
+                                </a>
+                            </li>
+                        )}
                     </ul>
                 </div>
             </div>
