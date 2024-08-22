@@ -51,10 +51,4 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 	Page<MovieViewDTO> findMoviesWithViewCountAbove100(@Param("startDate") LocalDateTime startDate,
 	                                                   @Param("endDate") LocalDateTime endDate,
 	                                                   Pageable pageable);
-	
-	@Query("SELECT m.id, m.title, m.director, m.releaseYear, m.rating, m.tags, m.cast, COALESCE(SUM(wl.progressTime), 0) " +
-		       "FROM Movie m LEFT JOIN WatchLog wl ON wl.movie.id = m.id " +
-		       "GROUP BY m.id, m.title, m.director, m.releaseYear, m.rating, m.tags, m.cast")
-		List<Object[]> findMoviesWithViewCounts();
-
 }

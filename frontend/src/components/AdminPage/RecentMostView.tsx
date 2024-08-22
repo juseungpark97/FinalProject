@@ -29,10 +29,9 @@ const RecentMostView = () => {
           <tr>
             <th>영화 제목</th>
             <th>장르</th>
-            <th>개봉년도</th>
             <th>감독</th>
             <th>배우</th>
-            <th>한달간 조회수</th>
+            <th>한달조회수</th>
           </tr>
         </thead>
         <tbody>
@@ -40,7 +39,6 @@ const RecentMostView = () => {
             <tr key={index}>
               <td>{item.title}</td>
               <td>{item.tags}</td>
-              <td>{item.releaseYear}년</td>
               <td>{item.director}</td>
               <td>{item.cast}</td>
               <td>{item.viewCount}회</td>

@@ -3,17 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface DataType {
-  name: string;
   조회수: number;
+  name: string;
   fill: string; // 추가된 색상 필드
 }
 
-const generateRandomColor = (): string => {
-  const r = Math.floor(Math.random() * 256);
-  const g = Math.floor(Math.random() * 256);
-  const b = Math.floor(Math.random() * 256);
-  return `rgb(${r}, ${g}, ${b})`;
-};
+// const generateRandomColor = (): string => {
+//   const r = Math.floor(Math.random() * 256);
+//   const g = Math.floor(Math.random() * 256);
+//   const b = Math.floor(Math.random() * 256);
+//   return `rgb(${r}, ${g}, ${b})`;
+// };
 
 // 데이터 생성 시 랜덤 색상 추가
 // const data: DataType[] = [
@@ -39,14 +39,7 @@ const ChartComponent = () => {
   useEffect(() => {
     axios.get('http://localhost:8088/dashboard/getGenreView')
       .then((res) => {
-        // 데이터와 함께 색상 추가
-        // const dataWithColors = res.data.map((item: any) => ({
-        //   ...item,
-        //   fill: generateRandomColor()
-        // }));
-        // setData(dataWithColors);
-        console.log("장르별 조회수");
-        console.log(res.data);
+        setData(res.data);
       })
       .catch(error => {
         console.error("Error fetching data", error);

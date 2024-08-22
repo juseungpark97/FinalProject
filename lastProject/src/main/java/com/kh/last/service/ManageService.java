@@ -3,6 +3,7 @@ package com.kh.last.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,31 +186,45 @@ public class ManageService {
 	}
 
 	public Map<String, Integer> getGenreViewCounts() {
-        Map<String, Integer> genreViewCounts = new HashMap<>();
-        
-        // 장르별 큰 분류 매핑
-        Map<String, List<String>> genreToCategories = GenreMapping.getGenreToCategories(); // 장르-큰 분류 매핑 가져오기
-        
-        // 영화와 조회 수를 가져옵니다.
-        List<Object[]> moviesWithViewCounts = movieRepository.findMoviesWithViewCounts();
+	    List<MovieViewDTO> movies = movieRepository.findAllMoviesAndView(); // 모든 영화를 조회
+	    Map<String, Integer> genreViewCounts = new HashMap<>();
+	    
+	    log.info("movies : {}", movies);
+	    
+	    // 장르별 큰 분류 매핑
+	    Map<String, List<String>> genreToCategories = GenreMapping.getGenreToCategories(); // 장르-큰 분류 매핑 가져오기
+	    
+	    log.info("genreToCategories : {}", genreToCategories);
 
-        for (Object[] record : moviesWithViewCounts) {
-            Movie movie = (Movie) record[0];
-            Integer viewCount = ((Number) record[1]).intValue(); // 조회 수
+	    for (MovieViewDTO movie : movies) {
+	        String tags = movie.getTags();
+	        if (tags != null) {
+	            int viewCount = movie.getViewCount() != null ? movie.getViewCount().intValue() : 0;
+	            log.info("tags : {}", tags);
 
-            List<String> tags = movie.getTagList();
-            if (tags != null) {
-                for (String tag : tags) {
-                    List<String> categories = genreToCategories.get(tag);
-                    if (categories != null) {
-                        for (String category : categories) {
-                            genreViewCounts.merge(category, viewCount, Integer::sum);
-                        }
-                    }
-                }
-            }
-        }
+	            // 대괄호와 따옴표를 제거하고 쉼표로 분할하여 List<String>으로 변환
+	            tags = tags.replaceAll("[\\[\\]\"]", ""); // 대괄호와 따옴표 제거
+	            List<String> tagList = Arrays.asList(tags.split("\\s*,\\s*")); // 쉼표로 분할하고 앞뒤 공백 제거
 
-        return genreViewCounts;
-    }
+	            for (String tag : tagList) {
+	                tag = tag.trim(); // 각 태그의 앞뒤 공백 제거
+	                log.info("장르 : {}", tag);
+
+	                // 각 태그가 속하는 큰 분류를 찾기
+	                for (Map.Entry<String, List<String>> entry : genreToCategories.entrySet()) {
+	                    if (entry.getValue().contains(tag)) {
+	    	                log.info("장르 일치 : {}", tag);
+	                        genreViewCounts.merge(entry.getKey(), viewCount, Integer::sum);
+	                    }else {
+	                    	genreViewCounts.merge(entry.getKey(), 0, Integer::sum);
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+	    log.info("genreViewCounts : {}", genreViewCounts);
+
+	    return genreViewCounts;
+	}
 }

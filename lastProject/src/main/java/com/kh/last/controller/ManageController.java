@@ -163,11 +163,11 @@ public class ManageController {
 	}
 	
 	@GetMapping("/getGenreView")
-    public Map<String, Object> getGenreView() {
+    public List<Map<String, Object>> getGenreView() {
         Map<String, Object> response = new HashMap<>();
         Map<String, Integer> genreViewCounts = service.getGenreViewCounts();
 
-        log.info("장르 뽑아온거 {} : ", genreViewCounts);
+        log.info("장르 뽑아온거  : {}", genreViewCounts);
         // 데이터와 색상 추가
         List<Map<String, Object>> dataWithColors = genreViewCounts.entrySet().stream()
             .map(entry -> {
@@ -178,9 +178,10 @@ public class ManageController {
                 return item;
             })
             .collect(Collectors.toList());
-
-        response.put("data", dataWithColors);
-        return response;
+        
+        //response.put("data", dataWithColors);
+        log.info("반환값 {} ", dataWithColors);
+        return dataWithColors;
     }
 
     private String generateRandomColor() {
