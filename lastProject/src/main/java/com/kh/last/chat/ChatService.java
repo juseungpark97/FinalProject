@@ -46,6 +46,7 @@ public class ChatService {
     public void closeChatRoom(Long chatRoomId) {
         ChatRoomList chatRoom = chatRoomListRepository.findById(chatRoomId)
             .orElseThrow(() -> new IllegalArgumentException("Invalid chatRoomId: " + chatRoomId));
+        chatRoom.setChatCheck("Y");
         chatRoom.setExitRoom("Y");
         chatRoomListRepository.save(chatRoom);
     }

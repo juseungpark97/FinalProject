@@ -1,7 +1,11 @@
 package com.kh.last.model.vo;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,8 +19,6 @@ import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Entity
 @Getter
@@ -48,6 +50,9 @@ public class Movie {
 
     @Transient
     private List<String> castList;
+    
+    @Column(name = "view_count")
+    private Long viewCount;
 
     @PostLoad
     private void postLoad() {

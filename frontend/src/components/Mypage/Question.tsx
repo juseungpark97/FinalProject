@@ -12,7 +12,12 @@ export interface ChatMessage {
     chatDate: string; // ISO 8601 문자열 형태로 LocalDateTime 데이터가 전달됨
 }
 
-const Question: React.FC = () => {
+export interface QuestionProps {
+    profileNo: number | null;
+};
+
+
+const Question: React.FC<QuestionProps> = ({ profileNo }) => {
     const [webSocket, setWebSocket] = useState<Client | null>(null);
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const url = 'http://localhost:8088';
@@ -20,9 +25,6 @@ const Question: React.FC = () => {
     const [message, setMessage] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
-
-    const selectedProfile = JSON.parse(localStorage.getItem('selectedProfile') || '{}');
-    const profileNo = selectedProfile?.profileNo || null;
 
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [chatRoomId, setChatRoomId] = useState<number | null>(null);

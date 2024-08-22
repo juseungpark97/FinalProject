@@ -1,52 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import styles from '../../pages/AdminPage/css/DashboardPage.module.css';
+import axios from 'axios';
 
-const data = [
-  {
-    name: 'Justin Lipshutz',
-    category: 'Marketing',
-    age: 22,
-    status: '+100%',
-    employmentType: 'Permanent',
-  },
-  {
-    name: 'Marcus Culhane',
-    category: 'Finance',
-    age: 24,
-    status: 'Contract',
-    employmentType: 'Contract',
-  },
-  {
-    name: 'Leo Stanton',
-    category: 'R&D',
-    age: 28,
-    status: 'Permanent',
-    employmentType: 'Permanent',
-  },
-  // 추가 데이터
-];
+export interface recentMovieProps {
+  title: string;
+  tags: string;
+  releaseYear: number;
+  director: string;
+  cast: string;
+  viewCount: number;
+};
 
 const RecentMostView = () => {
+  const [data, setData] = useState<recentMovieProps[]>([]);
+
+  useEffect(() => {
+    axios.get<recentMovieProps[]>('http://localhost:8088/dashboard/recentMostView')
+        .then((req) => {
+          setData(req.data);
+        })
+  })
+
   return (
-    <div>
-      <h2>최근 많이 본 영화 (1주일 내 100건 이상)</h2>
-      <table>
+    <div className={styles.recentTop}>
+      <h2 className={styles.recentTitle}>최근 많이 본 영화 (30일 내 100건 이상)</h2>
+      <table className={styles.recentMoviesTable}>
         <thead>
           <tr>
             <th>영화 제목</th>
-            <th>카테고리</th>
-            <th>연령 제한</th>
+            <th>장르</th>
+            <th>개봉년도</th>
             <th>감독</th>
-            <th>이번주 조회수</th>
+            <th>배우</th>
+            <th>한달간 조회수</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
             <tr key={index}>
-              <td>{item.name}</td>
-              <td>{item.category}</td>
-              <td>{item.age}</td>
-              <td>{item.status}</td>
-              <td>{item.employmentType}</td>
+              <td>{item.title}</td>
+              <td>{item.tags}</td>
+              <td>{item.releaseYear}년</td>
+              <td>{item.director}</td>
+              <td>{item.cast}</td>
+              <td>{item.viewCount}회</td>
             </tr>
           ))}
         </tbody>

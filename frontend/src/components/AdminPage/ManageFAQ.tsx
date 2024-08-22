@@ -78,14 +78,6 @@ export default function ManageFAQ() {
             <div className={styles.headerContainer}>
                 <h1 className={styles.movimanage}>자주하는질문</h1>
                 <div className={styles.searchContainer}>
-                    <input
-                        type="text"
-                        placeholder="질문검색"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className={styles.searchInput}
-                    />
-                    <button onClick={handleSearchClick} className={styles.searchButton}>검색</button>
                     <button className={styles.insertFAQButton} onClick={handleInsertFAQClick}>작성하기</button>
                 </div>
             </div>
