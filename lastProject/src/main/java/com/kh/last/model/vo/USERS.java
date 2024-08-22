@@ -13,10 +13,10 @@ public class USERS {
     @Column(name = "user_no")
     private Long userNo;
 
-    @Column(name = "email", nullable = false, length = 255)
+    @Column(name = "email", nullable = true, length = 255)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "password", nullable = true, length = 255)
     private String password;
 
     @Column(name = "role", nullable = true, length = 50)
@@ -34,7 +34,7 @@ public class USERS {
     @Column(name = "birthday", nullable = true, length = 100)
     private String birthday;
 
-    @Column(name = "username", nullable = false, length = 100)
+    @Column(name = "username", nullable = true, length = 100)
     private String username;
 
     @PrePersist
