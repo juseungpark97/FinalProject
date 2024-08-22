@@ -21,7 +21,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/oauth2/authorization/**").permitAll() // 로그인 및 OAuth2 인증 URL 접근 허용
+                .requestMatchers("/login", "/oauth2/authorization/**", "/paypal/success", "/paypal/cancel").permitAll() // 로그인 및 OAuth2 인증 URL 접근 허용
                 .anyRequest().authenticated() // 다른 모든 요청은 인증 필요
             )
             .formLogin(form -> form
