@@ -19,6 +19,7 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = memo(({ video }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // IntersectionObserver를 사용해 비디오가 뷰포트에 들어왔을 때 로드
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting && videoRef.current) {
@@ -58,7 +59,7 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = memo(({ video }) => {
 
     const handleLoadedData = () => {
         setIsVideoLoaded(true);
-        if (isHovered) {  // 이미 호버 상태라면 로드되자마자 재생
+        if (isHovered) { // 이미 호버 상태라면 로드되자마자 재생
             videoRef.current?.play().catch(error => console.error('Video play was interrupted:', error));
         }
     };
