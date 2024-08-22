@@ -19,7 +19,7 @@ const RecentMostView = () => {
         .then((req) => {
           setData(req.data);
         })
-  })
+  }, [])
 
   return (
     <div className={styles.recentTop}>

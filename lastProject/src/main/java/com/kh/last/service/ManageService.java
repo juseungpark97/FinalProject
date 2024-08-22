@@ -3,7 +3,9 @@ package com.kh.last.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -13,8 +15,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kh.last.common.GenreMapping;
 import com.kh.last.model.dto.MovieViewDTO;
 import com.kh.last.model.vo.Faq;
+import com.kh.last.model.vo.Movie;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.StopAccount;
 import com.kh.last.model.vo.USERS;
@@ -63,8 +67,7 @@ public class ManageService {
 		if (count == null) {
 			count = 0;
 		}
-		log.debug("count = {}", count);
-		return count.intValue();
+		return count;
 	}
 
 	public int movieCount() {
@@ -165,19 +168,48 @@ public class ManageService {
 			throw new IllegalArgumentException("User not found");
 		}
 	}
-	
-	public List<MovieViewDTO> recentMostView() {
-	    LocalDateTime now = LocalDateTime.now();
-	    LocalDateTime startDate = now.minus(29, ChronoUnit.DAYS);
-	    LocalDateTime endDate = now;
 
-	    // 상위 5개의 영화를 가져오기 위한 Pageable 객체 생성
-	    Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "viewCount"));
-	    
-	    // 페이징된 결과를 가져옴
-	    Page<MovieViewDTO> page = movieRepository.findMoviesWithViewCountAbove100(startDate, endDate, pageable);
-	    
-	    // 결과 리스트를 반환
-	    return page.getContent();
+	public List<MovieViewDTO> recentMostView() {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime startDate = now.minus(29, ChronoUnit.DAYS);
+		LocalDateTime endDate = now;
+
+		// 상위 5개의 영화를 가져오기 위한 Pageable 객체 생성
+		Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "viewCount"));
+
+		// 페이징된 결과를 가져옴
+		Page<MovieViewDTO> page = movieRepository.findMoviesWithViewCountAbove100(startDate, endDate, pageable);
+
+		// 결과 리스트를 반환
+		return page.getContent();
 	}
+
+	public Map<String, Integer> getGenreViewCounts() {
+        Map<String, Integer> genreViewCounts = new HashMap<>();
+        
+        // 장르별 큰 분류 매핑
+        Map<String, List<String>> genreToCategories = GenreMapping.getGenreToCategories(); // 장르-큰 분류 매핑 가져오기
+        
+        // 영화와 조회 수를 가져옵니다.
+        List<Object[]> moviesWithViewCounts = movieRepository.findMoviesWithViewCounts();
+
+        for (Object[] record : moviesWithViewCounts) {
+            Movie movie = (Movie) record[0];
+            Integer viewCount = ((Number) record[1]).intValue(); // 조회 수
+
+            List<String> tags = movie.getTagList();
+            if (tags != null) {
+                for (String tag : tags) {
+                    List<String> categories = genreToCategories.get(tag);
+                    if (categories != null) {
+                        for (String category : categories) {
+                            genreViewCounts.merge(category, viewCount, Integer::sum);
+                        }
+                    }
+                }
+            }
+        }
+
+        return genreViewCounts;
+    }
 }

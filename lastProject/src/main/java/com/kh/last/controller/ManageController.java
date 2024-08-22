@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/dashboard")
 @CrossOrigin(origins = "http://localhost:3000")  // 클라이언트의 출처 설정
 @RequiredArgsConstructor
+@Slf4j
 public class ManageController {
 	
 	private final ManageService service;
@@ -125,11 +127,11 @@ public class ManageController {
     }
     
 	@GetMapping("/getUser")
-	public Map<String, List> getUser(){
+	public Map<String, Object> getUser(){
 		List<USERS> list = service.getUser();
 		List<Profile> list2 = service.getProfile();
 		
-		Map<String, List> map = new HashMap<String, List>();
+		Map<String, Object> map = new HashMap<String, Object>();
 		
 		map.put("userList", list);
 		map.put("profileList", list2);
@@ -159,6 +161,34 @@ public class ManageController {
 	public List<MovieViewDTO> recentMostView(){
 		return service.recentMostView();
 	}
+	
+	@GetMapping("/getGenreView")
+    public Map<String, Object> getGenreView() {
+        Map<String, Object> response = new HashMap<>();
+        Map<String, Integer> genreViewCounts = service.getGenreViewCounts();
+
+        log.info("장르 뽑아온거 {} : ", genreViewCounts);
+        // 데이터와 색상 추가
+        List<Map<String, Object>> dataWithColors = genreViewCounts.entrySet().stream()
+            .map(entry -> {
+                Map<String, Object> item = new HashMap<>();
+                item.put("name", entry.getKey());
+                item.put("조회수", entry.getValue());
+                item.put("fill", generateRandomColor());
+                return item;
+            })
+            .collect(Collectors.toList());
+
+        response.put("data", dataWithColors);
+        return response;
+    }
+
+    private String generateRandomColor() {
+        int r = (int)(Math.random() * 256);
+        int g = (int)(Math.random() * 256);
+        int b = (int)(Math.random() * 256);
+        return String.format("rgb(%d, %d, %d)", r, g, b);
+    }
 }
 
 

@@ -82,10 +82,9 @@ export default function MovieManage() {
           <colgroup>
             <col style={{ width: "100px" }} />
             <col style={{ width: "300px" }} />
-            <col style={{ width: "100px" }} />
+            <col style={{ width: "200px" }} />
             <col style={{ width: "300px" }} />
             <col style={{ width: "250px" }} />
-            <col style={{ width: "100px" }} />
             <col style={{ width: "110px" }} />
             <col style={{ width: "100px" }} />
             <col style={{ width: "100px" }} />
@@ -98,8 +97,7 @@ export default function MovieManage() {
               <th>장르</th>
               <th>출연배우</th>
               <th>감독</th>
-              <th>상영시간</th>
-              <th>등록일자</th>
+              <th>개봉년도</th>
               <th>조회수</th>
               <th>평점</th>
               <th>삭제하기</th>
@@ -113,7 +111,6 @@ export default function MovieManage() {
                 <td>{movie.tags}</td>
                 <td>{movie.cast}</td>
                 <td>{movie.director}</td>
-                <td>0</td>
                 <td>{movie.releaseYear}</td>
                 <td>{movie.viewCount}</td>
                 <td>{movie.rating}&nbsp;/&nbsp;5</td>
