@@ -4,13 +4,14 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    host:true,
+    host: true,
     strictPort: true,
-    port: 3000,  
+    port: 3000,
+    open: true, // 브라우저 자동으로 열리게 설정
     hmr: {
-        host: "localhost",
-        port:3000,
-        protocol: "ws",
+      host: "localhost",
+      port: 3000,
+      protocol: "ws",
     },
     // proxy : {
     //   '/chat-websocket' : {
