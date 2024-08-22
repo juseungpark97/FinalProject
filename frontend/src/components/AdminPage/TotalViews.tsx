@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import styles from '../../pages/AdminPage/css/DashboardPage.module.css';
 
 const TotalViews: React.FC = () => {
   const [dailyViewCount, setDailyViewCount] = useState<number>(0);
@@ -20,7 +21,7 @@ const TotalViews: React.FC = () => {
 
   return (
     <div>
-      <h2>금일 영상 조회수</h2>
+      <h2 className={styles.h2}>금일 영상 조회수</h2>
       <p>{dailyViewCount.toLocaleString()}회</p>
     </div>
   );

@@ -22,7 +22,7 @@ public class ChatRoomList {
     private LocalDateTime createDate = LocalDateTime.now();
 
     @Column(name = "CHAT_CHECK", nullable = false, length = 3)
-    private String chatCheck = "N";
+    private String chatCheck = "Y";
 
     @Column(name = "EXIT_ROOM", nullable = false, length = 3)
     private String exitRoom = "N";

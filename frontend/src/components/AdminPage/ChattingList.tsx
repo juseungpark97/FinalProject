@@ -22,25 +22,26 @@ const ChattingList: React.FC = () => {
     const [filter, setFilter] = useState<'open' | 'closed'>('open'); // 추가된 필터 상태
     const itemsPerPage = 10;
 
+    // 필터에 따라 채팅 목록 API 호출
+    const fetchChatData = async () => {
+        const exitRoomValue = filter === 'open' ? 'N' : 'Y';
+        try {
+            const response = await axios.get('http://localhost:8088/api/chat/admin/list', {
+                params: { exitRoom: exitRoomValue }
+            });
+            const modifiedData = response.data.map((item: ChatItem) => ({
+                ...item,
+                recentChat: item.recentChat ?? '' // recentChat이 null이면 빈 문자열로 설정
+            }));
+            setData(modifiedData);
+            console.log(`열린 채팅 데이터: ${filter === 'open' ? JSON.stringify(modifiedData) : '[]'}`);
+            console.log(`닫힌 채팅 데이터: ${filter === 'closed' ? JSON.stringify(modifiedData) : '[]'}`);
+        } catch (error) {
+            console.error('Error fetching chat list:', error);
+        }
+    };
+    
     useEffect(() => {
-        // 필터에 따라 채팅 목록 API 호출
-        const fetchChatData = async () => {
-            const exitRoomValue = filter === 'open' ? 'N' : 'Y';
-            try {
-                const response = await axios.get('http://localhost:8088/api/chat/admin/list', {
-                    params: { exitRoom: exitRoomValue }
-                });
-                const modifiedData = response.data.map((item: ChatItem) => ({
-                    ...item,
-                    recentChat: item.recentChat ?? '' // recentChat이 null이면 빈 문자열로 설정
-                }));
-                setData(modifiedData);
-                console.log(`열린 채팅 데이터: ${filter === 'open' ? JSON.stringify(modifiedData) : '[]'}`);
-                console.log(`닫힌 채팅 데이터: ${filter === 'closed' ? JSON.stringify(modifiedData) : '[]'}`);
-            } catch (error) {
-                console.error('Error fetching chat list:', error);
-            }
-        };
 
         fetchChatData();
     }, [filter]); // filter 상태가 변경될 때마다 API 호출
@@ -61,6 +62,7 @@ const ChattingList: React.FC = () => {
     const closeModal = () => {
         setModalOpen(false);
         setCurrentChat(null);
+        fetchChatData();  // 페이지를 새로고침하는 대신 데이터만 갱신
     };
 
     return (
@@ -88,7 +90,7 @@ const ChattingList: React.FC = () => {
                     <div key={item.chatRoomId} className={styles.ChattingCard} style={{ position: 'relative' }}>
                         <div className={styles.ChattingCardTitle}>
                             {item.profileName}님의 채팅
-                            {item.hasNewMessage && (
+                            {!item.hasNewMessage && (
                                 <span className={styles.newMessageIndicator}>!</span>
                             )}
                         </div>

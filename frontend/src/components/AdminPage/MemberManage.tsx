@@ -1,60 +1,90 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../../pages/AdminPage/css/DashboardPage.module.css';
-import Pagination from './Pagination'; // Pagination 컴포넌트를 불러옵니다.
+import Pagination from './Pagination';
 import axios from 'axios';
+import StopModal from './stopAccountModal';
+import UnstopModal from './UnstopAccountModal';
 
-interface Member {
+interface User {
   userNo: number;
   username: string;
   status: string;
   email: string;
+  birthday: string;
+  phone: string;
   createdAt: string;
 }
 
 interface Profile {
-  profileId: number;
+  profileNo: number;
   profileName: string;
-  favoriteGenre: string;
-  kidsMode: boolean;
-  password: string;
+  profileVector: string | null;
+  userNo: { userNo: number };
 }
 
-const profilesData: { [key: number]: Profile[] } = {
-  1: [
-    { profileId: 1, profileName: '아이가 쓸 프로필', favoriteGenre: '코미디', kidsMode: true, password: '' },
-    { profileId: 2, profileName: '2qjsvmfhvlf', favoriteGenre: '액션, 호러', kidsMode: false, password: 'user1' },
-    // 추가 프로필 데이터...
-  ],
-  // 다른 회원의 프로필...
-};
-
+interface StopInfo {
+  reason: string;
+  stopDate: string;
+}
 
 export default function MemberManage() {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [membersData, setMembersData] = useState<Member[]>([]);
+  const [membersData, setMembersData] = useState<User[]>([]);
+  const [filteredMembers, setFilteredMembers] = useState<User[]>([]); // 검색 결과를 저장할 상태
+  const [profilesData, setProfilesData] = useState<{ [key: number]: Profile[] }>({});
+  const [selectedUserNo, setSelectedUserNo] = useState<number | null>(null);
+  const [isStopModalOpen, setIsStopModalOpen] = useState(false);
+  const [isUnstopModalOpen, setIsUnstopModalOpen] = useState(false);
+  const [stopInfo, setStopInfo] = useState<StopInfo | null>(null);
+  const [viewMode, setViewMode] = useState<'all' | 'stopped'>('all');
   const itemsPerPage = 10;
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearchClick();
+    }
+  };
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await axios.get<Member[]>('http://localhost:8088/dashboard/getUser');
-        console.log(response.data);
-        // 변환된 날짜 문자열로 처리
-        const updatedData = response.data.map(item => ({
-          ...item,
-          createdAt: item.createdAt ? item.createdAt.toString().substring(0, 10) : 'N/A' // 날짜를 문자열로 변환
-        }));
-        console.log(updatedData);
-        setMembersData(updatedData);
-      } catch (error) {
-        console.error("Failed to get user", error);
-      }
-    };
-
-    getUser();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:8088/dashboard/getUser');
+      console.log('Response data:', response.data);
+
+      const { userList, profileList } = response.data;
+
+      if (!Array.isArray(userList) || !Array.isArray(profileList)) {
+        throw new Error('Invalid data format');
+      }
+
+      const updatedMembers = userList.map((item: User) => ({
+        ...item,
+        phone: item.phone && item.phone.length === 11
+          ? `${item.phone.slice(0, 3)}-${item.phone.slice(3, 7)}-${item.phone.slice(7)}`
+          : item.phone,
+        createdAt: item.createdAt ? item.createdAt.substring(0, 10) : 'N/A'
+      }));
+
+      const profilesByUser: { [key: number]: Profile[] } = profileList.reduce((acc: { [key: number]: Profile[] }, profile: Profile) => {
+        const userNo = profile.userNo ? profile.userNo.userNo : -1;
+        if (!acc[userNo]) {
+          acc[userNo] = [];
+        }
+        acc[userNo].push(profile);
+        return acc;
+      }, {});
+
+      setMembersData(updatedMembers);
+      setFilteredMembers(updatedMembers); // 초기 상태로 필터링된 데이터 설정
+      setProfilesData(profilesByUser);
+    } catch (error) {
+      console.error("Failed to get user data", error);
+    }
+  };
 
   const handleRowClick = (id: number) => {
     setExpandedRow(expandedRow === id ? null : id);
@@ -65,33 +95,96 @@ export default function MemberManage() {
   };
 
   const handleSearchClick = () => {
-    console.log('검색어:', searchTerm);
+    // 검색 버튼 클릭 시 필터링된 데이터 업데이트
+    const filtered = membersData
+      .filter((member) => member.username.toLowerCase().includes(searchTerm.toLowerCase()))
+      .filter((member) => viewMode === 'all' || member.status === 'S');
+    setFilteredMembers(filtered);
+    setCurrentPage(1); // 검색 후 첫 페이지로 리셋
   };
 
-  const filteredMembers = membersData.filter(
-    (member) => member.username.includes(searchTerm)
-  );
+  const filteredMembersWithMode = filteredMembers
+    .filter((member) => viewMode === 'all' || member.status === 'S');
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredMembers.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredMembersWithMode.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  const stopAccount = async (userNo: number, event: React.MouseEvent) => {
+    event.preventDefault(); // 기본 동작을 막음
+    event.stopPropagation(); // 이벤트 전파를 막음
+
+    const selectedMember = membersData.find(member => member.userNo === userNo);
+
+    if (selectedMember?.status === 'A') {
+      setSelectedUserNo(userNo);
+      setIsStopModalOpen(true);
+    } else if (selectedMember?.status === 'S') {
+      try {
+        const response = await axios.get(`http://localhost:8088/dashboard/getStopInfo/${userNo}`);
+        const { reason, stopDate } = response.data;
+        setStopInfo({ reason, stopDate });
+        setSelectedUserNo(userNo);
+        setIsUnstopModalOpen(true);
+      } catch (error) {
+        console.error('Failed to fetch stop info', error);
+      }
+    }
+  };
+
+  const handleConfirmStop = async (reason: string) => {
+    if (selectedUserNo !== null) {
+      try {
+        await axios.post('http://localhost:8088/dashboard/stopAccount', {
+          reason,
+          userNo: selectedUserNo
+        });
+        // 데이터 새로고침
+        await fetchData();
+      } catch (error) {
+        console.error("정지하기 기능 수행 중 에러가 발생했습니다:", error);
+      }
+    }
+    setIsStopModalOpen(false);
+  };
+
+  const handleConfirmUnstop = async () => {
+    if (selectedUserNo !== null) {
+      try {
+        await axios.post('http://localhost:8088/dashboard/unstopAccount', { userNo: selectedUserNo });
+        // 데이터 새로고침
+        await fetchData();
+      } catch (error) {
+        console.error("정지 해제 기능 수행 중 에러가 발생했습니다:", error);
+      }
+    }
+    setIsUnstopModalOpen(false);
+  };
+
+  const handleCancelUnstop = () => {
+    setIsUnstopModalOpen(false);
+  };
 
   return (
     <div className={styles.tableContainer}>
       <div className={styles.headerContainer}>
         <h1 className={styles.movimanage}>회원 관리</h1>
-        <a>전체회원</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a>정지회원</a>
+        <a onClick={() => setViewMode('all')}>전체회원</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+        <a onClick={() => setViewMode('stopped')}>정지회원</a>
         <div className={styles.searchContainer}>
           <input
             type="text"
             placeholder="회원명"
+            onKeyDown={handleKeyDown}
             value={searchTerm}
             onChange={handleSearchChange}
             className={styles.searchInput}
           />
-          <button onClick={handleSearchClick} className={styles.searchButton}>검색</button>
+          <button type="button" onClick={handleSearchClick} className={styles.searchButton}>
+            검색
+          </button>
         </div>
       </div>
       <div>
@@ -99,8 +192,8 @@ export default function MemberManage() {
           <colgroup>
             <col style={{ width: "10%" }} />
             <col style={{ width: "10%" }} />
-            <col style={{ width: "15%" }} />
-            <col style={{ width: "25%" }} />
+            <col style={{ width: "20%" }} />
+            <col style={{ width: "20%" }} />
             <col style={{ width: "15%" }} />
             <col style={{ width: "15%" }} />
             <col style={{ width: "10%" }} />
@@ -108,47 +201,47 @@ export default function MemberManage() {
           <thead>
             <tr id={styles.firstrow}>
               <th>회원번호</th>
-              <th>이름</th>
               <th>닉네임</th>
               <th>아이디 / 이메일</th>
+              <th>핸드폰번호</th>
+              <th>생년월일</th>
               <th>가입일</th>
-              <th>구독상태</th>
               <th>정지여부</th>
             </tr>
           </thead>
           <tbody>
             {currentItems.map((member) => (
-              <React.Fragment key={member.userNo}>
-                <tr onClick={() => handleRowClick(member.userNo)}>
+              <>
+                <tr onClick={() => handleRowClick(member.userNo)} key={member.userNo}>
                   <td>{member.userNo}</td>
-                  <td>0</td>
                   <td>{member.username}</td>
                   <td>{member.email}</td>
+                  <td>{member.phone}</td>
+                  <td>{member.birthday}</td>
                   <td>{member.createdAt}</td>
-                  <td>0</td>
-                  <td><button>{member.status ? '정지해제' : '이용정지'}</button></td>
+                  <td>
+                    <button onClick={(e) => stopAccount(member.userNo, e)}>
+                      {member.status === 'A' ? '정지하기' : '정지해제'}
+                    </button>
+                  </td>
                 </tr>
                 {expandedRow === member.userNo && (
                   <tr>
                     <td colSpan={7} className={styles.expandedRow}>
-                      <table className={styles.innerTable}>
+                      <table>
                         <thead>
                           <tr>
-                            <th>프로필번호</th>
-                            <th>프로필이름</th>
+                            <th>프로필 번호</th>
+                            <th>프로필 이름</th>
                             <th>선호장르</th>
-                            <th>키즈모드 여부</th>
-                            <th>비밀번호</th>
                           </tr>
                         </thead>
                         <tbody>
                           {profilesData[member.userNo]?.map((profile) => (
-                            <tr key={profile.profileId}>
-                              <td>{profile.profileId}</td>
+                            <tr key={profile.profileNo}>
+                              <td>{profile.profileNo}</td>
                               <td>{profile.profileName}</td>
-                              <td>{profile.favoriteGenre}</td>
-                              <td>{profile.kidsMode ? 'Y' : 'N'}</td>
-                              <td>{profile.password}</td>
+                              <td>{profile.profileVector}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -156,17 +249,28 @@ export default function MemberManage() {
                     </td>
                   </tr>
                 )}
-              </React.Fragment>
+              </>
             ))}
           </tbody>
         </table>
         <Pagination
           itemsPerPage={itemsPerPage}
-          totalItems={filteredMembers.length}
+          totalItems={filteredMembersWithMode.length}
           paginate={paginate}
           currentPage={currentPage}
         />
       </div>
+      <StopModal
+        isOpen={isStopModalOpen}
+        onClose={() => setIsStopModalOpen(false)}
+        onConfirm={handleConfirmStop}
+      />
+      <UnstopModal
+        isOpen={isUnstopModalOpen}
+        onClose={handleCancelUnstop}
+        stopInfo={stopInfo}
+        onConfirm={handleConfirmUnstop}
+      />
     </div>
   );
 }

@@ -8,14 +8,17 @@ import Faq from '../../components/Mypage/Faq';
 import Question from '../../components/Mypage/Question';
 
 import axios from 'axios';
+import { Profile } from '../HomePage/services/interfaces';
 
 
 const HelpPage: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState<string>('faq');
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const profileNo = profile?.profileNo || null;
 
   return (
     <div className={styles.account}>
-      <Header />
+      <Header selectedProfile={profile} setSelectedProfile={setProfile} />
       <div className={styles.mainContainer}>
         <div className={styles.sidebar}>
           <HelpButtonContainer onMenuClick={setSelectedMenu} />
@@ -23,7 +26,7 @@ const HelpPage: React.FC = () => {
         <div className={styles.content}>
 
           {selectedMenu === 'faq' && <Faq />}
-          {selectedMenu === 'question' && <Question />}
+          {selectedMenu === 'question' && <Question profileNo={profileNo} />}
 
 
         </div>
