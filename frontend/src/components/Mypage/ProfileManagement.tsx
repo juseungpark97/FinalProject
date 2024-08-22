@@ -75,6 +75,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
         setIsModalOpen(false);
     };
 
+
     return (
         <div className={styles.profileManagementPage}>
             <div className={styles.content}>
@@ -122,10 +123,33 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                 <h3>프로필 설정</h3>
                 <div className={styles.quickLinks}>
                     <ul>
-                        <li><a href="/watch-settings">시청 제한 <span className={styles.arrow}>&gt;</span></a></li>
-                        <li><a href="/watch-history">시청 기록 <span className={styles.arrow}>&gt;</span></a></li>
-                        <li><a href="/payment-info">결제정보 <span className={styles.arrow}>&gt;</span></a></li>
-                        <li><a href="/privacy-policy">개인정보 및 데이터 설정 <span className={styles.arrow}>&gt;</span></a></li>
+                        <li>
+                            <button onClick={() => window.location.href = '/watch-settings'} className={styles.menuLink}>
+                                시청 제한 <span className={styles.arrow}>&gt;</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={() => window.location.href = '/watch-history'} className={styles.menuLink}>
+                                시청 기록 <span className={styles.arrow}>&gt;</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={() => window.location.href = '/payment-info'} className={styles.menuLink}>
+                                결제정보 <span className={styles.arrow}>&gt;</span>
+                            </button>
+                        </li>
+                        <li>
+                            <a
+                                href=""
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    onMenuClick('profileLock');
+                                }}
+                                className={styles.menuLink}
+                            >
+                                프로필 잠금 <span className={styles.arrow}>&gt;</span>
+                            </a>
+                        </li>
                         {selectedProfile.profileMain !== 'S' && (
                             <li>
                                 <a

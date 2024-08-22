@@ -81,7 +81,7 @@ public class UserController {
 
             return ResponseEntity.ok(response);
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
 

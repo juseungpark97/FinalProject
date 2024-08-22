@@ -21,7 +21,6 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
     if (selectedProfileData) {
       const profile = JSON.parse(selectedProfileData);
       setSelectedProfile(profile);
-      console.log('Profile loaded in Header from sessionStorage:', profile);
     }
 
     const token = localStorage.getItem('authToken');
@@ -66,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('authToken');
+    localStorage.removeItem('authToken');
     setSelectedProfile(null);
     sessionStorage.removeItem('selectedProfile');
     navigate('/login');

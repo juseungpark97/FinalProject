@@ -33,6 +33,12 @@ public class Profile {
     
     @Column(name = "profile_main", nullable = false, length = 1)
     private String profileMain; // 'M' for Main, 'S' for Sub
+    
+    @Column(name = "profile_pwd", nullable = true)
+    private Integer profilePwd;
+    
+    @Column(name = "is_locked", nullable = false)
+    private boolean isLocked = false;
 
     @Override
     public boolean equals(Object o) {

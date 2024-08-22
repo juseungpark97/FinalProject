@@ -9,6 +9,7 @@ import ProfileManagement from '../../../src/components/Mypage/ProfileManagement'
 import AccountDelete from '../../../src/components/Mypage/AccountDelete';
 import { Profile } from '../../types/Profile';
 import PasswordChange from '../../components/Mypage/PasswordChange';
+import ProfileLock from '../../components/Mypage/ProfileLock';
 
 
 const Account: React.FC = () => {
@@ -46,6 +47,9 @@ const Account: React.FC = () => {
           {selectedMenu === 'security' && <Security />}
           {selectedMenu === 'passwordChange' && <PasswordChange />}
           {selectedMenu === 'accountDelete' && profile?.profileMain === 'M' && <AccountDelete />}
+          {selectedMenu === 'profileLock' && profile && (
+            <ProfileLock profileId={profile.profileNo} />
+          )}
 
         </div>
       </div>

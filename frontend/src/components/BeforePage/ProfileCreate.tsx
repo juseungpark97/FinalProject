@@ -59,7 +59,7 @@ const ProfileCreate: React.FC<ProfileCreateProps> = ({ onProfileCreated, onCance
     };
 
     const handleSelectImage = (imageName: string) => {
-        const fileUrl = `http://localhost:8088/profile-images/${imageName}`;
+        const fileUrl = `/profile-images/${imageName}`;
         fetch(fileUrl)
             .then(response => response.blob())
             .then(blob => {

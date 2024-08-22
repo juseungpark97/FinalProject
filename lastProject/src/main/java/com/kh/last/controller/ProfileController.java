@@ -60,6 +60,14 @@ public class ProfileController {
         return ResponseEntity.ok(profiles);
     }
 
+    @GetMapping("/{profileNo}")
+    public ResponseEntity<Profile> getProfileById(@PathVariable Long profileNo) {
+        Profile profile = profileService.getProfileById(profileNo);
+        if (profile == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return ResponseEntity.ok(profile);
+    }
     @PostMapping("/create")
     public ResponseEntity<?> createProfile(@RequestParam String profileName, @RequestParam MultipartFile profileImg,
                                            @RequestHeader("Authorization") String token) {
@@ -69,13 +77,10 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                // 이미지 저장 로직
                 String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
                 String profileImgFilename = profileImg.getOriginalFilename();
                 Path imagePath = Paths.get(directory, profileImgFilename);
                 Files.write(imagePath, profileImg.getBytes());
-
-                // 이미지 경로를 '/profile-images/파일명' 형식으로 저장
                 String imagePathToStore = "/profile-images/" + profileImgFilename;
                 Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, imagePathToStore);
 
@@ -161,4 +166,64 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Error deleting profile"));
         }
     }
+    
+    @PutMapping("/{profileNo}/lock")
+    public ResponseEntity<?> lockProfile(@PathVariable Long profileNo, @RequestBody Map<String, String> request) {
+        try {
+            String password = request.get("password");
+            if (password == null || password.length() != 4) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Password must be 4 digits"));
+            }
+
+            Profile profile = profileService.getProfileById(profileNo);
+            if (profile == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
+            }
+
+            profile.setLocked(true);
+            profile.setProfilePwd(Integer.parseInt(password));
+
+            profileService.updateProfile(profile);
+
+            return ResponseEntity.ok(Map.of("success", true, "message", "Profile locked successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Error locking profile"));
+        }
+    }
+    
+    @PostMapping("/{profileNo}/verify-password")
+    public ResponseEntity<?> verifyProfilePassword(@PathVariable Long profileNo, @RequestBody Map<String, String> request) {
+        String password = request.get("password");
+        Profile profile = profileService.getProfileById(profileNo);
+        if (profile == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "Profile not found"));
+        }
+
+        // 비밀번호 검증
+        if (profile.isLocked() && profile.getProfilePwd() == Integer.parseInt(password)) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Password verified successfully"));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "message", "Invalid password"));
+        }
+    }
+    @PutMapping("/{profileNo}/unlock")
+    public ResponseEntity<?> unlockProfile(@PathVariable Long profileNo) {
+        try {
+            Profile profile = profileService.getProfileById(profileNo);
+            if (profile == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
+            }
+
+            // 프로필 잠금 해제
+            profile.setLocked(false);  // 잠금 해제
+            profile.setProfilePwd(null);  // 비밀번호 초기화
+
+            profileService.updateProfile(profile);
+
+            return ResponseEntity.ok(Map.of("success", true, "message", "Profile unlocked successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Error unlocking profile"));
+        }
+    }
+ 
 }

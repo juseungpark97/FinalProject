@@ -3,6 +3,7 @@ import axios from 'axios';
 import ProfileCreate from '../../components/BeforePage/ProfileCreate';
 import ProfileSelect from '../../components/BeforePage/ProfileSelect';
 import ConfirmModal from '../../components/BeforePage/ConfirmModal';
+import ProfilePasswordModal from '../../components/BeforePage/ProfilePasswordModal';
 import styles from './css/Profiles.module.css';
 import { useNavigate } from 'react-router-dom';
 import { Profile } from '../../types/Profile';
@@ -13,6 +14,7 @@ const ProfilePage: React.FC = () => {
     const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 모달 상태 추가
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -24,7 +26,11 @@ const ProfilePage: React.FC = () => {
                     axios.get(`http://localhost:8088/api/profiles/user/${userNo}`, { headers: { 'Authorization': `Bearer ${token}` } })
                         .then(response => {
                             if (Array.isArray(response.data)) {
-                                setProfiles(response.data);
+                                const profilesWithLockedStatus = response.data.map((profile: any) => ({
+                                    ...profile,
+                                    isLocked: profile.locked, // 서버에서 받은 locked 필드를 isLocked로 매핑
+                                }));
+                                setProfiles(profilesWithLockedStatus);
                                 if (response.data.length > 0) {
                                     setSelectedMenu('select');
                                 }
@@ -54,6 +60,15 @@ const ProfilePage: React.FC = () => {
     }, [selectedMenu]);
 
     const handleProfileSelect = (profile: Profile) => {
+        if (profile.isLocked) {
+            setSelectedProfile(profile);
+            setIsPasswordModalOpen(true); // 비밀번호 모달을 열기
+        } else {
+            proceedToSelectProfile(profile); // 잠금이 없으면 바로 프로필 선택
+        }
+    };
+
+    const proceedToSelectProfile = (profile: Profile) => {
         setSelectedProfile(profile);
         sessionStorage.setItem('selectedProfile', JSON.stringify(profile));
         navigate('/home');
@@ -108,6 +123,13 @@ const ProfilePage: React.FC = () => {
         }
     };
 
+    const handlePasswordVerified = () => {
+        if (selectedProfile) {
+            setIsPasswordModalOpen(false);
+            proceedToSelectProfile(selectedProfile); // 비밀번호 검증이 완료되면 프로필 선택 진행
+        }
+    };
+
     return (
         <div className={styles.profilePage}>
             {selectedMenu === 'create' && <ProfileCreate onProfileCreated={handleProfileCreated} onCancel={handleCancelCreate} />}
@@ -125,6 +147,14 @@ const ProfilePage: React.FC = () => {
                         onConfirm={confirmDelete}
                         message="정말로 삭제하시겠습니까?"
                     />
+                    {selectedProfile && (
+                        <ProfilePasswordModal
+                            profile={selectedProfile}
+                            isOpen={isPasswordModalOpen}
+                            onClose={() => setIsPasswordModalOpen(false)}
+                            onPasswordVerified={handlePasswordVerified}
+                        />
+                    )}
                 </>
             )}
         </div>

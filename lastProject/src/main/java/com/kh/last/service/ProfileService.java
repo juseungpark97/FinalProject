@@ -177,4 +177,15 @@ public class ProfileService {
         }
         return vectorMap;
     }
+    public void lockProfile(Long profileNo, String password) {
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
+
+        // 비밀번호 길이 검증은 컨트롤러에서 처리
+        profile.setLocked(true);
+        profile.setProfilePwd(Integer.parseInt(password));  // 비밀번호 저장 (해시 처리를 고려해야 함)
+
+        profileRepository.save(profile);
+    }
+  
 }
