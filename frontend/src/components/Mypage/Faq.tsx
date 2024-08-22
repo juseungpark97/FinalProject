@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './css/HelpPage.module.css';
+import axios from 'axios';
 
 interface FaqProps {
     faqList: {
@@ -11,12 +12,38 @@ interface FaqProps {
     }[];
 }
 
-const Faq: React.FC<FaqProps> = ({ faqList }) => {
+interface FaqType {
+    id: number;
+    question: string;
+    answer: string;
+    insertDate: string; // LocalDate를 문자열로 처리
+  }
+  
+const Faq: React.FC = () => {
     const [openFaqId, setOpenFaqId] = useState<number | null>(null);
 
     const toggleAnswer = (id: number) => {
         setOpenFaqId(openFaqId === id ? null : id);
     };
+
+    const [faqList, setFaqList] = useState<FaqType[]>([]);
+
+    useEffect(() => {
+        const getFAQ = async () => {
+            try {
+                const response = await axios.get<FaqType[]>('http://localhost:8088/dashboard/getFaq');
+                // 변환된 날짜 문자열로 처리
+                const updatedData = response.data.map(item => ({
+                    ...item,
+                    insertDate: item.insertDate.toString() // 날짜를 문자열로 변환
+                }));
+                setFaqList(updatedData);
+            } catch (error) {
+                console.error("Failed to get FAQ", error);
+            }
+        };
+        getFAQ();
+    }, []);
 
     return (
         <div className={styles.myPage}>

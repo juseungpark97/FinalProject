@@ -60,6 +60,7 @@ const MovieDetailPage: React.FC = () => {
       if (!isNaN(movieIdNumber)) {
         axios.get(`http://localhost:8088/api/movies/${movieIdNumber}`)
           .then(response => {
+            console.log(response.data);
             setMovie(response.data);
             setLoading(false);
           })
@@ -199,11 +200,15 @@ const MovieDetailPage: React.FC = () => {
   useEffect(() => {
     const updateProfileVector = async (profileNo: number, movieId: number, movieTags: string[]) => {
       try {
+        // 태그 배열을 JSON 형식으로 변환
+        const tagsJson = JSON.stringify(movieTags);
+
         await axios.post('http://localhost:8088/api/profiles/update-vector', {
           profileId: profileNo,
-          movieId: movieId, // movieId 추가
-          movieTags: movieTags,
+          movieId: movieId,
+          movieTags: tagsJson, // JSON 형식으로 전송
         });
+
         console.log('Profile vector updated successfully');
       } catch (error) {
         console.error('Error updating profile vector:', error);
@@ -510,8 +515,15 @@ const MovieDetailPage: React.FC = () => {
           onTimeUpdate={handleProgress}
           onLoadedMetadata={handleDuration}
           onEnded={handleEnded}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onCanPlay={() => {
+            videoRef.current?.play(); // 비디오가 재생 가능할 때 자동 재생
+          }}
           autoPlay
+          preload="auto" // 비디오를 미리 로드하도록 설정
         />
+
         <Box className={styles.controls} ref={controlsRef}>
           <IconButton onClick={handlePlayPause} className={styles.controlButton} sx={{ color: 'white' }}>
             {playing ? <PauseIcon /> : <PlayArrowIcon />}

@@ -1,7 +1,10 @@
 package com.kh.last.controller;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,13 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.last.model.dto.MovieViewDTO;
 import com.kh.last.model.vo.Faq;
-import com.kh.last.model.vo.Movie;
+import com.kh.last.model.vo.Profile;
+import com.kh.last.model.vo.StopAccount;
 import com.kh.last.model.vo.USERS;
 import com.kh.last.model.vo.Visit;
 import com.kh.last.service.ManageService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -61,19 +67,26 @@ public class ManageController {
 		
 	@GetMapping("/weekVisit")
 	public List<Visit> weekVisit() {
-		List<Visit> list = service.weekVisit();
-		
-		for(int i = 0;i < list.size(); i++) {
-			if (i == list.size() - 1) {  // 마지막 요소인지 확인
-	            Visit visit = list.get(i);
-	            visit.setDayCount("오늘");  // '오늘'로 설정
-	        }else {
-	            Visit visit = list.get(i);
-	            visit.setDayCount((list.size() - i - 1) + "일전");
+	    List<Visit> list = service.weekVisit();
+	    
+	    if (list.isEmpty()) {
+	        return list;
+	    }
+	    
+	    // 마지막 날짜를 기준으로 설정
+	    LocalDate lastVisitDate = list.get(list.size() - 1).getVisitDate();
+	    
+	    for (Visit visit : list) {
+	        long daysAgo = ChronoUnit.DAYS.between(visit.getVisitDate(), lastVisitDate);
+	        
+	        if (daysAgo == 0) {
+	            visit.setDayCount("오늘");
+	        } else {
+	            visit.setDayCount(daysAgo + "일 전");
 	        }
-		}
-		
-		return list;
+	    }
+	    
+	    return list;
 	}
 	
 	@GetMapping("/getFaq")
@@ -104,17 +117,47 @@ public class ManageController {
             return ResponseEntity.status(500).body("FAQ 삭제 중 오류가 발생했습니다.");
         }
     }
-	
+    
 	@GetMapping("/getMovie")
-	public List<Movie> getMovie(){
-		List<Movie> list = service.getMovie();
-		return list;
+    public List<MovieViewDTO> getMovie() {
+		List<MovieViewDTO> list = service.getMovies();
+        return list;
+    }
+    
+	@GetMapping("/getUser")
+	public Map<String, List> getUser(){
+		List<USERS> list = service.getUser();
+		List<Profile> list2 = service.getProfile();
+		
+		Map<String, List> map = new HashMap<String, List>();
+		
+		map.put("userList", list);
+		map.put("profileList", list2);
+		
+		return map;
 	}
 	
-	@GetMapping("/getUser")
-	public List<USERS> getUser(){
-		List<USERS> list = service.getUser();
-		return list;
+	@PostMapping("/stopAccount")
+	public void stopAccount(@RequestBody StopAccount account) {
+		Long userNo = account.getUserNo();
+		
+		service.stopAccount(userNo, account);
+	}
+	
+	@GetMapping("/getStopInfo/{userNo}")
+    public StopAccount getStopInfo(@PathVariable Long userNo) {
+        return service.getStopInfo(userNo);
+    }
+	
+	@PostMapping("/unstopAccount")
+	public void unstopAccount(@RequestBody Map<String, Long> request) {
+	    Long userNo = request.get("userNo");
+	    service.unstopAccount(userNo);
+	}
+	
+	@GetMapping("/recentMostView")
+	public List<MovieViewDTO> recentMostView(){
+		return service.recentMostView();
 	}
 }
 

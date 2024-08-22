@@ -65,7 +65,8 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('authToken'); // sessionStorage 사용
+
     setSelectedProfile(null);
     sessionStorage.removeItem('selectedProfile');
     navigate('/login');

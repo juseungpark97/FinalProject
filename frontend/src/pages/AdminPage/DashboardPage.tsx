@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SideMenu from '../../../src/components/AdminPage/SideMenu';
 import styles from './css/DashboardPage.module.css';
 import Header from '../../../src/components/CommonPage/Header';
@@ -12,9 +12,11 @@ import ChattingList from '../../../src/components/AdminPage/ChattingList';
 import UploadMovie from './UploadMovie';
 
 const DashboardPage: React.FC = () => {
+  const [profile, setProfile] = useState<{ profileImg: string; profileName: string; profileNo: number } | null>(null);
+
   return (
     <>
-      <Header />
+      <Header selectedProfile={profile} setSelectedProfile={setProfile} />
       <div className={styles.dashboardPage}>
         <SideMenu />
         <div className={styles.content}>

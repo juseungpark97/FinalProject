@@ -1,12 +1,22 @@
 package com.kh.last.model.vo;
 
+import java.util.Map;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Entity
@@ -39,17 +49,49 @@ public class Profile {
     
     @Column(name = "is_locked", nullable = false)
     private boolean isLocked = false;
+    @Lob
+    private String profileVector; // 사용자의 선호도를 JSON 문자열로 저장
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Profile profile = (Profile) o;
-        return profileNo != null && profileNo.equals(profile.profileNo);
+    @Transient
+    private Map<String, Integer> vectorList;
+
+    @PostLoad
+    private void postLoad() {
+        if (profileVector != null) {
+            this.vectorList = parseJsonArray(profileVector);
+        }
     }
 
-    @Override
-    public int hashCode() {
-        return 31;
+    @PrePersist
+    @PreUpdate
+    private void prePersist() {
+        if (vectorList != null) {
+            this.profileVector = stringifyJsonArray(vectorList);
+        }
+    }
+
+    public void updateVectorList(Map<String, Integer> newVectorList) {
+        this.vectorList = newVectorList;
+        prePersist(); // 변경 사항을 반영하여 JSON 문자열 업데이트
+    }
+
+    private Map<String, Integer> parseJsonArray(String jsonArray) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(jsonArray, new TypeReference<Map<String, Integer>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String stringifyJsonArray(Map<String, Integer> jsonArray) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(jsonArray);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

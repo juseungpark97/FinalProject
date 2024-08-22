@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.kh.last.model.vo.Movie;
 import com.kh.last.repository.MovieRepository;
@@ -32,9 +33,17 @@ public class MovieService {
         String videoKey = "movies/" + file.getOriginalFilename();
         String thumbnailKey = "thumbnail/" + thumbnail.getOriginalFilename();
 
+        // 비디오 파일의 메타데이터 설정
+        ObjectMetadata videoMetadata = new ObjectMetadata();
+        videoMetadata.setContentType("video/mp4"); // 비디오 파일의 MIME 타입 설정
+
+        // 썸네일 파일의 메타데이터 설정
+        ObjectMetadata thumbnailMetadata = new ObjectMetadata();
+        thumbnailMetadata.setContentType("image/jpeg"); // 썸네일 이미지의 MIME 타입 설정
+
         // S3에 파일 업로드
-        amazonS3.putObject(new PutObjectRequest(awsS3BucketName, videoKey, file.getInputStream(), null));
-        amazonS3.putObject(new PutObjectRequest(awsS3BucketName, thumbnailKey, thumbnail.getInputStream(), null));
+        amazonS3.putObject(new PutObjectRequest(awsS3BucketName, videoKey, file.getInputStream(), videoMetadata));
+        amazonS3.putObject(new PutObjectRequest(awsS3BucketName, thumbnailKey, thumbnail.getInputStream(), thumbnailMetadata));
 
         // S3 URL 생성
         String videoUrl = amazonS3.getUrl(awsS3BucketName, videoKey).toString();

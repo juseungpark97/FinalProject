@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import styles from '../../pages/AdminPage/css/DashboardPage.module.css';
 
 const TodayVisit = () => {
   const [todayVisit, setTodayVisit] = useState(0);
@@ -19,7 +20,7 @@ const TodayVisit = () => {
   }, []);
   return (
     <div>
-      <h2>일 방문자 수</h2>
+      <h2 className={styles.h2}>일 방문 수</h2>
       <p>{todayVisit.toLocaleString()}명</p>
     </div>
   );

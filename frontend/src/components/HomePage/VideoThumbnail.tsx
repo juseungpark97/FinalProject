@@ -15,16 +15,37 @@ interface VideoThumbnailProps {
 const VideoThumbnail: React.FC<VideoThumbnailProps> = memo(({ video }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isHovered, setIsHovered] = useState(false);
-    const [isVideoError, setIsVideoError] = useState(false);
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // IntersectionObserver를 사용해 비디오가 뷰포트에 들어왔을 때 로드
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && videoRef.current) {
+                    videoRef.current.preload = 'auto';
+                    videoRef.current.load();
+                    observer.unobserve(videoRef.current); // 로드가 시작되면 관찰 중지
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (videoRef.current) {
+            observer.observe(videoRef.current);
+        }
+
+        return () => {
+            if (videoRef.current) {
+                observer.unobserve(videoRef.current);
+            }
+        };
+    }, [video.url]);
 
     const handleMouseEnter = () => {
         setIsHovered(true);
         if (videoRef.current && isVideoLoaded) {
-            videoRef.current.play().catch(error => {
-                console.error('Video play was interrupted:', error);
-            });
+            videoRef.current.play().catch(error => console.error('Video play was interrupted:', error));
         }
     };
 
@@ -38,31 +59,14 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = memo(({ video }) => {
 
     const handleLoadedData = () => {
         setIsVideoLoaded(true);
-        setIsVideoError(false);
-    };
-
-    const handleError = () => {
-        setIsVideoError(true);
+        if (isHovered) { // 이미 호버 상태라면 로드되자마자 재생
+            videoRef.current?.play().catch(error => console.error('Video play was interrupted:', error));
+        }
     };
 
     const handleClick = () => {
         navigate(`/movie/${video.id}`);
     };
-
-    // 비디오를 화면에 나타나기 전에 미리 로드
-    useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.preload = 'auto'; // 비디오를 미리 로드하도록 설정
-            videoRef.current.addEventListener('loadeddata', handleLoadedData);
-            videoRef.current.addEventListener('error', handleError);
-            videoRef.current.load(); // 비디오 로드 트리거
-
-            return () => {
-                videoRef.current?.removeEventListener('loadeddata', handleLoadedData);
-                videoRef.current?.removeEventListener('error', handleError);
-            };
-        }
-    }, [video.url]);
 
     return (
         <div
@@ -80,16 +84,13 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = memo(({ video }) => {
             <video
                 ref={videoRef}
                 muted
-                preload="auto"
                 className={styles.video}
                 style={{ display: isHovered && isVideoLoaded ? 'block' : 'none' }}
+                onLoadedData={handleLoadedData}
             >
                 <source src={video.url} type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
-            {isVideoError && (
-                <div className={styles.error}>비디오를 로드하는 데 실패했습니다.</div>
-            )}
         </div>
     );
 });

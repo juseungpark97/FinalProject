@@ -1,5 +1,6 @@
 package com.kh.last.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +22,7 @@ public interface WatchLogRepository extends JpaRepository<WatchLog, WatchLogId> 
     List<Movie> findRecentMoviesByProfile(@Param("profileId") Long profileId);
     
     Optional<WatchLog> findByProfileAndMovie(Profile profile, Movie movie);
+    
+    @Query("SELECT COUNT(w) FROM WatchLog w WHERE w.viewedAt BETWEEN :startOfDay AND :endOfDay")
+    Long countDailyViews(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
 }

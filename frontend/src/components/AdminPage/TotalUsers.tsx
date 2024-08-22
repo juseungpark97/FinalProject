@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import styles from '../../pages/AdminPage/css/DashboardPage.module.css';
 
 const TotalUsers = () => {
   const [totalUsers, settotalUsers] = useState(0);
@@ -20,7 +21,7 @@ const TotalUsers = () => {
 
   return (
     <div>
-      <h2>전체 회원 수</h2>
+      <h2 className={styles.h2}>전체 회원 수</h2>
       <p>{totalUsers.toLocaleString()}명</p>
     </div>
   );

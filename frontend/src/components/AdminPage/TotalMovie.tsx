@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-
+import styles from '../../pages/AdminPage/css/DashboardPage.module.css';
 
 const TotalMovie = () => {
   const [movieAmount, setMovieAmount] = useState(0);
@@ -21,7 +21,7 @@ const TotalMovie = () => {
 
   return (
     <div>
-      <h2>전체 영화 수</h2>
+      <h2 className={styles.h2}>전체 영화 수</h2>
       <p>{movieAmount.toLocaleString()}편</p>
     </div>
   );
