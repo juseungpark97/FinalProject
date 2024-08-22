@@ -20,7 +20,7 @@ const PwLoginForm: React.FC = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:8088/api/users/login', {
+            const response = await axios.post('http://localhost:8088/api/users/loginUser', {
                 email,
                 password
             });
