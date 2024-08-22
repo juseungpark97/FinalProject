@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import ProfileImageSelectorModal from '../CommonPage/ProfileImageSelectorModal'; // 모달 컴포넌트 임포트
 import styles from '../../components/BeforePage/css/ProfileCreate.module.css';
-
-interface Profile {
-    profileNo: number;
-    profileImg: string;
-    profileName: string;
-}
+import { Profile } from '../../types/Profile';
 
 interface ProfileCreateProps {
     onProfileCreated: (newProfile: Profile) => void;
@@ -17,6 +12,7 @@ interface ProfileCreateProps {
 const ProfileCreate: React.FC<ProfileCreateProps> = ({ onProfileCreated, onCancel }) => {
     const [newProfileName, setNewProfileName] = useState('');
     const [newProfileImage, setNewProfileImage] = useState<File | null>(null); // 이미지 파일을 위한 상태
+    const [newProfileImageUrl, setNewProfileImageUrl] = useState<string | null>(null); // 실제로 저장할 이미지 URL 상태
     const [newProfileImagePreview, setNewProfileImagePreview] = useState<string | null>(null); // 미리보기 이미지 URL을 위한 상태
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
@@ -50,6 +46,7 @@ const ProfileCreate: React.FC<ProfileCreateProps> = ({ onProfileCreated, onCance
                 onProfileCreated(createdProfile);
                 setNewProfileName('');
                 setNewProfileImage(null);
+                setNewProfileImageUrl(null); // 이미지 URL 초기화
                 setNewProfileImagePreview(null); // 미리보기 이미지 초기화
                 setError(null);
             } else {
@@ -68,7 +65,8 @@ const ProfileCreate: React.FC<ProfileCreateProps> = ({ onProfileCreated, onCance
             .then(blob => {
                 const file = new File([blob], imageName, { type: blob.type });
                 setNewProfileImage(file); // 이미지 파일 상태에 설정
-                setNewProfileImagePreview(URL.createObjectURL(file)); // 미리보기 이미지 URL 설정
+                setNewProfileImageUrl(`/profile-images/${imageName}`); // 저장될 URL을 설정
+                setNewProfileImagePreview(fileUrl); // 미리보기 이미지 URL 설정
                 setIsModalOpen(false);
             })
             .catch(error => {
@@ -90,10 +88,9 @@ const ProfileCreate: React.FC<ProfileCreateProps> = ({ onProfileCreated, onCance
                 프로필 이미지 선택
             </button>
 
-            {/* 선택한 프로필 이미지 미리보기 */}
+
             {newProfileImagePreview && (
                 <div className={styles.previewContainer}>
-
                     <img src={newProfileImagePreview} alt="Profile Preview" className={styles.profileImage} />
                 </div>
             )}

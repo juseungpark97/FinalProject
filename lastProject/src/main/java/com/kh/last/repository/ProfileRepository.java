@@ -14,4 +14,6 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
     
     @Query("SELECT p FROM Profile p WHERE p.userNo.role <> :role AND p.userNo.status <> :status")
     List<Profile> findProfilesByUserRoleNotAndStatusNot(@Param("role") String role, @Param("status") String status);
+
+	int countByUserNo(USERS user);
 }
