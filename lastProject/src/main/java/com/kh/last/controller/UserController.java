@@ -28,6 +28,7 @@ import com.kh.last.model.dto.UserCreateRequest;
 import com.kh.last.model.dto.UserLoginRequest;
 import com.kh.last.model.vo.Subscription;
 import com.kh.last.model.vo.USERS;
+import com.kh.last.service.KakaoService;
 import com.kh.last.service.SubscriptionService;
 import com.kh.last.service.UserService;
 import com.kh.last.service.VisitService;
@@ -53,6 +54,9 @@ public class UserController {
 		this.subscriptionService = subscriptionService;
 		this.key = userService.getKey(); // UserService로부터 SecretKey 주입
 	}
+	
+	@Autowired
+    private KakaoService kakaoService;
 
 	// 사용자 등록 (회원가입)
 	@PostMapping("/register")
@@ -137,6 +141,18 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
 	}
+	
+	@GetMapping("/meKaKao")
+	public ResponseEntity<USERS> getCurrentUserKaKao(@RequestHeader("Authorization") String token) {
+		 String accessToken = token.replace("Bearer ", "");
+         String email = kakaoService.getKakaoUserEmail(accessToken);
+		 USERS user = userService.getUserByEmail(email);
+		if (user != null) {
+			return ResponseEntity.ok(user);
+		} else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
+	}
 
 	// 사용자 구독 처리
 	@PostMapping("/subscribe")
@@ -149,9 +165,24 @@ public class UserController {
 		Subscription subscription = subscriptionService.subscribeUser(email, months);
 		return ResponseEntity.ok(subscription);
 	}
+	
+	@PostMapping("/subscribe-kakao")
+	public ResponseEntity<Subscription> subscribeUserKaKao(@RequestHeader("Authorization") String token,
+			@RequestParam int months) {
+		 // Bearer 부분을 제거하고 순수 액세스 토큰만 남김
+        String accessToken = token.replace("Bearer ", "");
+
+        // 카카오 API를 사용해 이메일 가져오기
+        String email = kakaoService.getKakaoUserEmail(accessToken);
+
+		Subscription subscription = subscriptionService.subscribeUser(email, months);
+		return ResponseEntity.ok(subscription);
+	}
+
 
 	@GetMapping("/subscription-status")
 	public ResponseEntity<Map<String, Boolean>> getSubscriptionStatus(@RequestHeader("Authorization") String token) {
+		
 		try {
 			// 토큰에서 이메일을 추출
 			String email = userService.getEmailFromToken(token);
@@ -172,6 +203,33 @@ public class UserController {
 		}
 	}
 
+	
+	@GetMapping("/subscription-status-kakao")
+    public ResponseEntity<Map<String, Boolean>> getSubscriptionStatusKaKao(@RequestHeader("Authorization") String token) {
+        try {
+            // Bearer 부분을 제거하고 순수 액세스 토큰만 남김
+            String accessToken = token.replace("Bearer ", "");
+
+            // 카카오 API를 사용해 이메일 가져오기
+            String email = kakaoService.getKakaoUserEmail(accessToken);
+
+            if (email == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 유효하지 않은 토큰일 경우 401 응답
+            }
+
+            // 사용자의 구독 상태 확인
+            boolean isSubscribed = subscriptionService.isUserSubscribed(email);
+
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("isSubscribed", isSubscribed);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 인증 실패 시 401 응답
+        }
+    }
+	
+	
 	@DeleteMapping("/delete")
 	public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token) {
 		try {
