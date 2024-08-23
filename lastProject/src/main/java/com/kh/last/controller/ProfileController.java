@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -42,6 +43,9 @@ import io.jsonwebtoken.Jwts;
 @RequestMapping("/api/profiles")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ProfileController {
+	
+    @Value("${profile.images.path}")
+    private String profileImagesPath;
 
     @Autowired
     private ProfileService profileService;
@@ -97,8 +101,7 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                String directory = url;
-              
+            	String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
                 String profileImgFilename = profileImg.getOriginalFilename();
                 Path imagePath = Paths.get(directory, profileImgFilename);
                 Files.write(imagePath, profileImg.getBytes());
@@ -166,9 +169,10 @@ public class ProfileController {
 
     @GetMapping("/available-images")
     public ResponseEntity<List<String>> getAvailableImages() {
+    	 String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
         try {
             List<String> imageNames = Files
-                    .list(Paths.get(url))
+            		  .list(Paths.get(directory))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {
