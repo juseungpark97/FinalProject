@@ -179,6 +179,7 @@ h2 {
   cursor: pointer;
   font-size: 14px;
   transition: background-color 0.2s ease;
+  max-width: 100%;
 }
 
 .tg td button:hover,
@@ -678,10 +679,11 @@ h2 {
 
 /* 표 스타일링 추가 */
 .recentMoviesTable {
-  width: 110%;
+  width: 120%;
   border-collapse: collapse;
   font-family: Arial, sans-serif;
   background-color: #ffffff;
+  max-width: 120%;
 }
 
 .recentMoviesTable th, 
@@ -689,7 +691,7 @@ h2 {
   border: 1px solid #ddd;
   padding: 12px;
   text-align: center;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .recentMoviesTable th {
@@ -709,6 +711,10 @@ h2 {
 
 .recentMoviesTable td {
   color: #333; /* 본문 텍스트 색상 */
+  white-space: nowrap;    /* 텍스트가 줄 바꿈되지 않도록 설정 */
+  overflow: hidden;       /* 넘치는 텍스트는 숨기기 */
+  text-overflow: ellipsis; /* 넘치는 텍스트에 줄임표 표시 */
+  max-width: 150px;       /* 열의 최대 너비 설정 */
 }
 
 .recentMoviesTable td:first-child {
@@ -717,7 +723,6 @@ h2 {
 
 .recentMoviesTable th:first-child, 
 .recentMoviesTable td:first-child {
-  text-align: left; /* 첫 번째 열의 텍스트를 왼쪽 정렬 */
   padding-left: 15px; /* 첫 번째 열의 패딩 추가 */
 }
 
