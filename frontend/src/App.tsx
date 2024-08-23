@@ -18,6 +18,7 @@ import Findidpage from "./pages/BeforePage/findidpage";
 import findpwpage from "./pages/BeforePage/findpwpage";
 import Findpwpage from "./pages/BeforePage/findpwpage";
 import MembershipCancel from "./components/Mypage/MembershipCancel";
+import EasterEgg from "./EasterEgg/EasterEgg";
 "./pages/BeforePage/findpwpage";
 
 function App() {
@@ -92,6 +93,7 @@ function App() {
         <Route path="/Findidpage" element={<Findidpage />} />
         <Route path="/Findpwdpage" element={<Findpwpage />} />
         <Route path="/subscribe/success" element={<SubscribeSuccess />} /> {/* 구독 성공 페이지 경로 추가 */}
+        <Route path="/easterEgg" element={<EasterEgg />} />
       </Routes>
     </GoogleOAuthProvider>
   );
