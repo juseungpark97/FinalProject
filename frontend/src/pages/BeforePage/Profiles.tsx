@@ -16,6 +16,21 @@ const ProfilePage: React.FC = () => {
     const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 모달 상태 추가
     const navigate = useNavigate();
+
+    const highestScoreProfile = profiles.reduce((maxProfile, profile) => {
+        return profile.tetrisHighScore > (maxProfile?.tetrisHighScore || 0) ? profile : maxProfile;
+    }, null as Profile | null);
+
+    useEffect(() => {
+        console.log('모든 프로필의 점수:', profiles.map(profile => profile.tetrisHighScore));
+        if (highestScoreProfile) {
+            console.log('가장 높은 점수:', highestScoreProfile.tetrisHighScore);
+            console.log('하이스코어 프로필:', highestScoreProfile);
+        } else {
+            console.log('하이스코어 프로필이 없습니다.');
+        }
+    }, [profiles, highestScoreProfile]);
+
     useEffect(() => {
         // URL에서 토큰 추출
         const params = new URLSearchParams(location.search);
@@ -211,6 +226,7 @@ const ProfilePage: React.FC = () => {
                         onProfileSelect={handleProfileSelect}
                         onAddProfile={handleAddProfile}
                         onProfileDelete={openDeleteModal} // 삭제 모달 오픈 함수 전달
+                        highestScoreProfile={highestScoreProfile} // 하이스코어 프로필 전달
                     />
                     <ConfirmModal
                         isOpen={modalOpen}

@@ -7,9 +7,10 @@ interface ProfileSelectProps {
     onProfileSelect: (profile: Profile) => void;
     onAddProfile: () => void;
     onProfileDelete: (profile: Profile) => void;
+    highestScoreProfile: Profile | null;
 }
 
-const ProfileSelect: React.FC<ProfileSelectProps> = ({ profiles, onProfileSelect, onAddProfile, onProfileDelete }) => {
+const ProfileSelect: React.FC<ProfileSelectProps> = ({ profiles, onProfileSelect, onAddProfile, onProfileDelete, highestScoreProfile }) => {
     // 메인 계정을 앞에 두는 로직
     const sortedProfiles = [...profiles].sort((a, b) => {
         if (a.profileMain === 'M' && b.profileMain !== 'M') {
@@ -31,11 +32,18 @@ const ProfileSelect: React.FC<ProfileSelectProps> = ({ profiles, onProfileSelect
             <div className={styles.profiles}>
                 {sortedProfiles.map(profile => (
                     <div key={profile.profileNo} className={styles.profile}>
-                        <img src={profile.profileImg}
-                            alt={profile.profileName}
-                            className={styles.profileImage}
-                            onClick={() => handleProfileClick(profile)}
-                        />
+                        <div className={styles.crownContainer}>
+                            {/* 하이스코어 프로필에만 왕관 아이콘 추가 */}
+                            {highestScoreProfile && highestScoreProfile.profileNo === profile.profileNo && (
+                                <div className={styles.crown}></div>
+                            )}
+                            <img
+                                src={profile.profileImg}
+                                alt={profile.profileName}
+                                className={styles.profileImage}
+                                onClick={() => handleProfileClick(profile)}
+                            />
+                        </div>
                         <h2 className={styles.profileName}>{profile.profileName}</h2>
                         {profile.profileMain !== 'M' && (
                             <button
