@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -126,28 +125,7 @@ public class ManageController {
 		List<MovieViewDTO> list = service.getMovies();
         return list;
     }
-	
-	@PutMapping("/setActivateMovie")
-	public void setActivateMovie(@RequestBody Map<String, Object> request) {
-	    // movieId를 Integer에서 Long으로 안전하게 변환
-	    Object movieIdObj = request.get("movieId");
-	    Long id = null;
-
-	    if (movieIdObj instanceof Integer) {
-	        id = ((Integer) movieIdObj).longValue();
-	    } else if (movieIdObj instanceof Long) {
-	        id = (Long) movieIdObj;
-	    } else {
-	        throw new IllegalArgumentException("Invalid movieId type: " + movieIdObj.getClass().getName());
-	    }
-
-	    // 상태를 문자열로 받아오기
-	    String status = (String) request.get("status");
-	    
-	    // 서비스 호출
-	    service.setActivateMovie(id, status);
-	}
-
+    
 	@GetMapping("/getUser")
 	public Map<String, Object> getUser(){
 		List<USERS> list = service.getUser();

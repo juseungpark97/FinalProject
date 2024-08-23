@@ -15,6 +15,5 @@ public class MovieViewDTO {
 	private float rating;
 	private String tags;
 	private String cast;
-	private String status;
 	private Long viewCount;
 }

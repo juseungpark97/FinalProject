@@ -27,34 +27,6 @@ interface StopInfo {
   stopDate: string;
 }
 
-const formatProfileVector = (profileVector: string | null): string => {
-  if (!profileVector) {
-    return ''; // profileVector가 null일 경우 빈 문자열 반환
-  }
-
-  try {
-    // profileVector를 JSON 객체로 파싱
-    const profileObject: { [key: string]: number } = JSON.parse(profileVector);
-    if (typeof profileObject === 'object' && profileObject !== null) {
-      // Object.entries를 사용하여 객체의 키-값 쌍을 배열로 변환
-      const entries = Object.entries(profileObject) as [string, number][];
-
-      // 값을 기준으로 내림차순 정렬
-      const sortedEntries = entries.sort((a, b) => b[1] - a[1]);
-
-      // 최대 4개의 항목 추출
-      const topEntries = sortedEntries.slice(0, 4);
-
-      // 결과를 문자열로 변환하여 반환
-      return topEntries.map(entry => `${entry[0]}: ${entry[1]}`).join(', ');
-    }
-    return '';
-  } catch (error) {
-    console.error('Error parsing profile vector', error);
-    return '';
-  }
-};
-
 export default function MemberManage() {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,6 +40,11 @@ export default function MemberManage() {
   const [stopInfo, setStopInfo] = useState<StopInfo | null>(null);
   const [viewMode, setViewMode] = useState<'all' | 'stopped'>('all');
   const itemsPerPage = 10;
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearchClick();
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -200,7 +177,7 @@ export default function MemberManage() {
           <input
             type="text"
             placeholder="회원명"
-            onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
+            onKeyDown={handleKeyDown}
             value={searchTerm}
             onChange={handleSearchChange}
             className={styles.searchInput}
@@ -264,7 +241,7 @@ export default function MemberManage() {
                             <tr key={profile.profileNo}>
                               <td>{profile.profileNo}</td>
                               <td>{profile.profileName}</td>
-                              <td>{formatProfileVector(profile.profileVector)}</td>
+                              <td>{profile.profileVector}</td>
                             </tr>
                           ))}
                         </tbody>

@@ -179,7 +179,6 @@ h2 {
   cursor: pointer;
   font-size: 14px;
   transition: background-color 0.2s ease;
-  max-width: 100%;
 }
 
 .tg td button:hover,

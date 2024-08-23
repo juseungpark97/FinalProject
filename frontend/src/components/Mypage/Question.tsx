@@ -161,11 +161,7 @@ const Question: React.FC<QuestionProps> = ({ profileNo }) => {
                 chatDate: new Date().toISOString(),
             };
 
-            setChatMessages((prevMessages) => {
-                const updatedMessages = [...prevMessages, finalMessage];
-                scrollToBottom(); // 상태가 업데이트된 후 스크롤 이동
-                return updatedMessages;
-            });
+            setChatMessages((prevMessages) => [...prevMessages, finalMessage]);
 
             axios.post(`${url}/api/chat/close`, null, { params: { chatRoomId } })
                 .then(() => {

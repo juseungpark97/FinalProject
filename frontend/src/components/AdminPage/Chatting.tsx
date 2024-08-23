@@ -167,12 +167,6 @@ export const Chatting: React.FC<ChattingProps> = ({ isOpen, onClose, chatRoomId,
                         className={styles.chatInput}
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                insertChat();
-                            }
-                        }}
                         disabled={isReadOnly}
                     />
                     <button
