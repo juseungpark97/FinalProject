@@ -39,7 +39,7 @@ const ProfilePasswordModal: React.FC<ProfilePasswordModalProps> = ({ profile, is
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
                 <h4>프로필 비밀번호 입력</h4>
-                <input
+                <input className={styles.pwdInput}
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
