@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { GoogleOAuthProvider } from '@react-oauth/google'; // 구글 인증관련
 import Signin from "./pages/BeforePage/SignInPage";
-import Landing from "./pages/BeforePage/MainPage";
 import HomePage from "./pages/HomePage/HomePage";
 import DashboardPage from "./pages/AdminPage/DashboardPage";
 import UploadMovie from "./pages/AdminPage/UploadMovie";
@@ -18,6 +17,7 @@ import Findidpage from "./pages/BeforePage/findidpage";
 import findpwpage from "./pages/BeforePage/findpwpage";
 import Findpwpage from "./pages/BeforePage/findpwpage";
 import MembershipCancel from "./components/Mypage/MembershipCancel";
+import Landing from "./pages/BeforePage/MainPage";
 import EasterEgg from "./EasterEgg/EasterEgg";
 "./pages/BeforePage/findpwpage";
 

@@ -52,6 +52,8 @@ public class ProfileController {
     @Autowired ProfileRepository profileRepository;
 
     private final SecretKey key;
+    
+    private String url = "C:/finalProject/FinalProject/frontend/public/profile-images";
 
     @Autowired
     public ProfileController(UserService userService) {
@@ -95,7 +97,8 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
+                String directory = url;
+              
                 String profileImgFilename = profileImg.getOriginalFilename();
                 Path imagePath = Paths.get(directory, profileImgFilename);
                 Files.write(imagePath, profileImg.getBytes());
@@ -165,7 +168,7 @@ public class ProfileController {
     public ResponseEntity<List<String>> getAvailableImages() {
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images"))
+                    .list(Paths.get(url))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {
