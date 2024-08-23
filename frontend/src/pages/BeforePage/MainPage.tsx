@@ -10,7 +10,7 @@ const Landing: FunctionComponent = () => {
 
   // 자동 로그인 및 구독 상태 확인 로직 추가
   useEffect(() => {
-    const token = localStorage.getItem('authToken'); // 여기에서 'authToken'을 가져옵니다.
+    const token = localStorage.getItem('authToken'); // 'authToken'을 가져옵니다.
     if (token) {
       axios.get('http://localhost:8088/api/users/subscription-status', {
         headers: { 'Authorization': `Bearer ${token}` } // 'Bearer'와 함께 토큰을 헤더에 추가
@@ -62,10 +62,11 @@ const Landing: FunctionComponent = () => {
     }
   };  
 
-  const handleGoogleLogin = () => {
-    // 백엔드의 OAuth2 인증 요청 URI로 리디렉션
-    window.location.href = "http://localhost:8088/oauth2/authorization/google";
-  };
+  const handleKakaoLogin = () => {
+    // 백엔드의 카카오 OAuth2 인증 요청 URI로 리디렉션
+    window.location.href = "http://localhost:8088/oauth2/authorization/kakao";
+};
+
 
   // 로그인 페이지로 이동하는 함수 추가
   const handleLoginClick = () => {
@@ -101,8 +102,8 @@ const Landing: FunctionComponent = () => {
           </button>
           {error && <p className={styles.error}>{error}</p>}
         </div>
-        <button className={styles.googleLoginButton} onClick={handleGoogleLogin}>
-          Google 로그인하기
+        <button className={styles.kakaoLoginButton} onClick={handleKakaoLogin}>
+          카카오 로그인하기
         </button>
       </section>
     </div>

@@ -54,18 +54,38 @@ public class ProfileService {
         return profileRepository.findByUserNo(user);
     }
 
+
     public Profile createProfile(Long userNo, String profileName, String profileImg) {
         USERS user = userRepository.findById(userNo)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        
+        // 사용자별 첫 번째 프로필은 'M', 그 외 프로필은 'S'로 설정
+        String profileMain = profileRepository.countByUserNo(user) == 0 ? "M" : "S";
+        
         Profile profile = new Profile();
         profile.setUserNo(user);
         profile.setProfileName(profileName);
         profile.setProfileImg(profileImg);
+        profile.setProfileMain(profileMain);
+        
         return profileRepository.save(profile);
     }
+    
+    public void deleteProfile(Long profileNo) {
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        if ("M".equals(profile.getProfileMain())) {
+            throw new RuntimeException("Main profile cannot be deleted");
+        }
+
+        profileRepository.delete(profile);
+    }
+
+
 
     public String selectProfileImage(Long profileNo, String selectedImageName) {
-        String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+        String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
         Path imagePath = Paths.get(directory, selectedImageName);
 
         if (!Files.exists(imagePath)) {
@@ -80,20 +100,25 @@ public class ProfileService {
         return profile.getProfileImg();
     }
 
+
+
+
     public Profile getProfileById(Long profileNo) {
         return profileRepository.findById(profileNo)
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
     }
 
+
     public void updateProfile(Profile profile) {
         profileRepository.save(profile);
     }
+
 
     public String uploadProfileImage(MultipartFile file, Long profileNo) throws Exception {
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
 
-        String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+        String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
         Path imagePath = Paths.get(directory, file.getOriginalFilename());
         Files.write(imagePath, file.getBytes());
 
@@ -104,12 +129,14 @@ public class ProfileService {
         return profileImgUrl;
     }
 
+
     public void updateProfileName(Long profileNo, String profileName) {
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
         profile.setProfileName(profileName);
         profileRepository.save(profile);
     }
+
 
     @Transactional
     public void updateProfileVector(Long profileId, Long movieId, Map<String, Integer> movieTags) {
@@ -156,4 +183,16 @@ public class ProfileService {
             throw new RuntimeException("Error parsing profile vector", e);
         }
     }
+    
+    public void lockProfile(Long profileNo, String password) {
+        Profile profile = profileRepository.findById(profileNo)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
+
+        // 비밀번호 길이 검증은 컨트롤러에서 처리
+        profile.setLocked(true);
+        profile.setProfilePwd(Integer.parseInt(password));  // 비밀번호 저장 (해시 처리를 고려해야 함)
+
+        profileRepository.save(profile);
+    }
+
 }

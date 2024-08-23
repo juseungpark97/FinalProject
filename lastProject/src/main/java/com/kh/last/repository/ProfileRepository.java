@@ -12,6 +12,10 @@ import com.kh.last.model.vo.USERS;
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
     List<Profile> findByUserNo(USERS user);
     
+
+    long countByUserNo(USERS userNo);
+
     @Query("SELECT p FROM Profile p WHERE p.userNo.role <> :role AND p.userNo.status <> :status")
     List<Profile> findProfilesByUserRoleNotAndStatusNot(@Param("role") String role, @Param("status") String status);
+
 }
