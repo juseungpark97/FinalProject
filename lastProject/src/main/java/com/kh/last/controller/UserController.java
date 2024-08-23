@@ -160,22 +160,53 @@ public class UserController {
 	}
 
 	@PutMapping("/change-password")
-	    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token,
-	                                            @RequestBody PasswordChangeRequest request) {
-	        // 토큰에서 이메일 추출 (이메일 추출 로직은 기존 메소드 활용)
-	        String email = userService.getEmailFromToken(token);
-	        if (email == null) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-	        }
+	public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token,
+			@RequestBody PasswordChangeRequest request) {
+		// 토큰에서 이메일 추출 (이메일 추출 로직은 기존 메소드 활용)
+		String email = userService.getEmailFromToken(token);
+		if (email == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
 
-	        request.setEmail(email);
-	        boolean success = userService.myPagePwdChange(request);
+		request.setEmail(email);
+		boolean success = userService.myPagePwdChange(request);
 
-	        if (success) {
-	            return ResponseEntity.ok().body("Password changed successfully");
-	        } else {
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Current password is incorrect or user not found");
-	        }
-	    }
+		if (success) {
+			return ResponseEntity.ok().body("Password changed successfully");
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body("Current password is incorrect or user not found");
+		}
+	}
+
+	@PutMapping("/cancel-subscription")
+	public ResponseEntity<String> cancelSubscription(@RequestHeader("Authorization") String token) {
+		String email = userService.getEmailFromToken(token);
+		if (email == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
+
+		try {
+			subscriptionService.cancelSubscription(email);
+			return ResponseEntity.ok("Subscription cancelled successfully");
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+
+	@PutMapping("/reactivate-subscription")
+	public ResponseEntity<String> reactivateSubscription(@RequestHeader("Authorization") String token) {
+		String email = userService.getEmailFromToken(token);
+		if (email == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
+
+		try {
+			subscriptionService.reactivateSubscription(email);
+			return ResponseEntity.ok("Subscription reactivated successfully");
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
 
 }

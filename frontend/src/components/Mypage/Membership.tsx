@@ -47,6 +47,56 @@ const Membership: React.FC = () => {
 
     const handleCancel = () => {
         setShowCancel(false); // 멤버십 해지 취소 시 원래 페이지로 돌아옴
+
+        // 상태를 새로고침하거나 데이터를 다시 불러오기 위해 useEffect를 트리거
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            axios.get('http://localhost:8088/api/myPage/subscription-date', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then(response => {
+                    const subscriptionData: Subscription = response.data;
+                    setSubscription(subscriptionData);
+
+                    const today = new Date();
+                    const endDate = new Date(subscriptionData.endDate);
+                    const timeDiff = endDate.getTime() - today.getTime();
+                    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    setDaysLeft(daysRemaining);
+                })
+                .catch(error => {
+                    console.error('Error fetching subscription data:', error);
+                });
+        }
+    };
+
+    const handleMembershipReactivateClick = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            const response = await axios.put('http://localhost:8088/api/users/reactivate-subscription', null, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            if (response.status === 200) {
+                alert('멤버십이 성공적으로 재활성화되었습니다.');
+                // 구독 상태를 업데이트하여 페이지를 새로고침 없이 반영
+                setSubscription(prevState => prevState ? { ...prevState, subStatus: 'ACTIVE' } : null);
+            } else {
+                alert('멤버십 재활성화에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('네트워크 오류 또는 서버 응답 없음:', error);
+            alert('네트워크 오류 또는 서버가 응답하지 않습니다.');
+        }
     };
 
     return (
@@ -97,14 +147,25 @@ const Membership: React.FC = () => {
                                         결제 내역 확인 <span className={styles.arrow}>&gt;</span>
                                     </button>
                                 </li>
-                                <li>
-                                    <button
-                                        onClick={handleMembershipCancelClick}
-                                        className={styles.menuLink}
-                                    >
-                                        멤버십 해지 <span className={styles.arrow}>&gt;</span>
-                                    </button>
-                                </li>
+                                {subscription?.subStatus === "ACTIVE" ? (
+                                    <li>
+                                        <button
+                                            onClick={handleMembershipCancelClick}
+                                            className={styles.menuLink}
+                                        >
+                                            멤버십 해지 <span className={styles.arrow}>&gt;</span>
+                                        </button>
+                                    </li>
+                                ) : (
+                                    <li>
+                                        <button
+                                            onClick={handleMembershipReactivateClick}
+                                            className={styles.menuLink}
+                                        >
+                                            멤버십 재활성화 <span className={styles.arrow}>&gt;</span>
+                                        </button>
+                                    </li>
+                                )}
                             </ul>
                         </div>
                     </div>

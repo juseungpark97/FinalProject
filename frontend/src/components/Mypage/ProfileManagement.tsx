@@ -134,16 +134,6 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                 <div className={styles.quickLinks}>
                     <ul>
                         <li>
-                            <button onClick={() => window.location.href = '/watch-settings'} className={styles.menuLink}>
-                                시청 제한 <span className={styles.arrow}>&gt;</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button onClick={() => window.location.href = '/watch-history'} className={styles.menuLink}>
-                                시청 기록 <span className={styles.arrow}>&gt;</span>
-                            </button>
-                        </li>
-                        <li>
                             <button onClick={() => window.location.href = '/payment-info'} className={styles.menuLink}>
                                 결제정보 <span className={styles.arrow}>&gt;</span>
                             </button>

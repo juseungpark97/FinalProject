@@ -79,30 +79,33 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
     }
   }, [selectedProfile]);
 
+  const handleClick = () => {
+    navigate('/home');
+    window.location.reload(); // 페이지 새로고침
+  };
+
   return (
     <>
       <section className={`${styles.Header} ${className}`}>
         <header className={styles.header}>
           <div className={styles.headerBackground} />
-          <Link to="/home">
+          <div onClick={handleClick}>
             <img
               className={styles.logoText2}
               loading="lazy"
               alt=""
               src="/logo-text-2@2x.png"
             />
-          </Link>
+          </div>
           <div className={styles.navigation}>
             <div className={styles.homeNav}>
-              <div className={`${styles.homeButton} ${styles.iconButton}`}>
-                <Link to="/home" className={styles.a}>
-                  <img
-                    className={styles.homeButtonIcon}
-                    loading="lazy"
-                    alt=""
-                    src="/homeButton.png"
-                  />
-                </Link>
+              <div className={`${styles.homeButton} ${styles.iconButton}`} onClick={handleClick}>
+                <img
+                  className={styles.homeButtonIcon}
+                  loading="lazy"
+                  alt=""
+                  src="/homeButton.png"
+                />
               </div>
               <div
                 className={`${styles.searchNav} ${styles.iconButton}`}
