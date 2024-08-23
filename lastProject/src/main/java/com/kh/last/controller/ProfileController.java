@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.USERS;
+import com.kh.last.repository.ProfileRepository;
 import com.kh.last.service.ProfileService;
 import com.kh.last.service.UserService;
 
@@ -47,6 +48,8 @@ public class ProfileController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired ProfileRepository profileRepository;
 
     private final SecretKey key;
     
@@ -57,6 +60,18 @@ public class ProfileController {
         this.userService = userService;
         this.key = userService.getKey(); // UserService로부터 SecretKey 주입
     }
+    
+    @PostMapping("/{profileId}/tetris/score")
+    public ResponseEntity<Profile> updateTetrisScore(
+        @PathVariable Long profileId, 
+        @RequestBody int newScore) {
+        
+        Profile profile = profileRepository.findById(profileId).orElseThrow();
+        profile.updateTetrisHighScore(newScore);
+        profileRepository.save(profile);
+        return ResponseEntity.ok(profile);
+    }
+    
     @GetMapping("/user/{userNo}")
     public ResponseEntity<List<Profile>> getProfilesByUserNo(@PathVariable Long userNo) {
         List<Profile> profiles = profileService.getProfilesByUserNo(userNo);
@@ -83,6 +98,7 @@ public class ProfileController {
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
                 String directory = url;
+              
                 String profileImgFilename = profileImg.getOriginalFilename();
                 Path imagePath = Paths.get(directory, profileImgFilename);
                 Files.write(imagePath, profileImg.getBytes());

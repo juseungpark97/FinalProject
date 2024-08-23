@@ -1,0 +1,61 @@
+.tetris-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tetris-container {
+    display: flex;
+    gap: 20px;
+}
+
+.tetris {
+    display: grid;
+    grid-template-columns: repeat(10, 30px);
+    /* 10 열, 각 30px */
+    grid-template-rows: repeat(20, 30px);
+    /* 20 행, 각 30px */
+    gap: 1px;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border: 1px solid black;
+}
+
+.preview {
+    display: grid;
+    grid-template-columns: repeat(4, 30px);
+    /* 미리보기 블록 4열 */
+    grid-template-rows: repeat(4, 30px);
+    /* 미리보기 블록 4행 */
+    gap: 1px;
+}
+
+.preview-cell {
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border: 1px solid black;
+}
+
+.controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

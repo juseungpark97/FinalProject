@@ -11,6 +11,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.kh.last.model.dto.PasswordChangeRequest;
 import com.kh.last.model.vo.Subscription;
 import com.kh.last.model.vo.USERS;
 import com.kh.last.repository.SubscriptionRepository;
@@ -162,6 +163,7 @@ public class UserService {
 			USERS user = userOpt.get();
 			user.setPassword(passwordEncoder.encode(newPassword)); // 새 비밀번호로 업데이트
 			userRepository.save(user);
+
 			return true; // 비밀번호 변경 성공
 		}
 		return false; // 사용자를 찾을 수 없음
@@ -176,4 +178,28 @@ public class UserService {
 			return null;
 		}
 	}
+
+	public boolean myPagePwdChange(PasswordChangeRequest request) {
+    
+        Optional<USERS> userOptional = userRepository.findByEmail(request.getEmail());
+
+        if (userOptional.isEmpty()) {
+       
+            return false;
+        }
+
+        USERS user = userOptional.get();
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            // 현재 비밀번호가 일치하지 않음
+            return false;
+        }
+
+        // 새 비밀번호 암호화 및 저장
+        String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(encodedNewPassword);
+        userRepository.save(user);
+
+        return true; 
+    }
 }

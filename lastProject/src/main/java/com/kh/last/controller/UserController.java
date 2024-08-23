@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kh.last.model.dto.EmailCheckRequest;
 import com.kh.last.model.dto.EmailCheckResponse;
 import com.kh.last.model.dto.LoginResponse;
+import com.kh.last.model.dto.PasswordChangeRequest;
 import com.kh.last.model.dto.UserCreateRequest;
 import com.kh.last.model.dto.UserLoginRequest;
 import com.kh.last.model.vo.Subscription;
@@ -32,7 +34,6 @@ import com.kh.last.service.VisitService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -72,19 +73,21 @@ public class UserController {
 	public ResponseEntity<LoginResponse> loginUser(@RequestBody UserLoginRequest request) {
 		try {
 			String status = userService.checkUserStatus(request.getEmail());
-			if (status.equals("S")) {
+		  if (status != null) {
+			  if (status.equals("S")) {
 				// 정지유저 경고 메시지 전달
-				LoginResponse response = new LoginResponse(null);
+				EmailCheckResponse response = new EmailCheckResponse(false);
 				response.setMessage("정지된 계정입니다. 다른 계정으로 이용 부탁드립니다.");
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
 			}
+
 			if (status.equals("D")) {
 				// 탈퇴회원 안내 메시지 전달
-				LoginResponse response = new LoginResponse(null);
+				EmailCheckResponse response = new EmailCheckResponse(false);
 				response.setMessage("탈퇴한 회원입니다.");
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
 			}
-
+		}
 			String token = userService.loginUser(request.getEmail(), request.getPassword());
 			visitService.updateVisitCount();
 
@@ -118,7 +121,6 @@ public class UserController {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
 			}
 		}
-
 		boolean exists = userService.emailExists(request.getEmail());
 		return ResponseEntity.ok(new EmailCheckResponse(exists));
 	}
@@ -188,4 +190,23 @@ public class UserController {
 					.body("An error occurred during deactivation");
 		}
 	}
+
+	@PutMapping("/change-password")
+	    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token,
+	                                            @RequestBody PasswordChangeRequest request) {
+	        // 토큰에서 이메일 추출 (이메일 추출 로직은 기존 메소드 활용)
+	        String email = userService.getEmailFromToken(token);
+	        if (email == null) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+	        }
+
+	        request.setEmail(email);
+	        boolean success = userService.myPagePwdChange(request);
+
+	        if (success) {
+	            return ResponseEntity.ok().body("Password changed successfully");
+	        } else {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Current password is incorrect or user not found");
+	        }
+	    }
 }
