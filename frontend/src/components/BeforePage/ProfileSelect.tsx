@@ -1,27 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from '../../components/BeforePage/css/ProfileSelect.module.css';
-
-interface Profile {
-    profileNo: number;
-    profileImg: string;
-    profileName: string;
-}
+import { Profile } from '../../types/Profile';
 
 interface ProfileSelectProps {
     profiles: Profile[];
     onProfileSelect: (profile: Profile) => void;
     onAddProfile: () => void;
+    onProfileDelete: (profile: Profile) => void;
 }
 
-const ProfileSelect: React.FC<ProfileSelectProps> = ({ profiles, onProfileSelect, onAddProfile }) => {
+const ProfileSelect: React.FC<ProfileSelectProps> = ({ profiles, onProfileSelect, onAddProfile, onProfileDelete }) => {
+    // 메인 계정을 앞에 두는 로직
+    const sortedProfiles = [...profiles].sort((a, b) => {
+        if (a.profileMain === 'M' && b.profileMain !== 'M') {
+            return -1; // 메인 계정이 앞으로 오도록 정렬
+        } else if (a.profileMain !== 'M' && b.profileMain === 'M') {
+            return 1;
+        } else {
+            return 0;
+        }
+    });
+
+    const handleProfileClick = (profile: Profile) => {
+        onProfileSelect(profile);  // 프로필 클릭 시 상위 컴포넌트에 이벤트 전달
+    };
+
     return (
         <div className={styles.profileSelectionPage}>
             <h1>계정을 선택해주세요.</h1>
             <div className={styles.profiles}>
-                {profiles.map(profile => (
-                    <div key={profile.profileNo} className={styles.profile} onClick={() => onProfileSelect(profile)}>
-                        <img src={profile.profileImg} alt={profile.profileName} className={styles.profileImage} />
+                {sortedProfiles.map(profile => (
+                    <div key={profile.profileNo} className={styles.profile}>
+                        <img src={profile.profileImg}
+                            alt={profile.profileName}
+                            className={styles.profileImage}
+                            onClick={() => handleProfileClick(profile)}
+                        />
                         <h2 className={styles.profileName}>{profile.profileName}</h2>
+                        {profile.profileMain !== 'M' && (
+                            <button
+                                className={styles.deleteButton}
+                                onClick={() => onProfileDelete(profile)}
+                            >
+                                삭제
+                            </button>
+                        )}
                     </div>
                 ))}
                 {profiles.length < 4 && (

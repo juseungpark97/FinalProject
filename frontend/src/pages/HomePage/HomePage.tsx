@@ -4,9 +4,9 @@ import Frame from '../../components/HomePage/HomeFrame';
 import SliderSection from '../../components/HomePage/SliderSection';
 import SearchOverlay from '../../../src/components/HomePage/SearchOverlay';
 import { useMovies } from './hooks/useMovies';
-import { Profile } from './services/interfaces';
 import styles from './css/HomePage.module.css';
 import Footer from '../../components/CommonPage/Footer';
+import { Profile } from '../../types/Profile';
 
 const HomePage: React.FC = () => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
