@@ -19,12 +19,14 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
 
   useEffect(() => {
     const selectedProfileData = sessionStorage.getItem('selectedProfile');
+
     if (selectedProfileData) {
       const profile = JSON.parse(selectedProfileData);
       setSelectedProfile(profile);
     }
 
     const token = localStorage.getItem('authToken');
+
     if (token) {
       const decodedUser = decodeJWT(token);
       setUser(decodedUser);
@@ -67,8 +69,8 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
 
   const handleLogout = async () => {
     try {
-      // 일반 로그인 토큰 제거
       localStorage.removeItem('authToken');
+      localStorage.removeItem('kakaoAccessToken');
       setSelectedProfile(null);
       sessionStorage.removeItem('selectedProfile');
 

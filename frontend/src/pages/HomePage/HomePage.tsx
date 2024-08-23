@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import Header from '../../../src/components/CommonPage/Header';
 import Frame from '../../components/HomePage/HomeFrame';
 import SliderSection from '../../components/HomePage/SliderSection';
@@ -7,6 +7,7 @@ import { useMovies } from './hooks/useMovies';
 import styles from './css/HomePage.module.css';
 import Footer from '../../components/CommonPage/Footer';
 import { Profile } from '../../types/Profile';
+import { useLocation } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -43,6 +44,10 @@ const HomePage: React.FC = () => {
     setSearchTerm(query);
     handleCloseSearch();
   }, [handleCloseSearch]);
+
+  const location = useLocation();
+
+
 
   return (
     <div className={styles.main}>

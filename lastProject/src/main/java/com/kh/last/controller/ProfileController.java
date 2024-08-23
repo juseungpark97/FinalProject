@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.USERS;
 import com.kh.last.repository.ProfileRepository;
+import com.kh.last.service.KakaoService;
 import com.kh.last.service.ProfileService;
 import com.kh.last.service.UserService;
 
@@ -54,6 +55,8 @@ public class ProfileController {
     private UserService userService;
     
     @Autowired ProfileRepository profileRepository;
+    
+    @Autowired KakaoService kakaoService;
 
     private final SecretKey key;
     
@@ -100,6 +103,31 @@ public class ProfileController {
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
+            if (user != null) {
+
+            	String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
+                String profileImgFilename = profileImg.getOriginalFilename();
+                Path imagePath = Paths.get(directory, profileImgFilename);
+                Files.write(imagePath, profileImg.getBytes());
+                String imagePathToStore = "/profile-images/" + profileImgFilename;
+                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, imagePathToStore);
+
+                return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating profile");
+        }
+    }
+    
+    @PostMapping("/createKaKao")
+    public ResponseEntity<?> createProfileKaKao(@RequestParam String profileName, @RequestParam MultipartFile profileImg,
+                                           @RequestHeader("Authorization") String token) {
+        try {
+        	 String accessToken = token.replace("Bearer ", "");
+             String email = kakaoService.getKakaoUserEmail(accessToken);
+    		 USERS user = userService.getUserByEmail(email);
             if (user != null) {
 
             	String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();

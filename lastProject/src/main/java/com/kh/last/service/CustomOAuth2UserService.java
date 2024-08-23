@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import com.kh.last.model.vo.CustomOAuth2User;
 import com.kh.last.model.vo.USERS;
 import com.kh.last.repository.UserRepository;
 
@@ -29,20 +30,22 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        String userNameAttributeName = "id"; // 카카오는 사용자 ID를 기준으로
+        // 카카오 액세스 토큰 가져오기
+        String token = userRequest.getAccessToken().getTokenValue();
 
         Map<String, Object> attributes = oAuth2User.getAttributes();
-
         String email = (String) ((Map<String, Object>) attributes.get("kakao_account")).get("email");
         String nickname = (String) ((Map<String, Object>) attributes.get("properties")).get("nickname");
 
         USERS user = saveOrUpdateUser(email, nickname);
 
-        return new DefaultOAuth2User(
-            Collections.singleton(new SimpleGrantedAuthority(user.getRole())),
-            attributes,
-            userNameAttributeName
+        return new CustomOAuth2User(
+            new DefaultOAuth2User(
+                Collections.singleton(new SimpleGrantedAuthority(user.getRole())),
+                attributes,
+                "id" // 카카오의 사용자 ID를 기준으로 설정
+            ),
+            token
         );
     }
 
