@@ -80,7 +80,7 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+                String directory = "C:\\fffffffinal\\FinalProject\\frontend\\public\\profile-images";
                 String profileImgFilename = profileImg.getOriginalFilename();
                 Path imagePath = Paths.get(directory, profileImgFilename);
                 Files.write(imagePath, profileImg.getBytes());
@@ -150,7 +150,7 @@ public class ProfileController {
     public ResponseEntity<List<String>> getAvailableImages() {
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images"))
+                    .list(Paths.get("C:\\fffffffinal\\FinalProject\\frontend\\public\\profile-images"))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {

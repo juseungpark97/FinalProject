@@ -90,7 +90,7 @@ public class ProfileService {
 
 
     public String selectProfileImage(Long profileNo, String selectedImageName) {
-        String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
+        String directory = "C:\\fffffffinal\\FinalProject\\frontend\\public\\profile-images";
         Path imagePath = Paths.get(directory, selectedImageName);
 
         if (!Files.exists(imagePath)) {
@@ -123,7 +123,7 @@ public class ProfileService {
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
 
-        String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
+        String directory = "C:\\fffffffinal\\FinalProject\\frontend\\public\\profile-images";
         Path imagePath = Paths.get(directory, file.getOriginalFilename());
         Files.write(imagePath, file.getBytes());
 

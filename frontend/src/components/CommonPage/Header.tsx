@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './css/Header.module.css';
-import { Profile } from '../../types/Profile';
 
 export type HeaderProps = {
   className?: string;
@@ -11,20 +10,36 @@ export type HeaderProps = {
   setSelectedProfile: (profile: Profile | null) => void;
 };
 
+interface Profile {
+  profileNo: number;
+  profileImg: string;
+  profileName: string;
+}
+
 const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selectedProfile, setSelectedProfile }) => {
   const [user, setUser] = useState<any>(null);
-  const [clickCount, setClickCount] = useState(0);
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const selectedProfileData = sessionStorage.getItem('selectedProfile');
+    const token = sessionStorage.getItem('authToken');
+    console.log('Header selectedProfile:', selectedProfile);
+  }, [selectedProfile]);
+
+  useEffect(() => {
+    // 1. sessionStorage에서 selectedProfile을 먼저 가져옵니다.
+    const selectedProfileData = sessionStorage.getItem('selectedProfile'); // sessionStorage 사용
+    console.log('Session storage selectedProfile at the start:', selectedProfileData);
+
     if (selectedProfileData) {
       const profile = JSON.parse(selectedProfileData);
       setSelectedProfile(profile);
+      console.log('Profile loaded in Header from sessionStorage:', profile);
+    } else {
+      console.warn('Profile not found in sessionStorage');
     }
 
-    const token = localStorage.getItem('authToken');
+    // 2. 사용자 인증 정보를 가져옵니다.
+    const token = localStorage.getItem('authToken'); // sessionStorage 사용
     if (token) {
       const decodedUser = decodeJWT(token);
       setUser(decodedUser);
@@ -36,10 +51,13 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
       })
         .then(response => {
           setUser(response.data);
+          console.log('User data loaded:', response.data);
         })
         .catch(error => {
           console.error("Error fetching user data", error);
         });
+    } else {
+      console.warn('No authToken found in sessionStorage');
     }
 
   }, [setSelectedProfile]);
@@ -65,64 +83,59 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
     navigate('/profiles');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
+  const handleLogout = async () => {
+    try {
+      // 일반 로그인 토큰 제거
+      localStorage.removeItem('authToken');
+      setSelectedProfile(null);
+      sessionStorage.removeItem('selectedProfile');
 
-    setSelectedProfile(null);
-    sessionStorage.removeItem('selectedProfile');
-    navigate('/login');
+      // 카카오 로그아웃 처리
+      const clientId = "3cd0dba35845286d817669df88d06d12"; // 클라이언트 ID
+      const logoutRedirectUri = "http://localhost:3000"; // 로그아웃 후 리디렉션될 URI
+
+      // 카카오 로그아웃 URL 생성
+      const logoutUrl = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${encodeURIComponent(logoutRedirectUri)}`;
+
+      // 브라우저 리디렉션을 통해 카카오 로그아웃 요청
+      window.location.href = logoutUrl;
+
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   useEffect(() => {
     if (selectedProfile) {
-      sessionStorage.setItem('selectedProfile', JSON.stringify(selectedProfile));
+      sessionStorage.setItem('selectedProfile', JSON.stringify(selectedProfile)); // sessionStorage 사용
       console.log('Profile saved to sessionStorage:', selectedProfile);
     }
   }, [selectedProfile]);
-
-  const handleHomeClick = () => {
-    setClickCount(prev => prev + 1);
-
-    if (timer) {
-      clearTimeout(timer);
-    }
-
-    setTimer(setTimeout(() => {
-      setClickCount(0); // 일정 시간 후 클릭 카운트 초기화
-    }, 1000)); // 1초 내에 클릭을 3번 이상 하지 않으면 카운트를 초기화
-
-    if (clickCount + 1 === 3) {
-      navigate('/easterEgg'); // 3번 클릭 시 이동할 경로
-      setClickCount(0); // 클릭 카운트 초기화
-    } else {
-      navigate('/home'); // 기본적으로는 홈으로 이동
-    }
-  };
 
   return (
     <>
       <section className={`${styles.Header} ${className}`}>
         <header className={styles.header}>
           <div className={styles.headerBackground} />
-          <div onClick={handleHomeClick}>
+          <Link to="/home">
             <img
               className={styles.logoText2}
               loading="lazy"
               alt=""
               src="/logo-text-2@2x.png"
             />
-          </div>
+          </Link>
           <div className={styles.navigation}>
             <div className={styles.homeNav}>
               <div className={`${styles.homeButton} ${styles.iconButton}`}>
-                <div onClick={handleHomeClick} className={styles.a}>
+                <Link to="/home" className={styles.a}>
                   <img
                     className={styles.homeButtonIcon}
                     loading="lazy"
                     alt=""
                     src="/homeButton.png"
                   />
-                </div>
+                </Link>
               </div>
               <div
                 className={`${styles.searchNav} ${styles.iconButton}`}
@@ -151,7 +164,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
                     className={styles.profileBackgroundIcon}
                     loading="lazy"
                     alt="Profile"
-                    src={selectedProfile?.profileImg ? (selectedProfile.profileImg) : '/profile.png'}
+                    src={selectedProfile?.profileImg || '/profile.png'}
                   />
                   <img
                     className={styles.antDesigncaretDownFilledIcon}
