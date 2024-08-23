@@ -156,4 +156,10 @@ public class UserService {
         }
         return false;  // 사용자를 찾을 수 없음
     }
+
+	public String checkUserStatus(String email) {
+		USERS user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        return user.getStatus();
+	}
 }

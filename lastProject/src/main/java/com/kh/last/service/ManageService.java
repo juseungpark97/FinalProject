@@ -133,6 +133,24 @@ public class ManageService {
 		return list;
 	}
 
+	public void setActivateMovie(Long id, String status) {
+		Optional<Movie> movieOptional = movieRepository.findById(id);
+
+		if (movieOptional.isPresent()) {
+			Movie movie = movieOptional.get();
+
+			if ("A".equals(movie.getStatus())) {
+				movie.setStatus("D");
+			} else if ("D".equals(movie.getStatus())) {
+				movie.setStatus("A");
+			}
+
+			movieRepository.save(movie);
+		} else {
+			throw new RuntimeException("Movie not found with id: " + id);
+		}
+	}
+
 	public List<USERS> getUser() {
 		List<USERS> list = userRepository.findByRoleNotAndStatusNot("admin", "D");
 		return list;
@@ -186,45 +204,45 @@ public class ManageService {
 	}
 
 	public Map<String, Integer> getGenreViewCounts() {
-	    List<MovieViewDTO> movies = movieRepository.findAllMoviesAndView(); // 모든 영화를 조회
-	    Map<String, Integer> genreViewCounts = new HashMap<>();
-	    
-	    log.info("movies : {}", movies);
-	    
-	    // 장르별 큰 분류 매핑
-	    Map<String, List<String>> genreToCategories = GenreMapping.getGenreToCategories(); // 장르-큰 분류 매핑 가져오기
-	    
-	    log.info("genreToCategories : {}", genreToCategories);
+		List<MovieViewDTO> movies = movieRepository.findAllMoviesAndView(); // 모든 영화를 조회
+		Map<String, Integer> genreViewCounts = new HashMap<>();
 
-	    for (MovieViewDTO movie : movies) {
-	        String tags = movie.getTags();
-	        if (tags != null) {
-	            int viewCount = movie.getViewCount() != null ? movie.getViewCount().intValue() : 0;
-	            log.info("tags : {}", tags);
+		log.info("movies : {}", movies);
 
-	            // 대괄호와 따옴표를 제거하고 쉼표로 분할하여 List<String>으로 변환
-	            tags = tags.replaceAll("[\\[\\]\"]", ""); // 대괄호와 따옴표 제거
-	            List<String> tagList = Arrays.asList(tags.split("\\s*,\\s*")); // 쉼표로 분할하고 앞뒤 공백 제거
+		// 장르별 큰 분류 매핑
+		Map<String, List<String>> genreToCategories = GenreMapping.getGenreToCategories(); // 장르-큰 분류 매핑 가져오기
 
-	            for (String tag : tagList) {
-	                tag = tag.trim(); // 각 태그의 앞뒤 공백 제거
-	                log.info("장르 : {}", tag);
+		log.info("genreToCategories : {}", genreToCategories);
 
-	                // 각 태그가 속하는 큰 분류를 찾기
-	                for (Map.Entry<String, List<String>> entry : genreToCategories.entrySet()) {
-	                    if (entry.getValue().contains(tag)) {
-	    	                log.info("장르 일치 : {}", tag);
-	                        genreViewCounts.merge(entry.getKey(), viewCount, Integer::sum);
-	                    }else {
-	                    	genreViewCounts.merge(entry.getKey(), 0, Integer::sum);
-	                    }
-	                }
-	            }
-	        }
-	    }
-	    
-	    log.info("genreViewCounts : {}", genreViewCounts);
+		for (MovieViewDTO movie : movies) {
+			String tags = movie.getTags();
+			if (tags != null) {
+				int viewCount = movie.getViewCount() != null ? movie.getViewCount().intValue() : 0;
+				log.info("tags : {}", tags);
 
-	    return genreViewCounts;
+				// 대괄호와 따옴표를 제거하고 쉼표로 분할하여 List<String>으로 변환
+				tags = tags.replaceAll("[\\[\\]\"]", ""); // 대괄호와 따옴표 제거
+				List<String> tagList = Arrays.asList(tags.split("\\s*,\\s*")); // 쉼표로 분할하고 앞뒤 공백 제거
+
+				for (String tag : tagList) {
+					tag = tag.trim(); // 각 태그의 앞뒤 공백 제거
+					log.info("장르 : {}", tag);
+
+					// 각 태그가 속하는 큰 분류를 찾기
+					for (Map.Entry<String, List<String>> entry : genreToCategories.entrySet()) {
+						if (entry.getValue().contains(tag)) {
+							log.info("장르 일치 : {}", tag);
+							genreViewCounts.merge(entry.getKey(), viewCount, Integer::sum);
+						} else {
+							genreViewCounts.merge(entry.getKey(), 0, Integer::sum);
+						}
+					}
+				}
+			}
+		}
+
+		log.info("genreViewCounts : {}", genreViewCounts);
+
+		return genreViewCounts;
 	}
 }

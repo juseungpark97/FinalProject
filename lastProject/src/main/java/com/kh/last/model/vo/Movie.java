@@ -1,5 +1,6 @@
 package com.kh.last.model.vo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -38,6 +39,7 @@ public class Movie {
     private String thumbnailUrl;
     private float rating;
     private String genre;
+    private String status;
 
     @Lob
     private String tags;
@@ -72,6 +74,9 @@ public class Movie {
         }
         if (castList != null) {
             this.cast = stringifyJsonArray(castList);
+        }
+        if (this.status == null) {
+            this.status = "A"; // 엔티티 생성 시 기본값 설정
         }
     }
 

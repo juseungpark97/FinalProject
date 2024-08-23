@@ -11,6 +11,19 @@ export interface recentMovieProps {
   viewCount: number;
 };
 
+const formatArrayString = (arrayString: string): string => {
+  try {
+    const array = JSON.parse(arrayString);
+    if (Array.isArray(array)) {
+      return array.join(', '); // 원하는 구분자나 포맷으로 수정 가능
+    }
+    return '';
+  } catch (error) {
+    console.error('Error parsing array string', error);
+    return '';
+  }
+};
+
 const RecentMostView = () => {
   const [data, setData] = useState<recentMovieProps[]>([]);
 
@@ -38,9 +51,9 @@ const RecentMostView = () => {
           {data.map((item, index) => (
             <tr key={index}>
               <td>{item.title}</td>
-              <td>{item.tags}</td>
+              <td>{formatArrayString(item.tags)}</td>
               <td>{item.director}</td>
-              <td>{item.cast}</td>
+              <td>{formatArrayString(item.cast)}</td>
               <td>{item.viewCount}회</td>
             </tr>
           ))}
