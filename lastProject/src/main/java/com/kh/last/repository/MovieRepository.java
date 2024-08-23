@@ -30,9 +30,10 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 			"m.rating, " + // Double
 			"m.tags, " + // String
 			"m.cast, " + // String
+			"m.status, " + // String			
 			"(SELECT COUNT(w) FROM WatchLog w WHERE w.movie.id = m.id) "
 			+ // Long
-			") " + "FROM Movie m")
+			") " + "FROM Movie m ORDER BY ID DESC")
 	List<MovieViewDTO> findAllMoviesAndView();
 
 	@Query("SELECT new com.kh.last.model.dto.MovieViewDTO(" + 
@@ -43,10 +44,11 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 	        "m.rating, " + 
 	        "m.tags, " + 
 	        "m.cast, " + 
+	        "m.status, " + 
 	        "(SELECT COUNT(w) FROM WatchLog w WHERE w.movie.id = m.id AND w.viewedAt BETWEEN :startDate AND :endDate) viewCount " + 
 	        ") " + 
 	        "FROM Movie m " +
-	        "WHERE (SELECT COUNT(w) FROM WatchLog w WHERE w.movie.id = m.id AND w.viewedAt BETWEEN :startDate AND :endDate) >= 2 " +
+	        "WHERE (SELECT COUNT(w) FROM WatchLog w WHERE w.movie.id = m.id AND w.viewedAt BETWEEN :startDate AND :endDate) >= 1 " +
 	        "ORDER BY viewCount DESC")
 	Page<MovieViewDTO> findMoviesWithViewCountAbove100(@Param("startDate") LocalDateTime startDate,
 	                                                   @Param("endDate") LocalDateTime endDate,

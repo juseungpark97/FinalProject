@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/dashboard")
 @CrossOrigin(origins = "http://localhost:3000")  // 클라이언트의 출처 설정
 @RequiredArgsConstructor
+@Slf4j
 public class ManageController {
 	
 	private final ManageService service;
@@ -123,13 +126,34 @@ public class ManageController {
 		List<MovieViewDTO> list = service.getMovies();
         return list;
     }
-    
+	
+	@PutMapping("/setActivateMovie")
+	public void setActivateMovie(@RequestBody Map<String, Object> request) {
+	    // movieId를 Integer에서 Long으로 안전하게 변환
+	    Object movieIdObj = request.get("movieId");
+	    Long id = null;
+
+	    if (movieIdObj instanceof Integer) {
+	        id = ((Integer) movieIdObj).longValue();
+	    } else if (movieIdObj instanceof Long) {
+	        id = (Long) movieIdObj;
+	    } else {
+	        throw new IllegalArgumentException("Invalid movieId type: " + movieIdObj.getClass().getName());
+	    }
+
+	    // 상태를 문자열로 받아오기
+	    String status = (String) request.get("status");
+	    
+	    // 서비스 호출
+	    service.setActivateMovie(id, status);
+	}
+
 	@GetMapping("/getUser")
-	public Map<String, List> getUser(){
+	public Map<String, Object> getUser(){
 		List<USERS> list = service.getUser();
 		List<Profile> list2 = service.getProfile();
 		
-		Map<String, List> map = new HashMap<String, List>();
+		Map<String, Object> map = new HashMap<String, Object>();
 		
 		map.put("userList", list);
 		map.put("profileList", list2);
@@ -159,6 +183,35 @@ public class ManageController {
 	public List<MovieViewDTO> recentMostView(){
 		return service.recentMostView();
 	}
+	
+	@GetMapping("/getGenreView")
+    public List<Map<String, Object>> getGenreView() {
+        Map<String, Object> response = new HashMap<>();
+        Map<String, Integer> genreViewCounts = service.getGenreViewCounts();
+
+        log.info("장르 뽑아온거  : {}", genreViewCounts);
+        // 데이터와 색상 추가
+        List<Map<String, Object>> dataWithColors = genreViewCounts.entrySet().stream()
+            .map(entry -> {
+                Map<String, Object> item = new HashMap<>();
+                item.put("name", entry.getKey());
+                item.put("조회수", entry.getValue());
+                item.put("fill", generateRandomColor());
+                return item;
+            })
+            .collect(Collectors.toList());
+        
+        //response.put("data", dataWithColors);
+        log.info("반환값 {} ", dataWithColors);
+        return dataWithColors;
+    }
+
+    private String generateRandomColor() {
+        int r = (int)(Math.random() * 256);
+        int g = (int)(Math.random() * 256);
+        int b = (int)(Math.random() * 256);
+        return String.format("rgb(%d, %d, %d)", r, g, b);
+    }
 }
 
 

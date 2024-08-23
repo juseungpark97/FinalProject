@@ -40,18 +40,27 @@ const Landing: FunctionComponent = () => {
   const handleGetStarted = async () => {
     try {
       const response = await axios.post('http://localhost:8088/api/users/check-email', { email });
-      if (response.data.exists) {
-        localStorage.setItem('email', email);
-        navigate('/passwordlogin');
-      } else {
-        alert('이메일이 존재하지 않습니다. 회원가입 페이지로 이동합니다.');
-        navigate('/signin');
+  
+      if (response.status === 200) {
+        if (response.data.exists) {
+          localStorage.setItem('email', email);
+          navigate('/passwordlogin');
+        } else {
+          alert('이메일이 존재하지 않습니다. 회원가입 페이지로 이동합니다.');
+          navigate('/signin');
+        }
       }
-    } catch (error) {
-      console.error('Error checking email:', error);
-      setError('이메일 확인 중 오류가 발생했습니다.');
+    } catch (error: any) {
+      if (error.response && error.response.status === 403) {
+        // 경고 메시지를 alert 창으로 띄운 후, 확인을 누르면 로그인 페이지로 이동
+        alert(error.response.data.message);
+        navigate('/');
+      } else {
+        console.error('Error checking email:', error);
+        setError('이메일 확인 중 오류가 발생했습니다.');
+      }
     }
-  };
+  };  
 
   const handleKakaoLogin = () => {
     // 백엔드의 카카오 OAuth2 인증 요청 URI로 리디렉션

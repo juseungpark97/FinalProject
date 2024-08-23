@@ -25,17 +25,24 @@ const LoginForm: React.FC = () => {
                 email,
                 password
             });
-            localStorage.setItem('authToken', response.data.token);
-            console.log('Login successful:', response.data);
 
-            // 구독 여부에 따라 페이지 리디렉션
-            if (response.data.subscribed) {
-                navigate('/profiles');  // 구독 상태가 ACTIVE이면 프로필 페이지로 이동
-            } else {
-                navigate('/subscribe');  // 구독 상태가 ACTIVE가 아니면 구독 페이지로 이동
+            if (response.status === 200) {
+                localStorage.setItem('authToken', response.data.token);
+                console.log('Login successful:', response.data);
+
+                // 구독 여부에 따라 페이지 리디렉션
+                if (response.data.subscribed) {
+                    navigate('/profiles');  // 구독 상태가 ACTIVE이면 프로필 페이지로 이동
+                } else {
+                    navigate('/subscribe');  // 구독 상태가 ACTIVE가 아니면 구독 페이지로 이동
+                }
             }
-        } catch (error) {
-            setError('Login failed. Please check your email and password.');
+        } catch (error: any) {
+            if (error.response && error.response.status === 403) {
+                alert(error.response.data.message);
+            } else {
+                setError('Login failed. Please check your email and password.');
+            }
         }
     };
 

@@ -110,12 +110,17 @@ public class RecommendationService {
     }
 
     private Map<String, Integer> parseJsonToMap(String json) {
+        if (json == null || json.isEmpty()) {
+            System.err.println("Received null or empty JSON for profile vector");
+            return new HashMap<>();  // 기본 빈 맵 반환
+        }
+        
         try {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(json, new TypeReference<Map<String, Integer>>() {});
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            return new HashMap<>();  // Return empty map on error
+            return new HashMap<>();  // 오류 발생 시 빈 맵 반환
         }
     }
 
