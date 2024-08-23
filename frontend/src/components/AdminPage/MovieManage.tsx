@@ -70,13 +70,21 @@ export default function MovieManage() {
     applyFilters(); // 검색 클릭 시 필터 적용
   };
 
-  const setActivateMovie = async (movieId: number, status: string) => {
-    try {
-      await axios.put('http://localhost:8088/dashboard/setActivateMovie', { movieId, status });
-      // 상태 변경 후 영화 목록을 다시 가져옵니다.
-      await fetchMovies();
-    } catch (error) {
-      console.error("Failed to update Movie status", error);
+  const setActivateMovie = async (movie: Movie) => {
+    const action = movie.status === "A" ? "비활성화" : "활성화";
+    const confirmMessage = `${movie.title}을(를) ${action} 하시겠습니까?`;
+
+    if (window.confirm(confirmMessage)) {
+      try {
+        await axios.put('http://localhost:8088/dashboard/setActivateMovie', { movieId: movie.movieId, status: movie.status });
+        // 상태 변경 후 영화 목록을 다시 가져옵니다.
+        await fetchMovies();
+      } catch (error) {
+        console.error("Failed to update Movie status", error);
+      }
+    } else {
+      // 사용자가 취소를 클릭한 경우
+      console.log('사용자가 작업을 취소했습니다.');
     }
   };
 
@@ -145,7 +153,7 @@ export default function MovieManage() {
                 <td>{movie.viewCount}</td>
                 <td>{movie.rating}&nbsp;/&nbsp;5</td>
                 <td>
-                  <button onClick={() => setActivateMovie(movie.movieId, movie.status)}>
+                  <button onClick={() => setActivateMovie(movie)}>
                     {movie.status === 'A' ? '비활성화' : '활성화'}
                   </button>
                 </td>

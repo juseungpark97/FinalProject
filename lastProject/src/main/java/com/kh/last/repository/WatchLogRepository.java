@@ -25,4 +25,6 @@ public interface WatchLogRepository extends JpaRepository<WatchLog, WatchLogId> 
     
     @Query("SELECT COUNT(w) FROM WatchLog w WHERE w.viewedAt BETWEEN :startOfDay AND :endOfDay")
     Long countDailyViews(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
+    
+    void deleteByProfile(Profile profile);
 }
