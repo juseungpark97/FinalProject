@@ -56,6 +56,8 @@ public class ProfileController {
     @Autowired ProfileRepository profileRepository;
 
     private final SecretKey key;
+    
+    private String url = "C:/finalProject/FinalProject/frontend/public/profile-images";
 
     @Autowired
     public ProfileController(UserService userService) {
