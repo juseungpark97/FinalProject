@@ -101,6 +101,7 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
+
             	String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
                 String profileImgFilename = profileImg.getOriginalFilename();
                 Path imagePath = Paths.get(directory, profileImgFilename);
@@ -172,6 +173,7 @@ public class ProfileController {
     	 String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
         try {
             List<String> imageNames = Files
+
             		  .list(Paths.get(directory))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
