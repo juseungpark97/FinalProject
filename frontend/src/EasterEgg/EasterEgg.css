@@ -11,8 +11,10 @@
 
 .tetris {
     display: grid;
-    grid-template-columns: repeat(10, 30px); /* 10 열, 각 30px */
-    grid-template-rows: repeat(20, 30px);   /* 20 행, 각 30px */
+    grid-template-columns: repeat(10, 30px);
+    /* 10 열, 각 30px */
+    grid-template-rows: repeat(20, 30px);
+    /* 20 행, 각 30px */
     gap: 1px;
 }
 
@@ -25,8 +27,10 @@
 
 .preview {
     display: grid;
-    grid-template-columns: repeat(4, 30px); /* 미리보기 블록 4열 */
-    grid-template-rows: repeat(4, 30px);    /* 미리보기 블록 4행 */
+    grid-template-columns: repeat(4, 30px);
+    /* 미리보기 블록 4열 */
+    grid-template-rows: repeat(4, 30px);
+    /* 미리보기 블록 4행 */
     gap: 1px;
 }
 

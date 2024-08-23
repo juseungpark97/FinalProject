@@ -75,8 +75,6 @@ const TETROMINOS: { [key: string]: Tetromino } = {
     },
 };
 
-
-
 // 보드 크기 설정
 const STAGE_WIDTH = 10;
 const STAGE_HEIGHT = 20;
@@ -139,6 +137,7 @@ const removeCompletedRows = (stage: any, setScore: React.Dispatch<React.SetState
 
     return newStage;
 };
+
 // 현재 블록을 스테이지에 그려주는 함수
 const drawPlayer = (stage: any, player: any) => {
     const newStage = stage.map((row: any) => row.map((cell: any) => (cell[1] === 'clear' ? [0, 'clear'] : cell)));
@@ -155,7 +154,6 @@ const drawPlayer = (stage: any, player: any) => {
 
     return newStage;
 };
-
 
 const getColor = (key: string | number): string => {
     const tetromino = TETROMINOS[key as keyof typeof TETROMINOS];
@@ -183,10 +181,22 @@ const EasterEgg: React.FC = () => {
         collided: false,
     });
     const [nextTetromino, setNextTetromino] = useState<TetrominoShape>(getNextTetromino());
+    const [isPaused, setIsPaused] = useState(false);
 
     const saveScore = async (score: number) => {
+        const selectedProfile = sessionStorage.getItem('selectedProfile');
+
+        if (!selectedProfile) {
+            console.error('Selected profile data가 존재하지 않습니다.');
+            return;
+        }
+
         try {
-            await fetch(`/api/profiles/1/tetris/score`, {
+            // JSON 파싱하여 profileNo 추출
+            const parsedProfile = JSON.parse(selectedProfile);
+            const profileId = parsedProfile.profileNo;
+
+            await fetch(`http://localhost:8088/api/profiles/${profileId}/tetris/score`, { // profileId를 사용해 동적으로 URL 설정
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(score),
@@ -282,6 +292,10 @@ const EasterEgg: React.FC = () => {
         resetPlayer();
     };
 
+    const togglePause = () => {
+        setIsPaused((prev) => !prev);
+    };
+
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (!gameOver) {
@@ -302,14 +316,14 @@ const EasterEgg: React.FC = () => {
     }, [movePlayer, rotatePlayer, dropPlayer, gameOver]);
 
     useEffect(() => {
-        if (!gameOver) {
+        if (!gameOver && !isPaused) {
             const drop = setInterval(() => {
                 dropPlayer();
             }, 500); // 블록이 천천히 내려오도록 조정
 
             return () => clearInterval(drop);
         }
-    }, [player.pos.y, gameOver, stage]);
+    }, [player.pos.y, gameOver, stage, isPaused]);
 
     useEffect(() => {
         setStage((prevStage) => drawPlayer(prevStage, player));
@@ -352,6 +366,7 @@ const EasterEgg: React.FC = () => {
             </div>
             <div className="controls">
                 <button onClick={startGame}>Start Game</button>
+                <button onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</button>
             </div>
         </div>
     );

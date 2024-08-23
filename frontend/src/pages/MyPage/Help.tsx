@@ -8,7 +8,7 @@ import Faq from '../../components/Mypage/Faq';
 import Question from '../../components/Mypage/Question';
 
 import axios from 'axios';
-import { Profile } from '../HomePage/services/interfaces';
+import { Profile } from '../../types/Profile';
 
 
 const HelpPage: React.FC = () => {
@@ -24,13 +24,9 @@ const HelpPage: React.FC = () => {
           <HelpButtonContainer onMenuClick={setSelectedMenu} />
         </div>
         <div className={styles.content}>
-
           {selectedMenu === 'faq' && <Faq />}
           {selectedMenu === 'question' && <Question profileNo={profileNo} />}
-
-
         </div>
-
       </div>
     </div >
   );

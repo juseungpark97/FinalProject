@@ -38,6 +38,7 @@ const Faq: React.FC = () => {
                     insertDate: item.insertDate.toString() // 날짜를 문자열로 변환
                 }));
                 setFaqList(updatedData);
+                console.log(faqList);
             } catch (error) {
                 console.error("Failed to get FAQ", error);
             }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +33,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 public class ProfileService {
+	
+    
+    @Value("${profile.images.path}")
+    private String profileImagesPath;
 
     @Autowired
     private ProfileRepository profileRepository;
@@ -47,6 +52,8 @@ public class ProfileService {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    
 
     public List<Profile> getProfilesByUserNo(Long userNo) {
         USERS user = userRepository.findById(userNo)
@@ -90,7 +97,7 @@ public class ProfileService {
 
 
     public String selectProfileImage(Long profileNo, String selectedImageName) {
-        String directory = "C:\\fffffffinal\\FinalProject\\frontend\\public\\profile-images";
+    	String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
         Path imagePath = Paths.get(directory, selectedImageName);
 
         if (!Files.exists(imagePath)) {
@@ -123,7 +130,7 @@ public class ProfileService {
         Profile profile = profileRepository.findById(profileNo)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid profile ID"));
 
-        String directory = "C:\\fffffffinal\\FinalProject\\frontend\\public\\profile-images";
+        String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
         Path imagePath = Paths.get(directory, file.getOriginalFilename());
         Files.write(imagePath, file.getBytes());
 

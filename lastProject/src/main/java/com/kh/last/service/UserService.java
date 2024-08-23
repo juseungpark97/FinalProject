@@ -163,10 +163,22 @@ public class UserService {
 			USERS user = userOpt.get();
 			user.setPassword(passwordEncoder.encode(newPassword)); // 새 비밀번호로 업데이트
 			userRepository.save(user);
-			return true;
+
+			return true; // 비밀번호 변경 성공
 		}
-		return false;
+		return false; // 사용자를 찾을 수 없음
 	}
+
+	public String checkUserStatus(String email) {
+		Optional<USERS> userOpt = userRepository.findByEmail(email);
+		if(userOpt.isPresent()) {
+			USERS user = userOpt.get();
+			return user.getStatus();
+		}else {
+			return null;
+		}
+	}
+
 	public boolean myPagePwdChange(PasswordChangeRequest request) {
     
         Optional<USERS> userOptional = userRepository.findByEmail(request.getEmail());
