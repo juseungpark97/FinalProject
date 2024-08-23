@@ -22,16 +22,6 @@ const ProfilePage: React.FC = () => {
     }, null as Profile | null);
 
     useEffect(() => {
-        console.log('모든 프로필의 점수:', profiles.map(profile => profile.tetrisHighScore));
-        if (highestScoreProfile) {
-            console.log('가장 높은 점수:', highestScoreProfile.tetrisHighScore);
-            console.log('하이스코어 프로필:', highestScoreProfile);
-        } else {
-            console.log('하이스코어 프로필이 없습니다.');
-        }
-    }, [profiles, highestScoreProfile]);
-
-    useEffect(() => {
         // URL에서 토큰 추출
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
