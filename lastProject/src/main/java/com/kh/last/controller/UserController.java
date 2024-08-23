@@ -179,34 +179,35 @@ public class UserController {
 		}
 	}
 
-	@PutMapping("/cancel-subscription")
-	public ResponseEntity<String> cancelSubscription(@RequestHeader("Authorization") String token) {
-		String email = userService.getEmailFromToken(token);
-		if (email == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-		}
+	  @PutMapping("/cancel-subscription")
+	    public ResponseEntity<String> cancelSubscription(@RequestHeader("Authorization") String token) {
+	        String email = userService.getEmailFromToken(token);
+	        if (email == null) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+	        }
 
-		try {
-			subscriptionService.cancelSubscription(email);
-			return ResponseEntity.ok("Subscription cancelled successfully");
-		} catch (IllegalStateException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
-	}
+	        try {
+	            subscriptionService.cancelSubscription(email);
+	            return ResponseEntity.ok("Subscription cancelled successfully");
+	        } catch (IllegalStateException e) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	        }
+	    }
+	  
+	  @PutMapping("/reactivate-subscription")
+	    public ResponseEntity<String> reactivateSubscription(@RequestHeader("Authorization") String token) {
+	        String email = userService.getEmailFromToken(token);
+	        if (email == null) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+	        }
 
-	@PutMapping("/reactivate-subscription")
-	public ResponseEntity<String> reactivateSubscription(@RequestHeader("Authorization") String token) {
-		String email = userService.getEmailFromToken(token);
-		if (email == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-		}
+	        try {
+	            subscriptionService.reactivateSubscription(email);
+	            return ResponseEntity.ok("Subscription reactivated successfully");
+	        } catch (IllegalStateException e) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	        }
+	    }
 
-		try {
-			subscriptionService.reactivateSubscription(email);
-			return ResponseEntity.ok("Subscription reactivated successfully");
-		} catch (IllegalStateException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
-	}
 
 }
