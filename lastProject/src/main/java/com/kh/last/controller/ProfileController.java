@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.USERS;
 import com.kh.last.service.ProfileService;
@@ -53,13 +55,12 @@ public class ProfileController {
         this.userService = userService;
         this.key = userService.getKey(); // UserService로부터 SecretKey 주입
     }
-
     @GetMapping("/user/{userNo}")
     public ResponseEntity<List<Profile>> getProfilesByUserNo(@PathVariable Long userNo) {
         List<Profile> profiles = profileService.getProfilesByUserNo(userNo);
         return ResponseEntity.ok(profiles);
     }
-
+    
     @GetMapping("/{profileNo}")
     public ResponseEntity<Profile> getProfileById(@PathVariable Long profileNo) {
         Profile profile = profileService.getProfileById(profileNo);
@@ -68,6 +69,8 @@ public class ProfileController {
         }
         return ResponseEntity.ok(profile);
     }
+
+
     @PostMapping("/create")
     public ResponseEntity<?> createProfile(@RequestParam String profileName, @RequestParam MultipartFile profileImg,
                                            @RequestHeader("Authorization") String token) {
@@ -77,15 +80,13 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+                String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
                 String profileImgFilename = profileImg.getOriginalFilename();
-                if (profileImgFilename != null && !profileImgFilename.isEmpty()) {
-                    Path path = Paths.get("C:/finalProject/FinalProject/frontend/public/profile-images" + profileImgFilename);
-                    Files.copy(profileImg.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                }
-                
-                // 프로필 생성
-                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, profileImgFilename)
+                Path imagePath = Paths.get(directory, profileImgFilename);
+                Files.write(imagePath, profileImg.getBytes());
+                String imagePathToStore = "/profile-images/" + profileImgFilename;
+                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, imagePathToStore);
+
                 return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -94,16 +95,38 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating profile");
         }
     }
+    
+    @DeleteMapping("/{profileNo}")
+    public ResponseEntity<?> deleteProfile(@PathVariable Long profileNo) {
+        try {
+            profileService.deleteProfile(profileNo);
+            return ResponseEntity.ok().body(Map.of("success", true, "message", "Profile deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Error deleting profile"));
+        }
+    }
+
+
 
     @PostMapping("/update-vector")
     public ResponseEntity<?> updateProfileVector(@RequestBody Map<String, Object> request) {
         try {
             Long profileId = Long.parseLong(request.get("profileId").toString());
-            Long movieId = Long.parseLong(request.get("movieId").toString()); // movieId 추가
-            List<String> movieTags = (List<String>) request.get("movieTags");
+            Long movieId = Long.parseLong(request.get("movieId").toString());
+            String movieTagsJson = request.get("movieTags").toString();
 
-            // ProfileService의 메서드를 호출할 때 movieId도 함께 전달
-            profileService.updateProfileVector(profileId, movieId, movieTags);
+            // JSON 문자열을 List<String>으로 변환
+            ObjectMapper mapper = new ObjectMapper();
+            List<String> movieTags = mapper.readValue(movieTagsJson, new TypeReference<List<String>>() {});
+
+            // movieTags를 Map<String, Integer>로 변환
+            Map<String, Integer> movieTagsMap = movieTags.stream()
+                    .collect(Collectors.toMap(tag -> tag, tag -> 1, (a, b) -> a));
+
+            // ProfileService의 메서드를 호출할 때 movieTagsMap을 전달
+            profileService.updateProfileVector(profileId, movieId, movieTagsMap);
 
             return ResponseEntity.ok().body(Map.of("success", true));
         } catch (Exception e) {
@@ -122,12 +145,12 @@ public class ProfileController {
         }
     }
 
+
     @GetMapping("/available-images")
     public ResponseEntity<List<String>> getAvailableImages() {
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/finalProject/FinalProject/frontend/public/profile-images"))
-
+                    .list(Paths.get("C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images"))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {
@@ -136,29 +159,45 @@ public class ProfileController {
         }
     }
 
-    @PutMapping("/{profileNo}/update-image")
-    public ResponseEntity<?> updateProfileImage(@PathVariable Long profileNo, @RequestParam("imageName") String imageName) {
+
+    @PutMapping("/{profileNo}/update")
+    public ResponseEntity<?> updateProfile(
+        @PathVariable Long profileNo,
+        @RequestParam(value = "profileName", required = false) String profileName,
+        @RequestParam(value = "imageName", required = false) String imageName
+    ) {
         try {
             // 데이터베이스에서 프로필 정보 가져오기
             Profile profile = profileService.getProfileById(profileNo);
             if (profile == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
             }
-            
-            // 프로필 이미지 경로 업데이트
-            String imagePath = "/profile-images/" + imageName;
-            profile.setProfileImg(imagePath);
+
+            // 프로필 이름이 제공된 경우 업데이트
+            if (profileName != null && !profileName.isEmpty()) {
+                profile.setProfileName(profileName);
+            }
+
+            // 이미지 파일이 제공된 경우 업데이트
+            if (imageName != null && !imageName.isEmpty()) {
+                String imagePath = "/profile-images/" + imageName;
+                profile.setProfileImg(imagePath);
+            }
 
             // DB 업데이트
             profileService.updateProfile(profile);
 
-            // 프로필 이미지 업데이트
-            if (profileImg != null && !profileImg.isEmpty()) {
-                // 이미지 저장 로직 (이미지 경로 설정 및 저장)
-                String directory = "C:/finalProject/FinalProject/frontend/public/profile-images";
-                Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
-                Files.write(imagePath, profileImg.getBytes());
-                profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());
+            return ResponseEntity.ok(Map.of("success", true, "profileImg", profile.getProfileImg(), "profileName", profile.getProfileName()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+    @PutMapping("/{profileNo}/lock")
+    public ResponseEntity<?> lockProfile(@PathVariable Long profileNo, @RequestBody Map<String, String> request) {
+        try {
+            String password = request.get("password");
+            if (password == null || password.length() != 4) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Password must be 4 digits"));
             }
 
             Profile profile = profileService.getProfileById(profileNo);
@@ -192,6 +231,8 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "message", "Invalid password"));
         }
     }
+
+    
     @PutMapping("/{profileNo}/unlock")
     public ResponseEntity<?> unlockProfile(@PathVariable Long profileNo) {
         try {
@@ -211,5 +252,10 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Error unlocking profile"));
         }
     }
- 
+
+
+
+    
+    
+
 }
