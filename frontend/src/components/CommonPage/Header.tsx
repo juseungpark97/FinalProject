@@ -13,8 +13,9 @@ export type HeaderProps = {
 
 const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selectedProfile, setSelectedProfile }) => {
   const [user, setUser] = useState<any>(null);
+  const [clickCount, setClickCount] = useState(0);
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const selectedProfileData = sessionStorage.getItem('selectedProfile');
@@ -65,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // sessionStorage 사용
+    localStorage.removeItem('authToken');
 
     setSelectedProfile(null);
     sessionStorage.removeItem('selectedProfile');
@@ -79,30 +80,49 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
     }
   }, [selectedProfile]);
 
+  const handleHomeClick = () => {
+    setClickCount(prev => prev + 1);
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    setTimer(setTimeout(() => {
+      setClickCount(0); // 일정 시간 후 클릭 카운트 초기화
+    }, 1000)); // 1초 내에 클릭을 3번 이상 하지 않으면 카운트를 초기화
+
+    if (clickCount + 1 === 3) {
+      navigate('/easterEgg'); // 3번 클릭 시 이동할 경로
+      setClickCount(0); // 클릭 카운트 초기화
+    } else {
+      navigate('/home'); // 기본적으로는 홈으로 이동
+    }
+  };
+
   return (
     <>
       <section className={`${styles.Header} ${className}`}>
         <header className={styles.header}>
           <div className={styles.headerBackground} />
-          <Link to="/home">
+          <div onClick={handleHomeClick}>
             <img
               className={styles.logoText2}
               loading="lazy"
               alt=""
               src="/logo-text-2@2x.png"
             />
-          </Link>
+          </div>
           <div className={styles.navigation}>
             <div className={styles.homeNav}>
               <div className={`${styles.homeButton} ${styles.iconButton}`}>
-                <Link to="/home" className={styles.a}>
+                <div onClick={handleHomeClick} className={styles.a}>
                   <img
                     className={styles.homeButtonIcon}
                     loading="lazy"
                     alt=""
                     src="/homeButton.png"
                   />
-                </Link>
+                </div>
               </div>
               <div
                 className={`${styles.searchNav} ${styles.iconButton}`}
