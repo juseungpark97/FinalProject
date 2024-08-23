@@ -46,4 +46,22 @@ h1 {
 .profileName {
     font-size: 1.2em;
     color: #d6a060;
+    margin-bottom: 10px;
+    /* 삭제 버튼과의 간격 추가 */
+}
+
+/* 추가된 삭제 버튼 스타일 */
+.deleteButton {
+    padding: 5px 10px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s;
+}
+
+.deleteButton:hover {
+    background-color: darkred;
 }

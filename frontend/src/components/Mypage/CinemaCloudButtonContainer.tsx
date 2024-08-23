@@ -4,15 +4,16 @@ import styles from './css/CinemaCloudButtonContainer.module.css';
 
 interface Props {
   onMenuClick: (menu: string) => void;
+  profileMain: string; // 'M' for Main, 'S' for Sub
 }
 
-const CinemaCloudButtonContainer: React.FC<Props> = ({ onMenuClick }) => {
+const CinemaCloudButtonContainer: React.FC<Props> = ({ onMenuClick, profileMain }) => {
   const location = useLocation();
   const [activeMenu, setActiveMenu] = useState('overview'); // 기본적으로 '개요'가 활성화
 
   // 경로와 메뉴의 매핑을 명시적으로 타입 지정
   const pathToMenuMap: Record<string, string> = {
-    '/home': 'overview',
+    '/overview': 'overview',
     '/profile': 'profile',
     '/membership': 'membership',
     '/security': 'security',
@@ -78,17 +79,19 @@ const CinemaCloudButtonContainer: React.FC<Props> = ({ onMenuClick }) => {
             </button>
           </div>
         </li>
-        <li>
-          <div className='accountDelete'>
-            <button
-              onClick={() => { onMenuClick('accountDelete'); setActiveMenu('accountDelete'); }}
-              className={`${styles.menuItem} ${activeMenu === 'accountDelete' ? styles.active : ''}`}
-            >
-              <img src="logout2.png" alt="회원탈퇴" className={styles.icon} />
-              회원탈퇴
-            </button>
-          </div>
-        </li>
+        {profileMain === 'M' && (
+          <li>
+            <div className='accountDelete'>
+              <button
+                onClick={() => { onMenuClick('accountDelete'); setActiveMenu('accountDelete'); }}
+                className={`${styles.menuItem} ${activeMenu === 'accountDelete' ? styles.active : ''}`}
+              >
+                <img src="logout2.png" alt="회원탈퇴" className={styles.icon} />
+                회원탈퇴
+              </button>
+            </div>
+          </li>
+        )}
       </ul>
     </div>
   );

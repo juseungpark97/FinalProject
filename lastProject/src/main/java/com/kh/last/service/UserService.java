@@ -55,10 +55,21 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public void deactivateUser(String email) {
+        USERS user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        user.setStatus("D");
+        userRepository.save(user);
+    }
+
     public String loginUser(String email, String password) throws BadCredentialsException {
         Optional<USERS> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
             USERS user = userOpt.get();
+            if ("D".equals(user.getStatus())) {
+                throw new BadCredentialsException("User account is deactivated.");
+            }
             if (passwordEncoder.matches(password, user.getPassword())) {
                 return generateToken(user);
             }
@@ -156,10 +167,10 @@ public class UserService {
         }
         return false;  // 사용자를 찾을 수 없음
     }
-
 	public String checkUserStatus(String email) {
 		USERS user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
         return user.getStatus();
 	}
+
 }
