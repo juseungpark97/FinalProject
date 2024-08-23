@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './EasterEgg.css';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 type TetrominoShape = (string | number)[][];
 
@@ -105,6 +106,8 @@ const checkCollision = (
     return false;
 };
 
+
+
 // 라인 제거 및 점수 계산
 const removeCompletedRows = (stage: any, setScore: React.Dispatch<React.SetStateAction<number>>) => {
     let clearedRows = 0;
@@ -172,6 +175,8 @@ const getNextTetromino = (): TetrominoShape => {
 };
 
 const EasterEgg: React.FC = () => {
+    const navigate = useNavigate();
+
     const [stage, setStage] = useState(createStage());
     const [gameOver, setGameOver] = useState(false);
     const [score, setScore] = useState(0);
@@ -192,11 +197,10 @@ const EasterEgg: React.FC = () => {
         }
 
         try {
-            // JSON 파싱하여 profileNo 추출
             const parsedProfile = JSON.parse(selectedProfile);
             const profileId = parsedProfile.profileNo;
 
-            await fetch(`http://localhost:8088/api/profiles/${profileId}/tetris/score`, { // profileId를 사용해 동적으로 URL 설정
+            await fetch(`http://localhost:8088/api/profiles/${profileId}/tetris/score`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(score),
@@ -205,6 +209,10 @@ const EasterEgg: React.FC = () => {
             console.error('Error saving score:', error);
         }
     };
+
+    const handleBack = useCallback(() => {
+        navigate(-1);
+    }, [navigate]);
 
     const updatePlayerPos = ({ x, y, collided }: { x: number; y: number; collided: boolean }) => {
         setPlayer((prev) => ({
@@ -235,7 +243,7 @@ const EasterEgg: React.FC = () => {
         } else {
             if (player.pos.y < 1) {
                 setGameOver(true);
-                saveScore(score); // 게임 오버 시 점수 저장
+                saveScore(score);
                 setStage(createStage());
                 return;
             }
@@ -319,7 +327,7 @@ const EasterEgg: React.FC = () => {
         if (!gameOver && !isPaused) {
             const drop = setInterval(() => {
                 dropPlayer();
-            }, 500); // 블록이 천천히 내려오도록 조정
+            }, 500);
 
             return () => clearInterval(drop);
         }
@@ -329,9 +337,12 @@ const EasterEgg: React.FC = () => {
         setStage((prevStage) => drawPlayer(prevStage, player));
     }, [player]);
 
+    
     return (
         <div className="tetris-wrapper">
-            <div className="score">Score: {score}</div>
+            <button className="back-button" onClick={handleBack}>
+                &#9664;
+            </button>
             <div className="tetris-container">
                 <div className="tetris">
                     {gameOver ? (
@@ -349,6 +360,11 @@ const EasterEgg: React.FC = () => {
                             ))
                         )
                     )}
+                    <div className="score">Score: {score}</div>
+                    <div className="controls">
+                        <button onClick={startGame}>Start Game</button>
+                        <button onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</button>
+                    </div>
                 </div>
                 <div className="preview">
                     {nextTetromino.map((row, rowIndex) =>
@@ -363,10 +379,6 @@ const EasterEgg: React.FC = () => {
                         ))
                     )}
                 </div>
-            </div>
-            <div className="controls">
-                <button onClick={startGame}>Start Game</button>
-                <button onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</button>
             </div>
         </div>
     );
