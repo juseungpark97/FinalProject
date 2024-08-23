@@ -145,23 +145,34 @@ public class ProfileController {
         }
     }
 
-    @PutMapping("/{profileNo}/update-image")
-    public ResponseEntity<?> updateProfileImage(@PathVariable Long profileNo, @RequestParam("imageName") String imageName) {
+    @PutMapping("/{profileNo}/update")
+    public ResponseEntity<?> updateProfile(
+        @PathVariable Long profileNo,
+        @RequestParam(value = "profileName", required = false) String profileName,
+        @RequestParam(value = "imageName", required = false) String imageName
+    ) {
         try {
             // 데이터베이스에서 프로필 정보 가져오기
             Profile profile = profileService.getProfileById(profileNo);
             if (profile == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
             }
-            
-            // 프로필 이미지 경로 업데이트
-            String imagePath = "/profile-images/" + imageName;
-            profile.setProfileImg(imagePath);
+
+            // 프로필 이름이 제공된 경우 업데이트
+            if (profileName != null && !profileName.isEmpty()) {
+                profile.setProfileName(profileName);
+            }
+
+            // 이미지 파일이 제공된 경우 업데이트
+            if (imageName != null && !imageName.isEmpty()) {
+                String imagePath = "/profile-images/" + imageName;
+                profile.setProfileImg(imagePath);
+            }
 
             // DB 업데이트
             profileService.updateProfile(profile);
 
-            return ResponseEntity.ok(Map.of("success", true, "profileImg", profile.getProfileImg()));
+            return ResponseEntity.ok(Map.of("success", true, "profileImg", profile.getProfileImg(), "profileName", profile.getProfileName()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
         }

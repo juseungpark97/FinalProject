@@ -44,33 +44,33 @@ const PasswordChange: React.FC = () => {
             <div className={styles.content}>
                 <h1>비밀번호 변경</h1>
                 <div className={styles.formGroup}>
-                    <label>현재 비밀번호</label>
+                    <label className={styles.formLabel}>현재 비밀번호</label>
                     <input
                         type="password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        className={styles.input}
+                        className={styles.profilePwdInput}
                     />
                 </div>
                 <div className={styles.formGroup}>
-                    <label>새 비밀번호</label>
+                    <label className={styles.formLabel}>새 비밀번호</label>
                     <input
                         type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className={styles.input}
+                        className={styles.profilePwdInput}
                     />
                 </div>
                 <div className={styles.formGroup}>
-                    <label>새 비밀번호 확인</label>
+                    <label className={styles.formLabel}>새 비밀번호 확인</label>
                     <input
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={styles.input}
+                        className={styles.profilePwdInput}
                     />
                 </div>
-                <button onClick={handlePasswordChange} className={styles.button}>
+                <button onClick={handlePasswordChange} className={styles.menuLink}>
                     비밀번호 변경
                 </button>
             </div>

@@ -29,6 +29,10 @@ const Account: React.FC = () => {
       setProfile(updated);
       sessionStorage.setItem('selectedProfile', JSON.stringify(updated));
     }
+
+  };
+  const handleMenuClick = (menu: string) => {
+    setSelectedMenu(menu);
   };
 
   return (
@@ -44,7 +48,7 @@ const Account: React.FC = () => {
           )}
           {selectedMenu === 'overview' && <OverView />}
           {selectedMenu === 'membership' && <Membership />}
-          {selectedMenu === 'security' && <Security />}
+          {selectedMenu === 'security' && <Security onMenuClick={handleMenuClick} />}
           {selectedMenu === 'passwordChange' && <PasswordChange />}
           {selectedMenu === 'accountDelete' && profile?.profileMain === 'M' && <AccountDelete />}
           {selectedMenu === 'profileLock' && profile && (
