@@ -79,11 +79,13 @@ public class ProfileController {
             if (user != null) {
                 String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
                 String profileImgFilename = profileImg.getOriginalFilename();
-                Path imagePath = Paths.get(directory, profileImgFilename);
-                Files.write(imagePath, profileImg.getBytes());
-                String imagePathToStore = "/profile-images/" + profileImgFilename;
-                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, imagePathToStore);
-
+                if (profileImgFilename != null && !profileImgFilename.isEmpty()) {
+                    Path path = Paths.get("C:/finalProject/FinalProject/frontend/public/profile-images" + profileImgFilename);
+                    Files.copy(profileImg.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                }
+                
+                // 프로필 생성
+                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, profileImgFilename)
                 return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -124,7 +126,8 @@ public class ProfileController {
     public ResponseEntity<List<String>> getAvailableImages() {
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images"))
+                    .list(Paths.get("C:/finalProject/FinalProject/frontend/public/profile-images"))
+
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {
@@ -149,30 +152,13 @@ public class ProfileController {
             // DB 업데이트
             profileService.updateProfile(profile);
 
-            return ResponseEntity.ok(Map.of("success", true, "profileImg", profile.getProfileImg()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
-        }
-    }
-    
-    @DeleteMapping("/{profileNo}")
-    public ResponseEntity<?> deleteProfile(@PathVariable Long profileNo) {
-        try {
-            profileService.deleteProfile(profileNo);
-            return ResponseEntity.ok().body(Map.of("success", true, "message", "Profile deleted successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Error deleting profile"));
-        }
-    }
-    
-    @PutMapping("/{profileNo}/lock")
-    public ResponseEntity<?> lockProfile(@PathVariable Long profileNo, @RequestBody Map<String, String> request) {
-        try {
-            String password = request.get("password");
-            if (password == null || password.length() != 4) {
-                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Password must be 4 digits"));
+            // 프로필 이미지 업데이트
+            if (profileImg != null && !profileImg.isEmpty()) {
+                // 이미지 저장 로직 (이미지 경로 설정 및 저장)
+                String directory = "C:/finalProject/FinalProject/frontend/public/profile-images";
+                Path imagePath = Paths.get(directory, profileImg.getOriginalFilename());
+                Files.write(imagePath, profileImg.getBytes());
+                profile.setProfileImg("/profile-images/" + profileImg.getOriginalFilename());
             }
 
             Profile profile = profileService.getProfileById(profileNo);
