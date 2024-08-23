@@ -86,10 +86,10 @@ const ProfileLock: React.FC<{ profileId: number }> = ({ profileId }) => {
                             placeholder="4자리 비밀번호 입력"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            className={styles.input}
+                            className={styles.profilePwdInput}
                         />
-                        <button onClick={handleSetLock} className={styles.link} disabled={isSubmitting}>
-                            잠금 설정
+                        <button onClick={handleSetLock} className={styles.menuLink} disabled={isSubmitting}>
+                            프로필 잠금 설정하기 &gt;
                         </button>
                     </>
                 )}

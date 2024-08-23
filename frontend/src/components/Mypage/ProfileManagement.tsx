@@ -28,36 +28,46 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
 
     const handleProfileUpdate = async () => {
         try {
-            if (newProfileImage) {  // newProfileImage가 null이 아닌지 확인
-                const formData = new FormData();
-                formData.append('imageName', newProfileImage);  // null이 아닐 때만 추가
+            const formData = new FormData();
 
-                const response = await axios.put(`http://localhost:8088/api/profiles/${selectedProfile.profileNo}/update-image`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-
-                if (response.status === 200 && response.data.success) {
-                    const updatedProfile = {
-                        ...selectedProfile,
-                        profileImg: response.data.profileImg
-                    };
-
-                    setSelectedProfile(updatedProfile);
-                    onProfileUpdate(updatedProfile);
-                    alert('프로필 이미지가 변경되었습니다.');
-                } else {
-                    console.error('Failed to update profile:', response.data);
-                }
+            // 이미지가 제공되었는지 확인하고 추가
+            if (newProfileImage) {
+                formData.append('imageName', newProfileImage);  // 새로운 이미지가 있는 경우에만 추가
             } else {
-                console.error('No new profile image provided.');
+                console.log('No new profile image provided. Keeping the existing image.');
+            }
+
+            // 프로필 이름이 변경되었는지 확인하고 추가
+            if (newProfileName && newProfileName !== selectedProfile.profileName) {
+                formData.append('profileName', newProfileName);
+            }
+
+            // 서버로 요청 전송
+            const response = await axios.put(`http://localhost:8088/api/profiles/${selectedProfile.profileNo}/update`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200 && response.data.success) {
+                const updatedProfile = {
+                    ...selectedProfile,
+                    profileImg: response.data.profileImg || selectedProfile.profileImg,  // 이미지가 업데이트되지 않은 경우 기존 이미지 유지
+                    profileName: response.data.profileName || selectedProfile.profileName,  // 이름이 업데이트되지 않은 경우 기존 이름 유지
+                };
+
+                setSelectedProfile(updatedProfile);
+                onProfileUpdate(updatedProfile);
+                alert('프로필이 성공적으로 업데이트되었습니다.');
+            } else {
+                console.error('Failed to update profile:', response.data);
+                alert('프로필 업데이트에 실패했습니다.');
             }
         } catch (error) {
             console.error('Error updating profile:', error);
+            alert('프로필 업데이트 중 오류가 발생했습니다.');
         }
     };
-
     const openModal = () => {
         setIsModalOpen(true);
     };

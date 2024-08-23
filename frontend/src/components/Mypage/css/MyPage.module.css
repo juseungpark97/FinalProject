@@ -244,3 +244,51 @@
     font-size: 16px;
     color: #000;
 }
+
+.nameInput {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid rgb(192, 192, 192);
+    background-color: white;
+    border-radius: 8px;
+    font-size: 18px;
+    color: black;
+}
+
+
+.nameinput:focus {
+    border-color: #d6a060;
+    outline: none;
+}
+
+.profilePwdInput {
+    flex: none;
+    width: 300px;
+    padding: 15px;
+    border: 1px solid rgb(192, 192, 192);
+    background-color: white;
+    border-radius: 8px;
+    font-size: 18px;
+    color: black;
+    box-sizing: border-box;
+}
+
+.nameInput:focus,
+.profilePwdInput:focus {
+    border-color: #d6a060;
+    outline: none;
+}
+
+.formGroup {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.formLabel {
+    width: 150px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 50px;
+    text-align: right;
+}

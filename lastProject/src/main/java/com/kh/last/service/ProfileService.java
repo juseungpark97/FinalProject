@@ -71,14 +71,19 @@ public class ProfileService {
         return profileRepository.save(profile);
     }
     
+    @Transactional
     public void deleteProfile(Long profileNo) {
         Profile profile = profileRepository.findById(profileNo)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
+            .orElseThrow(() -> new RuntimeException("Profile not found"));
 
         if ("M".equals(profile.getProfileMain())) {
             throw new RuntimeException("Main profile cannot be deleted");
         }
 
+        // 프로필과 관련된 모든 시청 기록 삭제
+        watchLogRepository.deleteByProfile(profile);
+
+        // 프로필 삭제
         profileRepository.delete(profile);
     }
 
