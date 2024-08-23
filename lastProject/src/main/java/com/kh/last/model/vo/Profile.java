@@ -45,10 +45,19 @@ public class Profile {
     @Column(name = "profile_main", nullable = false, length = 1)
     private String profileMain; // 'M' for Main, 'S' for Sub
 
-
-
     @Lob
     private String profileVector; // 사용자의 선호도를 JSON 문자열로 저장
+    
+    // 테트리스 점수
+    @Column(name = "tetris_high_score", nullable = false)
+    private int tetrisHighScore = 0; // 최고 점수
+
+    // 테트리스 점수 업데이트 메서드
+    public void updateTetrisHighScore(int newScore) {
+        if (newScore > this.tetrisHighScore) {
+            this.tetrisHighScore = newScore;
+        }
+    }
 
     @Transient
     private Map<String, Integer> vectorList;

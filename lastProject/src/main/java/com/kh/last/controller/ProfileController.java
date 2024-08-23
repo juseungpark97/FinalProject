@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.USERS;
+import com.kh.last.repository.ProfileRepository;
 import com.kh.last.service.ProfileService;
 import com.kh.last.service.UserService;
 
@@ -47,6 +48,8 @@ public class ProfileController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired ProfileRepository profileRepository;
 
     private final SecretKey key;
 
@@ -55,6 +58,18 @@ public class ProfileController {
         this.userService = userService;
         this.key = userService.getKey(); // UserService로부터 SecretKey 주입
     }
+    
+    @PostMapping("/{profileId}/tetris/score")
+    public ResponseEntity<Profile> updateTetrisScore(
+        @PathVariable Long profileId, 
+        @RequestBody int newScore) {
+        
+        Profile profile = profileRepository.findById(profileId).orElseThrow();
+        profile.updateTetrisHighScore(newScore);
+        profileRepository.save(profile);
+        return ResponseEntity.ok(profile);
+    }
+    
     @GetMapping("/user/{userNo}")
     public ResponseEntity<List<Profile>> getProfilesByUserNo(@PathVariable Long userNo) {
         List<Profile> profiles = profileService.getProfilesByUserNo(userNo);
@@ -80,7 +95,7 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+                String directory = "C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images";
                 String profileImgFilename = profileImg.getOriginalFilename();
                 Path imagePath = Paths.get(directory, profileImgFilename);
                 Files.write(imagePath, profileImg.getBytes());
@@ -150,7 +165,7 @@ public class ProfileController {
     public ResponseEntity<List<String>> getAvailableImages() {
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images"))
+                    .list(Paths.get("C:/Users/hyejin/Desktop/FinalProject/frontend/public/profile-images"))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {
