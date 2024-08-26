@@ -55,7 +55,7 @@ function App() {
         metaDescription = "Upload a new movie.";
         break;
       default:
-        title = "Default Title";
+        title = "CinemaCloud";
         metaDescription = "Default description.";
         break;
     }

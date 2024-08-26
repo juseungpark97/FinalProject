@@ -256,7 +256,7 @@
 }
 
 
-.nameinput:focus {
+.nameInput:focus {
     border-color: #d6a060;
     outline: none;
 }

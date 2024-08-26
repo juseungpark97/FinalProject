@@ -118,16 +118,6 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
                   src="/fesearch.svg"
                 />
               </div>
-              <div className={`${styles.notificationsNav} ${styles.iconButton}`}>
-                <Link to="/notifications">
-                  <img
-                    className={styles.faSolidbellIcon}
-                    loading="lazy"
-                    alt=""
-                    src="/fasolidbell.svg"
-                  />
-                </Link>
-              </div>
               <div className={`${styles.profileNav} ${styles.iconButton}`}>
                 <div className={styles.clickableDiv}>
                   <img

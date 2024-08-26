@@ -31,14 +31,4 @@ public class MyPageController {
                            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/cancel-subscription")
-    public ResponseEntity<String> cancelSubscription(@RequestHeader("Authorization") String token) {
-        boolean success = myPageService.cancelSubscription(token);
-        if (success) {
-            return ResponseEntity.ok("Subscription canceled successfully.");
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to cancel subscription.");
-        }
-    }
-
 }

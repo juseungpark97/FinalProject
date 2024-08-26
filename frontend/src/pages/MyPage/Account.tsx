@@ -10,16 +10,20 @@ import AccountDelete from '../../../src/components/Mypage/AccountDelete';
 import { Profile } from '../../types/Profile';
 import PasswordChange from '../../components/Mypage/PasswordChange';
 import ProfileLock from '../../components/Mypage/ProfileLock';
-
+import PhoneChange from '../../components/Mypage/PhoneChange';
 
 const Account: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState<string>('overview');
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    const storedProfile = sessionStorage.getItem('selectedProfile');
-    if (storedProfile) {
-      setProfile(JSON.parse(storedProfile));
+    try {
+      const storedProfile = sessionStorage.getItem('selectedProfile');
+      if (storedProfile) {
+        setProfile(JSON.parse(storedProfile));
+      }
+    } catch (error) {
+      console.error('Failed to parse stored profile:', error);
     }
   }, []);
 
@@ -28,11 +32,17 @@ const Account: React.FC = () => {
       const updated = { ...profile, ...updatedProfile };
       setProfile(updated);
       sessionStorage.setItem('selectedProfile', JSON.stringify(updated));
+    } else {
+      console.warn('No profile available to update');
     }
-
   };
+
   const handleMenuClick = (menu: string) => {
     setSelectedMenu(menu);
+  };
+
+  const handlePhoneChangeSuccess = () => {
+    setSelectedMenu('security');  // 핸드폰 변경 성공 시 Security 메뉴로 리다이렉트
   };
 
   return (
@@ -50,11 +60,11 @@ const Account: React.FC = () => {
           {selectedMenu === 'membership' && <Membership />}
           {selectedMenu === 'security' && <Security onMenuClick={handleMenuClick} />}
           {selectedMenu === 'passwordChange' && <PasswordChange />}
+          {selectedMenu === 'phoneChange' && <PhoneChange onPhoneChangeSuccess={handlePhoneChangeSuccess} />}
           {selectedMenu === 'accountDelete' && profile?.profileMain === 'M' && <AccountDelete />}
           {selectedMenu === 'profileLock' && profile && (
             <ProfileLock profileId={profile.profileNo} />
           )}
-
         </div>
       </div>
     </div>
