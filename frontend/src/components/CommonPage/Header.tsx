@@ -15,14 +15,17 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
-
+  // Session에서 Profile 불러오기
   useEffect(() => {
     const selectedProfileData = sessionStorage.getItem('selectedProfile');
     if (selectedProfileData) {
       const profile = JSON.parse(selectedProfileData);
       setSelectedProfile(profile);
     }
+  }, [setSelectedProfile]);
 
+  // 사용자 정보 로드
+  useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
       const decodedUser = decodeJWT(token);
@@ -40,8 +43,7 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
           console.error("Error fetching user data", error);
         });
     }
-
-  }, [setSelectedProfile]);
+  }, []);
 
   const decodeJWT = (token: string) => {
     try {
@@ -60,107 +62,106 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
     }
   };
 
+  // 계정 전환 핸들링
   const handleProfileChange = () => {
     navigate('/profiles');
   };
 
+  // 로그아웃 핸들링
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // sessionStorage 사용
-
+    localStorage.removeItem('authToken');
     setSelectedProfile(null);
     sessionStorage.removeItem('selectedProfile');
     navigate('/login');
   };
 
+  // 홈으로 이동
+  const handleClick = () => {
+    navigate('/home');
+  };
+
+  // 선택된 프로필을 세션에 저장
   useEffect(() => {
     if (selectedProfile) {
       sessionStorage.setItem('selectedProfile', JSON.stringify(selectedProfile));
-      console.log('Profile saved to sessionStorage:', selectedProfile);
     }
   }, [selectedProfile]);
 
-  const handleClick = () => {
-    navigate('/home');
-    window.location.reload(); // 페이지 새로고침
-  };
-
   return (
-    <>
-      <section className={`${styles.Header} ${className}`}>
-        <header className={styles.header}>
-          <div className={styles.headerBackground} />
-          <div onClick={handleClick}>
-            <img
-              className={styles.logoText2}
-              loading="lazy"
-              alt=""
-              src="/logo-text-2@2x.png"
-            />
-          </div>
-          <div className={styles.navigation}>
-            <div className={styles.homeNav}>
-              <div className={`${styles.homeButton} ${styles.iconButton}`} onClick={handleClick}>
+    <section className={`${styles.Header} ${className}`}>
+      <header className={styles.header}>
+        <div className={styles.headerBackground} />
+        <div onClick={handleClick}>
+          <img
+            className={styles.logoText2}
+            loading="lazy"
+            alt=""
+            src="/logo-text-2@2x.png"
+          />
+        </div>
+        <div className={styles.navigation}>
+          <div className={styles.homeNav}>
+            <div className={`${styles.homeButton} ${styles.iconButton}`} onClick={handleClick}>
+              <img
+                className={styles.homeButtonIcon}
+                loading="lazy"
+                alt=""
+                src="/homeButton.png"
+              />
+            </div>
+            <div
+              className={`${styles.searchNav} ${styles.iconButton}`}
+              onClick={onSearchClick}
+            >
+              <img
+                className={styles.fesearchIcon}
+                loading="lazy"
+                alt=""
+                src="/fesearch.svg"
+              />
+            </div>
+            <div className={`${styles.profileNav} ${styles.iconButton}`}>
+              <div className={styles.clickableDiv}>
                 <img
-                  className={styles.homeButtonIcon}
+                  className={styles.profileBackgroundIcon}
+                  loading="lazy"
+                  alt="Profile"
+                  src={selectedProfile?.profileImg ? (selectedProfile.profileImg) : '/profile.png'}
+                />
+                <img
+                  className={styles.antDesigncaretDownFilledIcon}
                   loading="lazy"
                   alt=""
-                  src="/homeButton.png"
+                  src="/antdesigncaretdownfilled.svg"
                 />
-              </div>
-              <div
-                className={`${styles.searchNav} ${styles.iconButton}`}
-                onClick={onSearchClick}
-              >
-                <img
-                  className={styles.fesearchIcon}
-                  loading="lazy"
-                  alt=""
-                  src="/fesearch.svg"
-                />
-              </div>
-              <div className={`${styles.profileNav} ${styles.iconButton}`}>
-                <div className={styles.clickableDiv}>
-                  <img
-                    className={styles.profileBackgroundIcon}
-                    loading="lazy"
-                    alt="Profile"
-                    src={selectedProfile?.profileImg ? (selectedProfile.profileImg) : '/profile.png'}
-                  />
-                  <img
-                    className={styles.antDesigncaretDownFilledIcon}
-                    loading="lazy"
-                    alt=""
-                    src="/antdesigncaretdownfilled.svg"
-                  />
-                  <div className={styles.dropdownMenu}>
-                    {selectedProfile && (
-                      <div className={`${styles.dropdownItem} ${styles.disabledItem}`}>
-                        <h3>{selectedProfile.profileName} 님</h3>
-                      </div>
-                    )}
-                    <div className={styles.dropdownItem} onClick={handleProfileChange}>
-                      계정 전환
+                <div className={styles.dropdownMenu}>
+                  {selectedProfile && (
+                    <div className={`${styles.dropdownItem} ${styles.disabledItem}`}>
+                      <h3>{selectedProfile.profileName} 님</h3>
                     </div>
-                    <Link to="/account" className={styles.dropdownItem}>
-                      계정
-                    </Link>
-                    <Link to="/help" className={styles.dropdownItem}>
-                      고객센터
-                    </Link>
-                    <div
-                      className={styles.dropdownItem}
-                      onClick={handleLogout}
-                    >
-                      로그아웃
-                    </div>
+                  )}
+                  <div className={styles.dropdownItem} onClick={handleProfileChange}>
+                    계정 전환
+                  </div>
+                  <Link to="/account" className={styles.dropdownItem}>
+                    계정
+                  </Link>
+                  <Link to="/help" className={styles.dropdownItem}>
+                    고객센터
+                  </Link>
+                  <div
+                    className={styles.dropdownItem}
+                    onClick={handleLogout}
+                  >
+                    로그아웃
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </header>
-      </section>
-    </>
+        </div>
+      </header>
+    </section>
   );
 };
 

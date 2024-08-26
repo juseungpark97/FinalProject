@@ -19,20 +19,24 @@ const ProfilePage: React.FC = () => {
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
+        const storedProfile = sessionStorage.getItem('selectedProfile');
+
+        if (storedProfile) {
+            setSelectedProfile(JSON.parse(storedProfile));
+        }
 
         if (token) {
             axios.get('http://localhost:8088/api/users/subscription-status', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(response => {
-                    console.log("Full Server Response:", response.data);  // 전체 응답 구조 확인
+                    console.log("Full Server Response:", response.data);
                     const { isSubscribed, subStatus, endDate } = response.data;
-                    console.log("Subscription End Date:", endDate);  // endDate 값을 로그로 출력
+                    console.log("Subscription End Date:", endDate);
 
                     const today = new Date();
                     const endSubscriptionDate = new Date(endDate);
 
-                    // 구독 상태에 따른 페이지 이동
                     if ((!isSubscribed && subStatus !== "ACTIVE") ||
                         (subStatus === "INACTIVE" && endSubscriptionDate < today)) {
                         navigate('/subscribe');
@@ -48,7 +52,7 @@ const ProfilePage: React.FC = () => {
                                                 isLocked: profile.locked,
                                             }));
                                             setProfiles(profilesWithLockedStatus);
-                                            if (response.data.length > 0) {
+                                            if (response.data.length > 0 && !storedProfile) {
                                                 setSelectedMenu('select');
                                             }
                                         } else {
@@ -78,11 +82,6 @@ const ProfilePage: React.FC = () => {
         }
     }, [navigate]);
 
-    useEffect(() => {
-        if (selectedMenu === 'select') {
-            sessionStorage.removeItem('selectedProfile');
-        }
-    }, [selectedMenu]);
 
     const handleProfileSelect = (profile: Profile) => {
         if (profile.isLocked) {
