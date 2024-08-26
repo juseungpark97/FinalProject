@@ -41,7 +41,7 @@ const LoginForm: React.FC = () => {
             if (error.response && error.response.status === 403) {
                 alert(error.response.data.message);
             } else {
-                setError('Login failed. Please check your email and password.');
+                setError('로그인에 실패하였습니다. 이메일과 비밀번호를 확인하세요');
             }
         }
     };
@@ -72,8 +72,8 @@ const LoginForm: React.FC = () => {
                     aria-label="비밀번호"
                     required
                 />
-                <a href="#" className={styles.forgotPassword}>아이디 찾기</a>
-                <a href="#" className={styles.forgotPassword}>비밀번호 찾기</a>
+                <a href="/Findidpage" className={styles.forgotPassword}>아이디 찾기</a>
+                <a href="/Findpwdpage" className={styles.forgotPassword}>비밀번호 찾기</a>
                 <button type="submit" className={styles.loginButton}>로그인</button>
                 {error && <p className={styles.error}>{error}</p>}
             </div>

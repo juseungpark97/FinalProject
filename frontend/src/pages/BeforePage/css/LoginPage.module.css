@@ -4,6 +4,7 @@
     flex-direction: column;
     color: #fff;
     justify-content: center;
+    min-height: 100vh; /* 화면 전체를 채우기 위해 추가 */
 }
 
 .container {
@@ -39,7 +40,6 @@
     object-fit: auto;
     object-position: center;
     width: px;
-   
 }
 
 .loginForm {
@@ -48,6 +48,7 @@
     background-color: rgba(0, 0, 0, 0.8);
     align-self: center;
     display: flex;
+    flex-direction: column; /* 컬럼 방향으로 조정 */
     margin-top: 0px;
     width: 610px;
     max-width: 100%;
@@ -65,14 +66,16 @@
 
 .formContent {
     display: flex;
+    flex-direction: column; /* 컬럼 방향으로 조정 */
     margin-bottom: 23px;
     width: 400px;
     max-width: 100%;
-    flex-direction: column;
 }
 
 .formTitle {
     font: 500 50px Roboto, sans-serif;
+    color: #fff; /* 제목 색상 */
+    text-align: center; /* 중앙 정렬 */
 }
 
 @media (max-width: 991px) {
@@ -88,6 +91,8 @@
     white-space: nowrap;
     padding: 30px 15px;
     font: 100 18px Roboto, sans-serif;
+    color: #fff; /* 텍스트 색상 */
+    width: 100%;
 }
 
 @media (max-width: 991px) {
@@ -98,34 +103,44 @@
 }
 
 .forgotPassword {
-    text-align: right;
-    align-self: end;
-    margin: 19px 27px 0 0;
+    text-align: center; /* 중앙 정렬 */
     font: 300 14px Roboto, sans-serif;
+    margin-top: 10px;
+    display: block; /* 블록으로 변경 */
+    color: #d6a060; /* 버튼과 동일한 색상 */
+    text-decoration: none; /* 밑줄 제거 */
+    transition: color 0.3s, border-bottom 0.3s; /* 부드러운 색상 전환 효과 */
 }
 
-@media (max-width: 991px) {
-    .forgotPassword {
-        margin-right: 10px;
-    }
+.forgotPassword:hover {
+    color: #fff; /* 호버 시 색상 변경 */
+    border-bottom: 1px solid #d6a060; /* 호버 시 밑줄 추가 */
 }
 
 .loginButton {
+    margin-left: 20px;
     border-radius: 10px;
     background-color: #d6a060;
-    margin-top: 65px;
-    white-space: nowrap;
-    text-align: center;
-    padding: 27px 60px;
+    margin-top: 20px;
+    padding: 15px 60px;
     font: 700 24px Roboto, sans-serif;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    text-align: center; /* 중앙 정렬 */
 }
 
 @media (max-width: 991px) {
     .loginButton {
-        margin-top: 40px;
-        white-space: initial;
-        padding: 0 20px;
+        margin-top: 20px;
+        padding: 15px 20px;
     }
+}
+
+.error {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
 }
 
 .helpText {

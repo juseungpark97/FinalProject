@@ -9,6 +9,34 @@
   background-position: center;
   opacity: 0.8;
 }
+.kakaoLoginButton {
+  background-color: #fee500; /* 카카오 기본 색상 */
+  color: #3c1a1a; /* 텍스트 색상 */
+  border: none;
+  border-radius: 5px;
+  padding: 15px 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+  margin-top: 10px;
+  width: 630px;
+
+}
+
+.kakaoLoginButton:hover {
+  background-color: #fddb00; /* Hover 시 색상 변화 */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.kakaoLoginButton img {
+  width: 24px; /* 카카오 아이콘의 크기 */
+  margin-right: 10px; /* 아이콘과 텍스트 사이의 여백 */
+}
 
 .backgroundOverlay {
   position: absolute;
