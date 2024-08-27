@@ -73,21 +73,21 @@ public class UserController {
 	public ResponseEntity<LoginResponse> loginUser(@RequestBody UserLoginRequest request) {
 		try {
 			String status = userService.checkUserStatus(request.getEmail());
-		  if (status != null) {
-			  if (status.equals("S")) {
-				// 정지유저 경고 메시지 전달
-				EmailCheckResponse response = new EmailCheckResponse(false);
-				response.setMessage("정지된 계정입니다. 다른 계정으로 이용 부탁드립니다.");
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+			if (status != null) {
+				if (status.equals("S")) {
+					// 정지유저 경고 메시지 전달
+					LoginResponse response = new LoginResponse(null);
+					response.setMessage("정지된 계정입니다. 다른 계정으로 이용 부탁드립니다.");
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+				}
+				if (status.equals("D")) {
+					// 탈퇴회원 안내 메시지 전달
+					LoginResponse response = new LoginResponse(null);
+					response.setMessage("탈퇴한 회원입니다.");
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+				}
 			}
 
-			if (status.equals("D")) {
-				// 탈퇴회원 안내 메시지 전달
-				EmailCheckResponse response = new EmailCheckResponse(false);
-				response.setMessage("탈퇴한 회원입니다.");
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-			}
-		}
 			String token = userService.loginUser(request.getEmail(), request.getPassword());
 			visitService.updateVisitCount();
 
@@ -192,21 +192,22 @@ public class UserController {
 	}
 
 	@PutMapping("/change-password")
-	    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token,
-	                                            @RequestBody PasswordChangeRequest request) {
-	        // 토큰에서 이메일 추출 (이메일 추출 로직은 기존 메소드 활용)
-	        String email = userService.getEmailFromToken(token);
-	        if (email == null) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-	        }
+	public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token,
+			@RequestBody PasswordChangeRequest request) {
+		// 토큰에서 이메일 추출 (이메일 추출 로직은 기존 메소드 활용)
+		String email = userService.getEmailFromToken(token);
+		if (email == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
 
-	        request.setEmail(email);
-	        boolean success = userService.myPagePwdChange(request);
+		request.setEmail(email);
+		boolean success = userService.myPagePwdChange(request);
 
-	        if (success) {
-	            return ResponseEntity.ok().body("Password changed successfully");
-	        } else {
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Current password is incorrect or user not found");
-	        }
-	    }
+		if (success) {
+			return ResponseEntity.ok().body("Password changed successfully");
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body("Current password is incorrect or user not found");
+		}
+	}
 }
