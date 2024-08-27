@@ -377,6 +377,7 @@ h2 {
 
 .pagination .pageLink {
   color: #2c3e50;
+  background-color: #ddd;
   padding: 8px 16px;
   text-decoration: none;
   border: 1px solid #ddd;
@@ -385,7 +386,7 @@ h2 {
 }
 
 .pagination .pageLink:hover {
-  background-color: #ddd;
+  background-color: #5e6972;
 }
 
 .pagination .active .pageLink {
@@ -679,7 +680,7 @@ h2 {
 
 /* 표 스타일링 추가 */
 .recentMoviesTable {
-  width: 120%;
+  width: 107%;
   border-collapse: collapse;
   font-family: Arial, sans-serif;
   background-color: #ffffff;
