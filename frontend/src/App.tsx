@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { GoogleOAuthProvider } from '@react-oauth/google'; // 구글 인증관련
+import { useEffect } from "react";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Signin from "./pages/BeforePage/SignInPage";
 import HomePage from "./pages/HomePage/HomePage";
 import DashboardPage from "./pages/AdminPage/DashboardPage";
@@ -14,12 +14,12 @@ import HelpPage from "./pages/MyPage/Help";
 import Profiles from "./pages/BeforePage/Profiles";
 import SubscribeSuccess from "./pages/HomePage/SubscribeSuccess";
 import Findidpage from "./pages/BeforePage/findidpage";
-import findpwpage from "./pages/BeforePage/findpwpage";
 import Findpwpage from "./pages/BeforePage/findpwpage";
 import MembershipCancel from "./components/Mypage/MembershipCancel";
 import Landing from "./pages/BeforePage/MainPage";
 import EasterEgg from "./EasterEgg/EasterEgg";
-"./pages/BeforePage/findpwpage";
+import ProtectedRoute from "../src/Auth/ProtectedRoute";
+import PublicRoute from "../src/Auth/publicRoute";
 
 function App() {
   const location = useLocation();
@@ -50,7 +50,7 @@ function App() {
       case "/dashboard/1on1chat":
         title = "Dashboard";
         metaDescription = "This is the dashboard page description.";
-        break; // 'break' 추가
+        break;
       case "/upload":
         title = "Upload Movie";
         metaDescription = "Upload a new movie.";
@@ -66,9 +66,10 @@ function App() {
     }
 
     if (metaDescription) {
-      const metaDescriptionTag: HTMLMetaElement | null = document.querySelector(
+      const metaDescriptionTag = document.querySelector(
         'head > meta[name="description"]'
-      );
+      ) as HTMLMetaElement;
+
       if (metaDescriptionTag) {
         metaDescriptionTag.content = metaDescription;
       }
@@ -78,22 +79,29 @@ function App() {
   return (
     <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
       <Routes>
-        <Route path="/signin" element={<Signin />} />  {/* 로그인 전 */}
-        <Route path="/" element={<Landing />} /> {/* 로그인 전 */}
-        <Route path="/home" element={<HomePage />} /> {/* 로그인 후 */}
-        <Route path="/dashboard/*" element={<DashboardPage />} /> {/* 로그인 후 USER테이블의 roll이 admin인 계정일때 */}
-        <Route path="/upload" element={<UploadMovie />} /> {/* 로그인 후 USER테이블의 roll이 admin인 계정일때 */}
-        <Route path="/movie/:movieId" element={<MovieDetailPage />} /> {/* 로그인 후 */}
-        <Route path="/account" element={<Account />} /> {/* 로그인 후 */}
-        <Route path="/help" element={<HelpPage />} /> {/* 로그인 후 */}
-        <Route path="/login" element={<LoginPage />} /> {/* 로그인 전 */}
-        <Route path="/subscribe" element={<SubscribePage />} /> {/* 로그인 후 */}
-        <Route path="/passwordlogin" element={<PwLogin />} /> {/* 로그인 전 */}
-        <Route path="/profiles" element={<Profiles />} /> {/* 로그인 후 */}
-        <Route path="/Findidpage" element={<Findidpage />} /> {/* 로그인 전 */}
-        <Route path="/Findpwdpage" element={<Findpwpage />} /> {/* 로그인 전 */}
-        <Route path="/subscribe/success" element={<SubscribeSuccess />} /> {/* 로그인 후 */}
-        <Route path="/easterEgg" element={<EasterEgg />} /> {/* 로그인 후 */}
+        {/* 로그인 안했을 때 접근 가능 */}
+        <Route path="/signin" element={<PublicRoute element={<Signin />} />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<PublicRoute element={<LoginPage />} />} />
+        <Route path="/passwordlogin" element={<PublicRoute element={<PwLogin />} />} />
+        <Route path="/Findidpage" element={<PublicRoute element={<Findidpage />} />} />
+        <Route path="/Findpwdpage" element={<PublicRoute element={<Findpwpage />} />} />
+
+        {/* 구독 관련 페이지: 누구나 접근 가능 */}
+        <Route path="/subscribe" element={<SubscribePage />} />
+        <Route path="/subscribe/success" element={<SubscribeSuccess />} />
+
+        {/* 로그인 했을 때 접근 가능 */}
+        <Route path="/home" element={<ProtectedRoute element={<HomePage />} requiredRole="user" />} />
+        <Route path="/movie/:movieId" element={<ProtectedRoute element={<MovieDetailPage />} requiredRole="user" />} />
+        <Route path="/account" element={<ProtectedRoute element={<Account />} requiredRole="user" />} />
+        <Route path="/profiles" element={<ProtectedRoute element={<Profiles />} requiredRole="user" />} />
+        <Route path="/help" element={<ProtectedRoute element={<HelpPage />} requiredRole="user" />} />
+        <Route path="/easterEgg" element={<ProtectedRoute element={<EasterEgg />} requiredRole="user" />} />
+
+        {/* 관리자만 접근 가능 */}
+        <Route path="/dashboard/*" element={<ProtectedRoute element={<DashboardPage />} requiredRole="admin" />} />
+        <Route path="/upload" element={<ProtectedRoute element={<UploadMovie />} requiredRole="admin" />} />
       </Routes>
     </GoogleOAuthProvider>
   );
