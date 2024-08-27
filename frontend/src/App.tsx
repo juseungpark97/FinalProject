@@ -78,22 +78,22 @@ function App() {
   return (
     <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
       <Routes>
-        <Route path="/signin" element={<Signin />} />
-        <Route path="/" element={<Landing />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/dashboard/*" element={<DashboardPage />} />
-        <Route path="/upload" element={<UploadMovie />} />
-        <Route path="/movie/:movieId" element={<MovieDetailPage />} />
-        <Route path="/account" element={<Account />} />
-        <Route path="/help" element={<HelpPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/subscribe" element={<SubscribePage />} />
-        <Route path="/passwordlogin" element={<PwLogin />} />
-        <Route path="/profiles" element={<Profiles />} />
-        <Route path="/Findidpage" element={<Findidpage />} />
-        <Route path="/Findpwdpage" element={<Findpwpage />} />
-        <Route path="/subscribe/success" element={<SubscribeSuccess />} /> {/* 구독 성공 페이지 경로 추가 */}
-        <Route path="/easterEgg" element={<EasterEgg />} />
+        <Route path="/signin" element={<Signin />} />  {/* 로그인 전 */}
+        <Route path="/" element={<Landing />} /> {/* 로그인 전 */}
+        <Route path="/home" element={<HomePage />} /> {/* 로그인 후 */}
+        <Route path="/dashboard/*" element={<DashboardPage />} /> {/* 로그인 후 USER테이블의 roll이 admin인 계정일때 */}
+        <Route path="/upload" element={<UploadMovie />} /> {/* 로그인 후 USER테이블의 roll이 admin인 계정일때 */}
+        <Route path="/movie/:movieId" element={<MovieDetailPage />} /> {/* 로그인 후 */}
+        <Route path="/account" element={<Account />} /> {/* 로그인 후 */}
+        <Route path="/help" element={<HelpPage />} /> {/* 로그인 후 */}
+        <Route path="/login" element={<LoginPage />} /> {/* 로그인 전 */}
+        <Route path="/subscribe" element={<SubscribePage />} /> {/* 로그인 후 */}
+        <Route path="/passwordlogin" element={<PwLogin />} /> {/* 로그인 전 */}
+        <Route path="/profiles" element={<Profiles />} /> {/* 로그인 후 */}
+        <Route path="/Findidpage" element={<Findidpage />} /> {/* 로그인 전 */}
+        <Route path="/Findpwdpage" element={<Findpwpage />} /> {/* 로그인 전 */}
+        <Route path="/subscribe/success" element={<SubscribeSuccess />} /> {/* 로그인 후 */}
+        <Route path="/easterEgg" element={<EasterEgg />} /> {/* 로그인 후 */}
       </Routes>
     </GoogleOAuthProvider>
   );
