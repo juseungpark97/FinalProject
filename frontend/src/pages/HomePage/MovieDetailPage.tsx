@@ -178,7 +178,7 @@ const MovieDetailPage: React.FC = () => {
           }
         })
           .then(() => {
-            navigate(-1); // 이전 페이지로 이동
+            navigate("/home"); // 이전 페이지로 이동
           })
           .catch(error => {
             console.error("Failed to save watch progress", error);
@@ -514,6 +514,7 @@ const MovieDetailPage: React.FC = () => {
           controls={false}
           onTimeUpdate={handleProgress}
           onLoadedMetadata={handleDuration}
+          muted={true} // 초기값을 true로 설정하여 자동 재생 가능하도록 함
           onEnded={handleEnded}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
