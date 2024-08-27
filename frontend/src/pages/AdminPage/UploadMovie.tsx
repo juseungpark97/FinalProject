@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDropzone, DropzoneInputProps, DropzoneRootProps } from 'react-dropzone';
 import './css/UploadMovie.css';
+import { useNavigate } from 'react-router-dom';
 
 const defaultGenres = [
   '드라마', '로맨스', '코미디', '스릴러', '미스터리', '호러', '액션', 'SF', '판타지', '다큐멘터리',
@@ -12,6 +13,8 @@ const defaultGenres = [
 ];
 
 const UploadMovie: React.FC = () => {
+  const navi = useNavigate();
+
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [genreTags, setGenreTags] = useState<string[]>([]);
@@ -148,6 +151,10 @@ const UploadMovie: React.FC = () => {
     setIsEditingRating(true);
   };
 
+  const movieList = () => {
+    navi('/dashboard/movieManage');
+  };
+
   const handleSubmit = async () => {
     const formData = new FormData();
     if (mediaFile) formData.append('file', mediaFile);
@@ -174,12 +181,13 @@ const UploadMovie: React.FC = () => {
 
       const result = await response.json();
       console.log('Success:', result);
+      alert(`${result.title}의 등록에 성공했습니다.`);
+      navi('/dashboard/movieManage');
     } catch (error) {
       console.error('Error:', error);
+      alert('등록중 문제가 발생했습니다.');
     }
   };
-
-
 
   return (
     <div className="container">
@@ -252,6 +260,7 @@ const UploadMovie: React.FC = () => {
             value={displayRating !== null ? displayRating : ''}
             onChange={(e) => setDisplayRating(e.target.value)}
             placeholder="별점 입력"
+            max={10}
           />
           {isEditingRating ? (
             <button onClick={handleAddRating}>추가</button>
@@ -324,10 +333,13 @@ const UploadMovie: React.FC = () => {
           <p>감독: {displayDirector}</p>
           <p>배우: {displayActors}</p>
           <p>개봉 연도: {displayReleaseYear}</p>
-          <p>별점: {displayRating}</p>
+          <p>별점: {parseFloat(displayRating) > 10 ? 10 : displayRating}</p>
           <p>장르: {Array.from(selectedGenres).join(', ')}</p>
         </div>
         <button className="upload-button" onClick={handleSubmit}>내용 업로드</button>
+      </div>
+      <div className="fixed-bottom-center">
+        <input type='button' value={'목록으로'} onClick={movieList}/>
       </div>
     </div>
   );

@@ -23,11 +23,11 @@
   
   .closeButton {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 10px;
+    right: 3px;
     border: none;
     background: transparent;
-    font-size: 30px; /* Larger button for better accessibility */
+    font-size: 25px; /* Larger button for better accessibility */
     cursor: pointer;
     color: #ffffff; /* White color for better visibility */
   }
