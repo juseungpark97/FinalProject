@@ -14,7 +14,6 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
-import { CustomPrevArrow, CustomNextArrow } from './CustomArrows';
 import 'slick-carousel/slick/slick-theme.css';
 import styles from './css/MovieDetailPage.module.css';
 import useRelatedMovies from '../../components/Movies/useRelatedMovies';
@@ -24,7 +23,7 @@ import VideoThumbnail from '../../../src/components/HomePage/VideoThumbnail';
 
 const MovieDetailPage: React.FC = () => {
   const { movieId } = useParams<{ movieId: string }>();
-  const navigate = useNavigate(); // useHistory 대신 useNavigate 사용
+  const navigate = useNavigate();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,22 +48,24 @@ const MovieDetailPage: React.FC = () => {
   const volumeSliderTimeoutRef = useRef<number | null>(null);
   const hideControlsTimeoutRef = useRef<number | null>(null);
 
-  interface LikeRequest {
-    movieId: number;
-    profileNo: number;
-  }
+  // 비디오가 로드되었을 때 메타데이터를 통해 총 길이 계산
+  const handleLoadedMetadata = useCallback(() => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  }, []);
 
+  // 영화 데이터 가져오기
   useEffect(() => {
     if (movieId) {
       const movieIdNumber = parseInt(movieId, 10);
       if (!isNaN(movieIdNumber)) {
         axios.get(`http://localhost:8088/api/movies/${movieIdNumber}`)
           .then(response => {
-            console.log(response.data);
             setMovie(response.data);
             setLoading(false);
           })
-          .catch(error => {
+          .catch(() => {
             setError('영화 세부 정보를 로드하는 중 오류가 발생했습니다.');
             setLoading(false);
           });
@@ -84,57 +85,7 @@ const MovieDetailPage: React.FC = () => {
     }
   }, [movie]);
 
-  useEffect(() => {
-    const addOrUpdateWatchLog = async () => {
-      if (movieId) {
-        const storedProfile = sessionStorage.getItem('selectedProfile');
-        if (storedProfile) {
-          const profile = JSON.parse(storedProfile);
-          const profileNo = profile.profileNo;
-          const movieIdNumber = parseInt(movieId, 10);
-
-          const progressTime = 0.0; // 기본값으로 0.0을 설정
-
-          if (!isNaN(movieIdNumber)) {
-            try {
-              // 기존의 삭제 작업을 제거하고, 바로 삽입 또는 업데이트 작업만 수행합니다.
-              await axios.post('http://localhost:8088/api/movies/watchlog', null, {
-                params: {
-                  movieId: movieIdNumber,
-                  profileNo,
-                  progressTime: progressTime,
-                },
-                headers: {
-                  'Content-Type': 'application/json'
-                }
-              });
-            } catch (error) {
-              if (error instanceof Error) {
-                console.error('시청 로그 관리 중 오류 발생:', error.message);
-              } else {
-                console.error('예상치 못한 오류 발생:', error);
-              }
-            }
-          } else {
-            console.error('유효하지 않은 movieId:', movieId);
-          }
-        } else {
-          console.error('세션 스토리지에서 프로필 정보를 찾을 수 없습니다.');
-        }
-      } else {
-        console.error('유효하지 않은 movieId:', movieId);
-      }
-    };
-
-    addOrUpdateWatchLog();
-
-    return () => {
-      // Cleanup code if necessary
-    };
-  }, [movieId]);
-
-
-
+  // 시청 기록 업데이트
   useEffect(() => {
     if (movieId) {
       const storedProfile = sessionStorage.getItem('selectedProfile');
@@ -146,17 +97,46 @@ const MovieDetailPage: React.FC = () => {
         })
           .then(response => {
             if (videoRef.current && response.data !== 0) {
-              videoRef.current.currentTime = response.data; // 저장된 시청 시간으로 이동
+              videoRef.current.addEventListener('loadedmetadata', () => {
+                setTimeout(() => {
+                  videoRef.current!.currentTime = response.data;
+                }, 100);  // 100ms 지연
+              });
             }
           })
-          .catch(error => {
-            console.error("Failed to fetch watch progress", error);
+          .catch(() => {
+            console.error("Failed to fetch watch progress");
           });
       }
     }
   }, [movieId]);
 
-  // 뒤로가기 버튼
+  // 시청 기록 기반으로 이어보기
+  useEffect(() => {
+    if (movieId) {
+      const storedProfile = sessionStorage.getItem('selectedProfile');
+      const profileNo = storedProfile ? JSON.parse(storedProfile).profileNo : null;
+
+      if (profileNo) {
+        axios.get('http://localhost:8088/api/movies/watchlog', {
+          params: { movieId: parseInt(movieId, 10), profileNo }
+        })
+          .then(response => {
+            if (videoRef.current && response.data !== 0) {
+              // 딜레이를 추가하여 비디오 로드 후 이어보기 기능 적용
+              setTimeout(() => {
+                videoRef.current!.currentTime = response.data;
+              }, 130);
+            }
+          })
+          .catch(() => {
+            console.error("Failed to fetch watch progress");
+          });
+      }
+    }
+  }, [movieId]);
+
+  // 뒤로가기 버튼 처리
   const handleBack = useCallback(() => {
     const storedProfile = sessionStorage.getItem('selectedProfile');
     const profileNo = storedProfile ? JSON.parse(storedProfile).profileNo : null;
@@ -164,24 +144,23 @@ const MovieDetailPage: React.FC = () => {
       const movieIdNumber = parseInt(movieId, 10);
 
       if (videoRef.current && profileNo) {
-        const currentTime = videoRef.current.currentTime; // 현재 시청 시간
+        const currentTime = videoRef.current.currentTime;
 
-        // 시청 시간을 서버에 저장
         axios.post('http://localhost:8088/api/movies/watchlog', null, {
           params: {
             movieId: movieIdNumber,
             profileNo,
-            progressTime: currentTime // 시청 시간 전송
+            progressTime: currentTime
           },
           headers: {
             'Content-Type': 'application/json',
           }
         })
           .then(() => {
-            navigate("/home"); // 이전 페이지로 이동
+            navigate("/home");
           })
-          .catch(error => {
-            console.error("Failed to save watch progress", error);
+          .catch(() => {
+            console.error("Failed to save watch progress");
           });
       } else {
         console.error("Profile number is missing. Unable to save watch progress.");
@@ -189,70 +168,14 @@ const MovieDetailPage: React.FC = () => {
     }
   }, [navigate, movieId]);
 
+  // 비디오 자동 재생 및 음소거 설정
   useEffect(() => {
-    // 좋아요 상태를 서버에서 가져오는 로직을 추가할 수 있습니다.
-    // 예: axios.get(`http://localhost:8088/api/movies/${movieId}/like-status`)
-    //   .then(response => setLiked(response.data.liked))
-    //   .catch(error => console.error('Error fetching like status:', error));
-  }, [movieId]);
-
-
-  useEffect(() => {
-    const updateProfileVector = async (profileNo: number, movieId: number, movieTags: string[]) => {
-      try {
-        // 태그 배열을 JSON 형식으로 변환
-        const tagsJson = JSON.stringify(movieTags);
-
-        await axios.post('http://localhost:8088/api/profiles/update-vector', {
-          profileId: profileNo,
-          movieId: movieId,
-          movieTags: tagsJson, // JSON 형식으로 전송
-        });
-
-        console.log('Profile vector updated successfully');
-      } catch (error) {
-        console.error('Error updating profile vector:', error);
-      }
-    };
-
-    if (movieId) {
-      const movieIdNumber = parseInt(movieId, 10);
-      if (!isNaN(movieIdNumber)) {
-        axios.get(`http://localhost:8088/api/movies/${movieIdNumber}`)
-          .then(response => {
-            setMovie(response.data);
-            setLoading(false);
-
-            const storedProfile = sessionStorage.getItem('selectedProfile');
-            if (storedProfile) {
-              const profile = JSON.parse(storedProfile);
-              const profileNo: number = profile.profileNo;
-
-              if (response.data.tagList) {
-                // 프로필 벡터 업데이트
-                updateProfileVector(profileNo, movieIdNumber, response.data.tagList);
-              }
-            } else {
-              console.error('세션 스토리지에서 프로필 정보를 찾을 수 없습니다.');
-            }
-          })
-          .catch(error => {
-            setError('영화 세부 정보를 로드하는 중 오류가 발생했습니다.');
-            setLoading(false);
-          });
-      } else {
-        setError('유효한 숫자가 아닌 영화 ID입니다.');
-        setLoading(false);
-      }
-    } else {
-      setError('영화 ID가 누락되었습니다.');
-      setLoading(false);
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+      setMuted(true);
+      videoRef.current.play();
     }
-  }, [movieId]);
-
-
-
-
+  }, []);
 
   const handlePlayPause = useCallback(() => {
     setPlaying(prev => !prev);
@@ -451,7 +374,6 @@ const MovieDetailPage: React.FC = () => {
       if (storedProfile) {
         const profile = JSON.parse(storedProfile);
         const profileNo = profile.profileNo;
-
         const movieIdNumber = parseInt(movieId, 10);
 
         if (!isNaN(movieIdNumber)) {
@@ -464,7 +386,7 @@ const MovieDetailPage: React.FC = () => {
               'Content-Type': 'application/json',
             }
           })
-            .then(response => {
+            .then(() => {
               console.log('Like status updated successfully');
             })
             .catch(error => {
@@ -480,8 +402,6 @@ const MovieDetailPage: React.FC = () => {
       console.error('movieId or movie is not available');
     }
   }, [movie, liked, movieId]);
-
-
 
   const getSliderSettings = (movieCount: number) => ({
     dots: false,
@@ -513,8 +433,8 @@ const MovieDetailPage: React.FC = () => {
           className={styles.reactPlayer}
           controls={false}
           onTimeUpdate={handleProgress}
-          onLoadedMetadata={handleDuration}
-          muted={true} // 초기값을 true로 설정하여 자동 재생 가능하도록 함
+          onLoadedMetadata={handleLoadedMetadata}
+          muted={true} // 비디오 자동 재생을 위한 초기 음소거 설정
           onEnded={handleEnded}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
@@ -522,7 +442,7 @@ const MovieDetailPage: React.FC = () => {
             videoRef.current?.play(); // 비디오가 재생 가능할 때 자동 재생
           }}
           autoPlay
-          preload="auto" // 비디오를 미리 로드하도록 설정
+          preload="auto"
         />
 
         <Box className={styles.controls} ref={controlsRef}>
