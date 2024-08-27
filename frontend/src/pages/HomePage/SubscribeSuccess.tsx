@@ -15,12 +15,9 @@ const SubscribeSuccess: React.FC = () => {
         console.log("useEffect 실행");
 
         const token = localStorage.getItem('authToken');
+        const kakaoAccessToken = localStorage.getItem("kakaoAccessToken");
 
-        if (!token) {
-            console.error('JWT 토큰이 없습니다. 로그인 페이지로 이동합니다.');
-            navigate('/login');
-            return;
-        }
+
 
         const subscribeUser = async () => {
             try {
@@ -58,7 +55,47 @@ const SubscribeSuccess: React.FC = () => {
             }
         };
 
-        subscribeUser();
+        const subscribeKaKao = async () => {
+            try {
+                const response = await axios.post('http://localhost:8088/api/users/subscribe-kakao', null, {
+                    headers: {
+                        'Authorization': `Bearer ${kakaoAccessToken}`,
+                    },
+                    params: {
+                        months: 1,
+                    }
+                });
+
+                console.log('구독이 성공적으로 처리되었습니다:', response.data);
+
+                // user 객체에서 이메일 추출
+                const userEmail = response.data.user.email;
+                console.log('사용자 이메일:', userEmail);
+
+                // 구독 성공 이메일 발송
+                if (userEmail) {
+                    try {
+                        await axios.post('http://localhost:8088/api/email/send-subscribe-success', { email: userEmail });
+                        console.log('구독 성공 이메일이 발송되었습니다.');
+                    } catch (error) {
+                        console.error('구독 성공 이메일 발송 중 오류 발생:', error);
+                    }
+                }
+
+                setTimeout(() => {
+                    navigate('/profiles');
+                }, 5000);
+
+            } catch (error) {
+                console.error('구독 처리 중 오류 발생:', error);
+            }
+        };
+
+        if (token) {
+            subscribeUser();
+        } else if (kakaoAccessToken) {
+            subscribeKaKao();
+        }
 
     }, [hasRequested, navigate]);
 

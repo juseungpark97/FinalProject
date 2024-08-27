@@ -65,3 +65,25 @@ h1 {
 .deleteButton:hover {
     background-color: darkred;
 }
+
+
+
+.crown {
+    position: relative;
+}
+
+.crown::after {
+    content: '👑';
+    position: absolute;
+    top: 50%;
+    /* 수직 가운데 정렬 */
+    left: 50%;
+    /* 수평 가운데 정렬 */
+    transform: translate(-50%, -50%);
+    /* 정확히 가운데로 이동 */
+    font-size: 30px;
+    /* 크기를 더 크게 */
+    color: gold;
+    z-index: 1;
+    /* 이미지 위에 표시되도록 설정 */
+}

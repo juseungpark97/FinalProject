@@ -19,12 +19,14 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
 
   useEffect(() => {
     const selectedProfileData = sessionStorage.getItem('selectedProfile');
+
     if (selectedProfileData) {
       const profile = JSON.parse(selectedProfileData);
       setSelectedProfile(profile);
     }
 
     const token = localStorage.getItem('authToken');
+
     if (token) {
       const decodedUser = decodeJWT(token);
       setUser(decodedUser);
@@ -65,12 +67,26 @@ const Header: React.FC<HeaderProps> = ({ className = "", onSearchClick, selected
     navigate('/profiles');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('kakaoAccessToken');
+      setSelectedProfile(null);
+      sessionStorage.removeItem('selectedProfile');
 
-    setSelectedProfile(null);
-    sessionStorage.removeItem('selectedProfile');
-    navigate('/login');
+      // 카카오 로그아웃 처리
+      const clientId = "3cd0dba35845286d817669df88d06d12"; // 클라이언트 ID
+      const logoutRedirectUri = "http://localhost:3000"; // 로그아웃 후 리디렉션될 URI
+
+      // 카카오 로그아웃 URL 생성
+      const logoutUrl = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${encodeURIComponent(logoutRedirectUri)}`;
+
+      // 브라우저 리디렉션을 통해 카카오 로그아웃 요청
+      window.location.href = logoutUrl;
+
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   useEffect(() => {
