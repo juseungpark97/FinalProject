@@ -17,7 +17,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <>
-      <Header selectedProfile={profile} setSelectedProfile={setProfile} />
       <div className={styles.dashboardPage}>
         <SideMenu />
         <div className={styles.content}>
