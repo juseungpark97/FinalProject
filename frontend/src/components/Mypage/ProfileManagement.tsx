@@ -130,6 +130,14 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                     <ul>
                         <li>
                             <button
+                                onClick={() => onMenuClick('likedMovies')}  // 좋아요 한 영상 메뉴 클릭 시 실행
+                                className={styles.menuLink}
+                            >
+                                좋아요 한 영상 <span className={styles.arrow}>&gt;</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button
                                 onClick={() => setShowPaymentInfo(!showPaymentInfo)}
                                 className={styles.menuLink}
                             >

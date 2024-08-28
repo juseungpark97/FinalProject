@@ -11,6 +11,7 @@ import { Profile } from '../../types/Profile';
 import PasswordChange from '../../components/Mypage/PasswordChange';
 import ProfileLock from '../../components/Mypage/ProfileLock';
 import PhoneChange from '../../components/Mypage/PhoneChange';
+import HeartList from '../../components/Mypage/HeartList';
 
 const Account: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState<string>('overview');
@@ -65,6 +66,7 @@ const Account: React.FC = () => {
           {selectedMenu === 'profileLock' && profile && (
             <ProfileLock profileId={profile.profileNo} />
           )}
+          {selectedMenu === 'likedMovies' && profile && <HeartList profileNo={profile.profileNo} />}
         </div>
       </div>
     </div>
