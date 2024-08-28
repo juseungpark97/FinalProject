@@ -138,29 +138,21 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ onMenuClick, prof
                             {showPaymentInfo && <PaymentInfo profileId={selectedProfile.profileNo} />}
                         </li>
                         <li>
-                            <a
-                                href=""
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onMenuClick('profileLock');
-                                }}
+                            <button
+                                onClick={() => onMenuClick('profileLock')}
                                 className={styles.menuLink}
                             >
                                 프로필 잠금 <span className={styles.arrow}>&gt;</span>
-                            </a>
+                            </button>
                         </li>
                         {selectedProfile.profileMain !== 'S' && (
                             <li>
-                                <a
-                                    href=""
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        onMenuClick('accountDelete');
-                                    }}
+                                <button
+                                    onClick={() => onMenuClick('accountDelete')}
                                     className={styles.menuLink}
                                 >
                                     회원 탈퇴 <span className={styles.arrow}>&gt;</span>
-                                </a>
+                                </button>
                             </li>
                         )}
                     </ul>
