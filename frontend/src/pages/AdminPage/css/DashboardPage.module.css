@@ -1,9 +1,8 @@
 .dashboardPage {
   display: flex;
-  height: 92vh;
+  height: 100vh;
   font-family: Arial, sans-serif;
   background-color: #f8f9fa;
-  padding-top: 70px;
   overflow: hidden;
 }
 
@@ -20,9 +19,8 @@
   flex-direction: row;
   align-content: center;
   padding: 10px;
-  overflow-y: auto;
   width: 100%;
-  height: calc(100vh - 70px);
+  height: calc(100vh);
 }
 
 .leftColumn {
@@ -206,6 +204,7 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 50px;
   margin-bottom: 20px;
   margin-left: 200px;
   margin-right: 200px;
@@ -377,6 +376,7 @@ h2 {
 
 .pagination .pageLink {
   color: #2c3e50;
+  background-color: #ddd;
   padding: 8px 16px;
   text-decoration: none;
   border: 1px solid #ddd;
@@ -385,7 +385,7 @@ h2 {
 }
 
 .pagination .pageLink:hover {
-  background-color: #ddd;
+  background-color: #5e6972;
 }
 
 .pagination .active .pageLink {
@@ -416,6 +416,10 @@ h2 {
   cursor: pointer;
   font-size: 18px;
   color: #2c3e50;
+}
+
+span :hover{
+  cursor: pointer;
 }
 
 .filterContainer .activeFilter {
@@ -456,7 +460,7 @@ h2 {
 
 .ChattingCardButton {
   margin-left: 30%;
-  width: 40%;
+  width: 45%;
   background-color: #2c3e50;
   color: white;
   border: none;
@@ -679,7 +683,7 @@ h2 {
 
 /* 표 스타일링 추가 */
 .recentMoviesTable {
-  width: 120%;
+  width: 107%;
   border-collapse: collapse;
   font-family: Arial, sans-serif;
   background-color: #ffffff;

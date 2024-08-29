@@ -1,8 +1,7 @@
-import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { GoogleOAuthProvider } from '@react-oauth/google'; // 구글 인증관련
+import { useEffect } from "react";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Signin from "./pages/BeforePage/SignInPage";
-import Landing from "./pages/BeforePage/MainPage";
 import HomePage from "./pages/HomePage/HomePage";
 import DashboardPage from "./pages/AdminPage/DashboardPage";
 import UploadMovie from "./pages/AdminPage/UploadMovie";
@@ -15,11 +14,14 @@ import HelpPage from "./pages/MyPage/Help";
 import Profiles from "./pages/BeforePage/Profiles";
 import SubscribeSuccess from "./pages/HomePage/SubscribeSuccess";
 import Findidpage from "./pages/BeforePage/findidpage";
-import findpwpage from "./pages/BeforePage/findpwpage";
 import Findpwpage from "./pages/BeforePage/findpwpage";
 import MembershipCancel from "./components/Mypage/MembershipCancel";
 import HeartList from "./components/Mypage/HeartList";
 "./pages/BeforePage/findpwpage";
+import Landing from "./pages/BeforePage/MainPage";
+import EasterEgg from "./EasterEgg/EasterEgg";
+import ProtectedRoute from "../src/Auth/ProtectedRoute";
+import PublicRoute from "../src/Auth/publicRoute";
 
 function App() {
   const location = useLocation();
@@ -50,7 +52,7 @@ function App() {
       case "/dashboard/1on1chat":
         title = "Dashboard";
         metaDescription = "This is the dashboard page description.";
-        break; // 'break' 추가
+        break;
       case "/upload":
         title = "Upload Movie";
         metaDescription = "Upload a new movie.";
@@ -66,9 +68,10 @@ function App() {
     }
 
     if (metaDescription) {
-      const metaDescriptionTag: HTMLMetaElement | null = document.querySelector(
+      const metaDescriptionTag = document.querySelector(
         'head > meta[name="description"]'
-      );
+      ) as HTMLMetaElement;
+
       if (metaDescriptionTag) {
         metaDescriptionTag.content = metaDescription;
       }
@@ -78,22 +81,27 @@ function App() {
   return (
     <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
       <Routes>
-        <Route path="/signin" element={<Signin />} />
+        {/* 로그인 안했을 때 접근 가능 */}
+        <Route path="/signin" element={<PublicRoute element={<Signin />} />} />
         <Route path="/" element={<Landing />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/dashboard/*" element={<DashboardPage />} />
-        <Route path="/upload" element={<UploadMovie />} />
-        <Route path="/movie/:movieId" element={<MovieDetailPage />} />
-        <Route path="/account" element={<Account />} />
-        <Route path="/help" element={<HelpPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<PublicRoute element={<LoginPage />} />} />
+        <Route path="/passwordlogin" element={<PublicRoute element={<PwLogin />} />} />
+        <Route path="/Findidpage" element={<PublicRoute element={<Findidpage />} />} />
+        <Route path="/Findpwdpage" element={<PublicRoute element={<Findpwpage />} />} />
+        {/* 구독 관련 페이지: 누구나 접근 가능 */}
         <Route path="/subscribe" element={<SubscribePage />} />
-        <Route path="/passwordlogin" element={<PwLogin />} />
-        <Route path="/profiles" element={<Profiles />} />
-        <Route path="/Findidpage" element={<Findidpage />} />
-        <Route path="/Findpwdpage" element={<Findpwpage />} />
-        <Route path="/subscribe/success" element={<SubscribeSuccess />} /> {/* 구독 성공 페이지 경로 추가 */}
-        <Route path="/heart-list" element={<HeartList profileNo={1} />} /> {/* HeartList 경로 추가 */}
+        <Route path="/heart-list" element={<HeartList profileNo={1} />} />
+        <Route path="/subscribe/success" element={<SubscribeSuccess />} />
+        {/* 로그인 했을 때 접근 가능 */}
+        <Route path="/home" element={<ProtectedRoute element={<HomePage />} requiredRole="user" />} />
+        <Route path="/movie/:movieId" element={<ProtectedRoute element={<MovieDetailPage />} requiredRole="user" />} />
+        <Route path="/account" element={<ProtectedRoute element={<Account />} requiredRole="user" />} />
+        <Route path="/profiles" element={<ProtectedRoute element={<Profiles />} requiredRole="user" />} />
+        <Route path="/help" element={<ProtectedRoute element={<HelpPage />} requiredRole="user" />} />
+        <Route path="/easterEgg" element={<ProtectedRoute element={<EasterEgg />} requiredRole="user" />} />
+        {/* 관리자만 접근 가능 */}
+        <Route path="/dashboard/*" element={<ProtectedRoute element={<DashboardPage />} requiredRole="admin" />} />
+        <Route path="/upload" element={<ProtectedRoute element={<UploadMovie />} requiredRole="admin" />} />
       </Routes>
     </GoogleOAuthProvider>
   );

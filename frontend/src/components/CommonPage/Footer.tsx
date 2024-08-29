@@ -7,18 +7,6 @@ const Footer: FunctionComponent = () => {
         <footer className={styles.footer}>
             <div className={styles.footerContent}>
 
-                <div className={styles.footerLinks}>
-                    <Link to="#">화면 해설</Link>
-                    <Link to="#">고객 센터</Link>
-                    <Link to="#">미디어 센터</Link>
-                    <Link to="#">개발 정보</Link>
-                    <Link to="#">이용 약관</Link>
-                    <Link to="#">개인정보</Link>
-                    <Link to="#">법적 고지</Link>
-                    <Link to="#">쿠키 설정</Link>
-                    <Link to="#">회사 정보</Link>
-                    <Link to="#">문의하기</Link>
-                </div>
 
                 <div className={styles.footerDisclaimer}>
                     <img src="/logo-text-2@2x.png" alt="로고" />

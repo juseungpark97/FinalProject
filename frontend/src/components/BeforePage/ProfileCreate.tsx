@@ -19,10 +19,13 @@ const ProfileCreate: React.FC<ProfileCreateProps> = ({ onProfileCreated, onCance
 
     const handleCreateProfile = async () => {
         const token = localStorage.getItem('authToken');
-        if (!token) {
+        const kakaoAccessToken = localStorage.getItem("kakaoAccessToken");
+        if (!token && !kakaoAccessToken) {
             setError('로그인이 필요합니다.');
             return;
         }
+
+
 
         if (!newProfileName || !newProfileImage) {
             setError('프로필 이름과 이미지를 모두 입력해주세요.');
@@ -33,29 +36,58 @@ const ProfileCreate: React.FC<ProfileCreateProps> = ({ onProfileCreated, onCance
         formData.append('profileName', newProfileName);
         formData.append('profileImg', newProfileImage as Blob); // 이미지 파일을 FormData에 추가
 
-        try {
-            const response = await axios.post('http://localhost:8088/api/profiles/create', formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
 
-            if (response.data) {
-                const createdProfile: Profile = response.data;
-                onProfileCreated(createdProfile);
-                setNewProfileName('');
-                setNewProfileImage(null);
-                setNewProfileImageUrl(null); // 이미지 URL 초기화
-                setNewProfileImagePreview(null); // 미리보기 이미지 초기화
-                setError(null);
-            } else {
-                setError('프로필 생성에 실패했습니다.');
+        if (token) {
+            try {
+                const response = await axios.post('http://localhost:8088/api/profiles/create', formData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                if (response.data) {
+                    const createdProfile: Profile = response.data;
+                    onProfileCreated(createdProfile);
+                    setNewProfileName('');
+                    setNewProfileImage(null);
+                    setNewProfileImageUrl(null); // 이미지 URL 초기화
+                    setNewProfileImagePreview(null); // 미리보기 이미지 초기화
+                    setError(null);
+                } else {
+                    setError('프로필 생성에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('프로필 생성 중 오류 발생:', error);
+                setError('프로필 생성 중 오류가 발생했습니다.');
             }
-        } catch (error) {
-            console.error('프로필 생성 중 오류 발생:', error);
-            setError('프로필 생성 중 오류가 발생했습니다.');
+        } else if (kakaoAccessToken) {
+            try {
+                const response = await axios.post('http://localhost:8088/api/profiles/createKaKao', formData, {
+                    headers: {
+                        'Authorization': `Bearer ${kakaoAccessToken}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                if (response.data) {
+                    const createdProfile: Profile = response.data;
+                    onProfileCreated(createdProfile);
+                    setNewProfileName('');
+                    setNewProfileImage(null);
+                    setNewProfileImageUrl(null); // 이미지 URL 초기화
+                    setNewProfileImagePreview(null); // 미리보기 이미지 초기화
+                    setError(null);
+                } else {
+                    setError('프로필 생성에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('프로필 생성 중 오류 발생:', error);
+                setError('프로필 생성 중 오류가 발생했습니다.');
+            }
+
         }
+
     };
 
     const handleSelectImage = (imageName: string) => {

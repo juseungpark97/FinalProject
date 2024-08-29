@@ -30,16 +30,6 @@ const SideMenu: React.FC = () => {
         </li>
         <li>
           <NavLink
-            to="/upload"
-            className={({ isActive }) =>
-              `${styles.menuItem} ${isActive ? styles.activeMenuItem : ''}`
-            }
-          >
-            영화 추가
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
             to="/dashboard/memberManage"
             className={({ isActive }) =>
               `${styles.menuItem} ${isActive ? styles.activeMenuItem : ''}`
@@ -66,6 +56,17 @@ const SideMenu: React.FC = () => {
             }
           >
             1대1채팅
+          </NavLink>
+        </li>
+        <li className={styles.menuSeparator} />
+        <li>
+          <NavLink
+            to="/upload"
+            className={({ isActive }) =>
+              `${styles.menuItem} ${isActive ? styles.activeMenuItem : ''}`
+            }
+          >
+            영화 추가
           </NavLink>
         </li>
       </ul>

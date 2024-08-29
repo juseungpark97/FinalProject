@@ -40,3 +40,8 @@
   font-weight: bold; /* 선택된 메뉴 항목의 폰트를 굵게 설정 */
   border-radius: 4px; /* 선택된 메뉴 항목의 모서리 둥글게 */
 }
+
+.menuSeparator {
+  border-top: 1px solid #444; /* 선 색상 및 두께 */
+  margin: 10px 0; /* 위아래 여백 */
+}

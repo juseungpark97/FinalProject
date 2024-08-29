@@ -14,33 +14,38 @@ const ProfilePage: React.FC = () => {
     const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
-    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // 비밀번호 모달 상태 추가
     const navigate = useNavigate();
+
+    const highestScoreProfile = profiles.reduce((maxProfile, profile) => {
+        return profile.tetrisHighScore > (maxProfile?.tetrisHighScore || 0) ? profile : maxProfile;
+    }, null as Profile | null);
+
+    useEffect(() => {
+        // URL에서 토큰 추출
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+
+        if (token) {
+            // 로컬 스토리지에 토큰 저장
+            localStorage.setItem('kakaoAccessToken', token);
+        }
+    }, [location]);
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        const storedProfile = sessionStorage.getItem('selectedProfile');
-
-        if (storedProfile) {
-            setSelectedProfile(JSON.parse(storedProfile));
-        }
+        const kakaoAccessToken = localStorage.getItem("kakaoAccessToken");
 
         if (token) {
             axios.get('http://localhost:8088/api/users/subscription-status', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(response => {
-                    console.log("Full Server Response:", response.data);
-                    const { isSubscribed, subStatus, endDate } = response.data;
-                    console.log("Subscription End Date:", endDate);
-
-                    const today = new Date();
-                    const endSubscriptionDate = new Date(endDate);
-
-                    if ((!isSubscribed && subStatus !== "ACTIVE") ||
-                        (subStatus === "INACTIVE" && endSubscriptionDate < today)) {
-                        navigate('/subscribe');
-                    } else {
+                    const isSubscribed = response.data.isSubscribed;
+                    if (!isSubscribed) {
+                        navigate('/subscribe'); // 구독자가 아니라면 구독 페이지로 리디렉션
+                    }
+                    else {
                         axios.get('http://localhost:8088/api/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
                             .then(response => {
                                 const userNo = response.data.userNo;
@@ -49,12 +54,13 @@ const ProfilePage: React.FC = () => {
                                         if (Array.isArray(response.data)) {
                                             const profilesWithLockedStatus = response.data.map((profile: any) => ({
                                                 ...profile,
-                                                isLocked: profile.locked,
+                                                isLocked: profile.locked, // 서버에서 받은 locked 필드를 isLocked로 매핑
                                             }));
                                             setProfiles(profilesWithLockedStatus);
-                                            if (response.data.length > 0 && !storedProfile) {
+                                            if (response.data.length > 0) {
                                                 setSelectedMenu('select');
                                             }
+
                                         } else {
                                             console.error('프로필 데이터가 배열이 아닙니다:', response.data);
                                         }
@@ -66,22 +72,68 @@ const ProfilePage: React.FC = () => {
                             .catch(error => {
                                 console.error('사용자 정보 조회 중 오류 발생:', error);
                                 if (error.response && error.response.status === 403) {
-                                    navigate('/subscribe');
+                                    navigate('/subscribe');  // 구독이 필요하면 구독 페이지로 리디렉션
                                 }
                             });
                     }
-                })
-                .catch(error => {
-                    console.error('구독 상태 확인 중 오류 발생:', error);
-                    if (error.response && error.response.status === 403) {
-                        navigate('/subscribe');
+                }
+                )
+        } else if (kakaoAccessToken) {
+            axios.get('http://localhost:8088/api/users/subscription-status-kakao', {
+                headers: { 'Authorization': `Bearer ${kakaoAccessToken}` }
+            })
+                .then(response => {
+                    const isSubscribed = response.data.isSubscribed;
+                    if (!isSubscribed) {
+                        navigate('/subscribe'); // 구독자가 아니라면 구독 페이지로 리디렉션
                     }
-                });
-        } else {
+                    else {
+                        axios.get('http://localhost:8088/api/users/meKaKao', { headers: { 'Authorization': `Bearer ${kakaoAccessToken}` } })
+                            .then(response => {
+                                const userNo = response.data.userNo;
+                                axios.get(`http://localhost:8088/api/profiles/user/${userNo}`, { headers: { 'Authorization': `Bearer ${kakaoAccessToken}` } })
+                                    .then(response => {
+                                        if (Array.isArray(response.data)) {
+                                            const profilesWithLockedStatus = response.data.map((profile: any) => ({
+                                                ...profile,
+                                                isLocked: profile.locked, // 서버에서 받은 locked 필드를 isLocked로 매핑
+                                            }));
+                                            setProfiles(profilesWithLockedStatus);
+                                            if (response.data.length > 0) {
+                                                setSelectedMenu('select');
+                                            }
+
+                                        } else {
+                                            console.error('프로필 데이터가 배열이 아닙니다:', response.data);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('프로필 조회 중 오류 발생:', error);
+                                    });
+                            })
+                            .catch(error => {
+                                console.error('사용자 정보 조회 중 오류 발생:', error);
+                                if (error.response && error.response.status === 403) {
+                                    navigate('/subscribe');  // 구독이 필요하면 구독 페이지로 리디렉션
+                                }
+                            });
+                    }
+                }
+                )
+
+        }
+
+
+        else {
             console.error('토큰이 없습니다');
         }
     }, [navigate]);
 
+    useEffect(() => {
+        if (selectedMenu === 'select') {
+            sessionStorage.removeItem('selectedProfile');
+        }
+    }, [selectedMenu]);
 
     const handleProfileSelect = (profile: Profile) => {
         if (profile.isLocked) {
@@ -164,6 +216,7 @@ const ProfilePage: React.FC = () => {
                         onProfileSelect={handleProfileSelect}
                         onAddProfile={handleAddProfile}
                         onProfileDelete={openDeleteModal} // 삭제 모달 오픈 함수 전달
+                        highestScoreProfile={highestScoreProfile} // 하이스코어 프로필 전달
                     />
                     <ConfirmModal
                         isOpen={modalOpen}

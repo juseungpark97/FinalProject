@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,6 +32,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.last.model.vo.Profile;
 import com.kh.last.model.vo.USERS;
+import com.kh.last.repository.ProfileRepository;
+import com.kh.last.service.KakaoService;
 import com.kh.last.service.ProfileService;
 import com.kh.last.service.UserService;
 
@@ -41,20 +44,41 @@ import io.jsonwebtoken.Jwts;
 @RequestMapping("/api/profiles")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ProfileController {
+	
+    @Value("${profile.images.path}")
+    private String profileImagesPath;
 
     @Autowired
     private ProfileService profileService;
 
     @Autowired
     private UserService userService;
+    
+    @Autowired ProfileRepository profileRepository;
+    
+    @Autowired KakaoService kakaoService;
 
     private final SecretKey key;
+    
+    private String url = "C:/finalProject/FinalProject/frontend/public/profile-images";
 
     @Autowired
     public ProfileController(UserService userService) {
         this.userService = userService;
         this.key = userService.getKey(); // UserService로부터 SecretKey 주입
     }
+    
+    @PostMapping("/{profileId}/tetris/score")
+    public ResponseEntity<Profile> updateTetrisScore(
+        @PathVariable Long profileId, 
+        @RequestBody int newScore) {
+        
+        Profile profile = profileRepository.findById(profileId).orElseThrow();
+        profile.updateTetrisHighScore(newScore);
+        profileRepository.save(profile);
+        return ResponseEntity.ok(profile);
+    }
+    
     @GetMapping("/user/{userNo}")
     public ResponseEntity<List<Profile>> getProfilesByUserNo(@PathVariable Long userNo) {
         List<Profile> profiles = profileService.getProfilesByUserNo(userNo);
@@ -80,7 +104,33 @@ public class ProfileController {
             String email = claims.getSubject();
             USERS user = userService.getUserByEmail(email);
             if (user != null) {
-                String directory = "C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images";
+
+            	String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
+                String profileImgFilename = profileImg.getOriginalFilename();
+                Path imagePath = Paths.get(directory, profileImgFilename);
+                Files.write(imagePath, profileImg.getBytes());
+                String imagePathToStore = "/profile-images/" + profileImgFilename;
+                Profile newProfile = profileService.createProfile(user.getUserNo(), profileName, imagePathToStore);
+
+                return ResponseEntity.status(HttpStatus.CREATED).body(newProfile);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating profile");
+        }
+    }
+    
+    @PostMapping("/createKaKao")
+    public ResponseEntity<?> createProfileKaKao(@RequestParam String profileName, @RequestParam MultipartFile profileImg,
+                                           @RequestHeader("Authorization") String token) {
+        try {
+        	 String accessToken = token.replace("Bearer ", "");
+             String email = kakaoService.getKakaoUserEmail(accessToken);
+    		 USERS user = userService.getUserByEmail(email);
+            if (user != null) {
+
+            	String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
                 String profileImgFilename = profileImg.getOriginalFilename();
                 Path imagePath = Paths.get(directory, profileImgFilename);
                 Files.write(imagePath, profileImg.getBytes());
@@ -148,9 +198,11 @@ public class ProfileController {
 
     @GetMapping("/available-images")
     public ResponseEntity<List<String>> getAvailableImages() {
+    	 String directory = Paths.get(System.getProperty("user.dir"), profileImagesPath).normalize().toString();
         try {
             List<String> imageNames = Files
-                    .list(Paths.get("C:/Users/user1/Desktop/ll/FinalProject/frontend/public/profile-images"))
+
+            		  .list(Paths.get(directory))
                     .map(path -> path.getFileName().toString()).collect(Collectors.toList());
             return ResponseEntity.ok(imageNames);
         } catch (IOException e) {

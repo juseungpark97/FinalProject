@@ -194,8 +194,9 @@ export default function MemberManage() {
     <div className={styles.tableContainer}>
       <div className={styles.headerContainer}>
         <h1 className={styles.movimanage}>회원 관리</h1>
-        <a onClick={() => setViewMode('all')}>전체회원</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-        <a onClick={() => setViewMode('stopped')}>정지회원</a>
+        <span onClick={() => setViewMode('all')}>전체회원</span>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <span onClick={() => setViewMode('stopped')}>정지회원</span>
         <div className={styles.searchContainer}>
           <input
             type="text"

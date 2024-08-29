@@ -10,13 +10,13 @@ import ManageFAQ from '../../../src/components/AdminPage/ManageFAQ';
 import InsertFAQ from '../../../src/components/AdminPage/InsertFAQ';
 import ChattingList from '../../../src/components/AdminPage/ChattingList';
 import UploadMovie from './UploadMovie';
+import { Profile } from '../../types/Profile';
 
 const DashboardPage: React.FC = () => {
-  const [profile, setProfile] = useState<{ profileImg: string; profileName: string; profileNo: number } | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   return (
     <>
-      <Header selectedProfile={profile} setSelectedProfile={setProfile} />
       <div className={styles.dashboardPage}>
         <SideMenu />
         <div className={styles.content}>

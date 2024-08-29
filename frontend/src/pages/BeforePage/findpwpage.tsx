@@ -19,7 +19,7 @@ const Findpwpage: React.FC = () => {
                     className={styles.logo} style={{ opacity: 1, zIndex: 1 }}
                 />
                 <FindPwForm />
-                <p className={styles.helpText}>Questions? Call 000-800-040-1843</p>
+             
 
             </div>
         </main>
