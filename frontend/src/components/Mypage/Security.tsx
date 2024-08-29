@@ -14,40 +14,28 @@ const Security: React.FC<SecurityProps> = ({ onMenuClick }) => {
                 <div className={styles.quickLinks}>
                     <ul>
                         <li>
-                            <a
-                                href=""
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onMenuClick('passwordChange'); // 클릭 시 비밀번호 변경으로 전환
-                                }}
+                            <button
+                                onClick={() => onMenuClick('passwordChange')}
                                 className={styles.menuLink}
                             >
                                 비밀번호 변경 <span className={styles.arrow}>&gt;</span>
-                            </a>
+                            </button>
                         </li>
                         <li>
-                            <a
-                                href=""
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onMenuClick('accountInfo'); // 이 메뉴도 필요에 따라 수정
-                                }}
+                            <button
+                                onClick={() => onMenuClick('accountInfo')}
                                 className={styles.menuLink}
                             >
                                 아이디/이메일 <span className={styles.arrow}>&gt;</span>
-                            </a>
+                            </button>
                         </li>
                         <li>
-                            <a
-                                href=""
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    onMenuClick('phoneChange'); // 이 메뉴도 필요에 따라 수정
-                                }}
+                            <button
+                                onClick={() => onMenuClick('phoneChange')}
                                 className={styles.menuLink}
                             >
                                 휴대폰 <span className={styles.arrow}>&gt;</span>
-                            </a>
+                            </button>
                         </li>
                     </ul>
                 </div>

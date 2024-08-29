@@ -274,12 +274,16 @@
   opacity: 1;
   transition: opacity 0.3s;
 }
+
 .back-button {
   position: absolute;
-  top: 20px; /* 상단에서 20px */
-  left: 20px; /* 좌측에서 20px */
+  top: 20px;
+  /* 상단에서 20px */
+  left: 20px;
+  /* 좌측에서 20px */
   padding: 10px 20px;
-  background-color: #ff5722; /* 버튼 배경색 */
+  background-color: #ff5722;
+  /* 버튼 배경색 */
   color: white;
   border: none;
   border-radius: 8px;
@@ -287,7 +291,8 @@
   font-size: 16px;
   box-shadow: 0px 5px 15px rgba(255, 87, 34, 0.3);
   transition: background-color 0.3s, box-shadow 0.3s;
-  z-index: 1000; /* 다른 요소 위에 버튼을 표시 */
+  z-index: 1000;
+  /* 다른 요소 위에 버튼을 표시 */
 }
 
 .back-button:hover {
