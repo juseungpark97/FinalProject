@@ -316,14 +316,4 @@ public class UserController {
 		}
 	}
 
-		request.setEmail(email);
-		boolean success = userService.myPagePwdChange(request);
-
-		if (success) {
-			return ResponseEntity.ok().body("Password changed successfully");
-		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body("Current password is incorrect or user not found");
-		}
-	}
 }
