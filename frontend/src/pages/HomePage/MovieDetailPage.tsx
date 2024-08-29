@@ -85,6 +85,59 @@ const MovieDetailPage: React.FC = () => {
     }
   }, [movie]);
 
+  useEffect(() => {
+    const updateProfileVector = async (profileNo: number, movieId: number, movieTags: string[]) => {
+      try {
+        // 태그 배열을 JSON 형식으로 변환
+        const tagsJson = JSON.stringify(movieTags);
+
+        await axios.post('http://localhost:8088/api/profiles/update-vector', {
+          profileId: profileNo,
+          movieId: movieId,
+          movieTags: tagsJson, // JSON 형식으로 전송
+        });
+
+        console.log('Profile vector updated successfully');
+      } catch (error) {
+        console.error('Error updating profile vector:', error);
+      }
+    };
+
+    if (movieId) {
+      const movieIdNumber = parseInt(movieId, 10);
+      if (!isNaN(movieIdNumber)) {
+        axios.get(`http://localhost:8088/api/movies/${movieIdNumber}`)
+          .then(response => {
+            setMovie(response.data);
+            setLoading(false);
+
+            const storedProfile = sessionStorage.getItem('selectedProfile');
+            if (storedProfile) {
+              const profile = JSON.parse(storedProfile);
+              const profileNo: number = profile.profileNo;
+
+              if (response.data.tagList) {
+                // 프로필 벡터 업데이트
+                updateProfileVector(profileNo, movieIdNumber, response.data.tagList);
+              }
+            } else {
+              console.error('세션 스토리지에서 프로필 정보를 찾을 수 없습니다.');
+            }
+          })
+          .catch(error => {
+            setError('영화 세부 정보를 로드하는 중 오류가 발생했습니다.');
+            setLoading(false);
+          });
+      } else {
+        setError('유효한 숫자가 아닌 영화 ID입니다.');
+        setLoading(false);
+      }
+    } else {
+      setError('영화 ID가 누락되었습니다.');
+      setLoading(false);
+    }
+  }, [movieId]);
+
   // 시청 기록 업데이트
   useEffect(() => {
     if (movieId) {
