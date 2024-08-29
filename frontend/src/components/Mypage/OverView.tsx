@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';  // useNavigate 훅 임포트
 import styles from './css/MyPage.module.css';
 
 interface Subscription {
@@ -11,13 +12,16 @@ interface Subscription {
 const OverView: React.FC = () => {
     const [subscription, setSubscription] = useState<Subscription | null>(null);
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
+    const navigate = useNavigate();  // useNavigate 훅 사용
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (!token) {
             alert('로그인이 필요합니다.');
+            navigate('/');  // 홈으로 리다이렉트
             return;
         }
+
 
         axios.get('http://localhost:8088/api/myPage/subscription-date', {
             headers: {

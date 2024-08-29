@@ -7,6 +7,7 @@ interface Subscription {
     startDate: string;
     endDate: string;
     subStatus: string;
+    cancelled: boolean;  // 여기서 필드 이름을 "cancelled"로 수정합니다.
 }
 
 const Membership: React.FC = () => {
@@ -15,39 +16,116 @@ const Membership: React.FC = () => {
     const [showCancel, setShowCancel] = useState<boolean>(false);
 
     useEffect(() => {
+        const fetchSubscriptionData = async () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('로그인이 필요합니다.');
+                return;
+            }
+
+            try {
+                const response = await axios.get('http://localhost:8088/api/myPage/subscription-date', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                console.log('Subscription data:', response.data); // 로그 추가
+
+                if (response.status === 200) {
+                    const subscriptionData: Subscription = response.data;
+                    setSubscription(subscriptionData);
+
+                    const today = new Date();
+                    const endDate = new Date(subscriptionData.endDate);
+                    const timeDiff = endDate.getTime() - today.getTime();
+                    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    setDaysLeft(daysRemaining);
+                } else {
+                    console.error('Failed to fetch subscription data:', response.status);
+                    alert('구독 정보를 불러오지 못했습니다.');
+                }
+            } catch (error) {
+                console.error('Error fetching subscription data:', error);
+                alert('구독 정보를 가져오는 중 오류가 발생했습니다.');
+            }
+        };
+
+        fetchSubscriptionData();
+    }, []);
+
+    const handleMembershipCancelClick = () => {
+        setShowCancel(true);
+    };
+
+    const handleCancel = () => {
+        setShowCancel(false);
+
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            axios.get('http://localhost:8088/api/myPage/subscription-date', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then(response => {
+                    const subscriptionData: Subscription = response.data;
+                    setSubscription(subscriptionData);
+
+                    const today = new Date();
+                    const endDate = new Date(subscriptionData.endDate);
+                    const timeDiff = endDate.getTime() - today.getTime();
+                    const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    setDaysLeft(daysRemaining);
+                })
+                .catch(error => {
+                    console.error('Error fetching subscription data:', error);
+                });
+        }
+    };
+
+    const handleMembershipReactivateClick = async () => {
         const token = localStorage.getItem('authToken');
         if (!token) {
             alert('로그인이 필요합니다.');
             return;
         }
 
-        axios.get('http://localhost:8088/api/myPage/subscription-date', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then(response => {
-                const subscriptionData: Subscription = response.data;
-                setSubscription(subscriptionData);
-
-                const today = new Date();
-                const endDate = new Date(subscriptionData.endDate);
-                const timeDiff = endDate.getTime() - today.getTime();
-                const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                setDaysLeft(daysRemaining);
-            })
-            .catch(error => {
-                console.error('Error fetching subscription data:', error);
+        try {
+            const response = await axios.put('http://localhost:8088/api/users/reactivate-subscription', null, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
             });
-    }, []);
 
-    const handleMembershipCancelClick = () => {
-        setShowCancel(true); // 멤버십 해지 페이지를 보여줌
+            if (response.status === 200) {
+                console.log('Reactivation Response:', response.data); // 로그 추가
+                alert('멤버십이 성공적으로 재활성화되었습니다.');
+                setSubscription(prevState => {
+                    if (prevState) {
+                        const updatedState = { ...prevState, cancelled: false }; // 필드 이름을 "cancelled"로 수정합니다.
+                        console.log('Updated State:', updatedState); // 상태 업데이트 로그 추가
+                        return updatedState;
+                    }
+                    return null;
+                });
+
+                // 상태가 변경된 후 컴포넌트 리렌더링 강제
+                setShowCancel(false);
+            } else {
+                alert('멤버십 재활성화에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('네트워크 오류 또는 서버 응답 없음:', error);
+            alert('네트워크 오류 또는 서버가 응답하지 않습니다.');
+        }
     };
 
-    const handleCancel = () => {
-        setShowCancel(false); // 멤버십 해지 취소 시 원래 페이지로 돌아옴
-    };
+    useEffect(() => {
+        if (subscription) {
+            console.log('Subscription state updated:', subscription); // 상태 변화 추적용 로그
+        }
+    }, [subscription]);
 
     return (
         <div className={styles.myPage}>
@@ -64,8 +142,8 @@ const Membership: React.FC = () => {
                                         구독 마감일 : {new Date(subscription.endDate).toLocaleDateString()}</li>
                                     <li>
                                         구독 상태 :
-                                        <span className={subscription.subStatus === "ACTIVE" ? styles.statusActiveText : styles.statusInactiveText}>
-                                            {subscription.subStatus === "ACTIVE" ? " 활성화" : " 비활성화"}
+                                        <span className={subscription.cancelled ? styles.statusInactiveText : styles.statusActiveText}>
+                                            {subscription.cancelled ? " 비활성화" : " 활성화"}
                                         </span>
                                     </li>
                                     {daysLeft !== null && (
@@ -97,20 +175,31 @@ const Membership: React.FC = () => {
                                         결제 내역 확인 <span className={styles.arrow}>&gt;</span>
                                     </button>
                                 </li>
-                                <li>
-                                    <button
-                                        onClick={handleMembershipCancelClick}
-                                        className={styles.menuLink}
-                                    >
-                                        멤버십 해지 <span className={styles.arrow}>&gt;</span>
-                                    </button>
-                                </li>
+                                {subscription?.cancelled ? (
+                                    <li>
+                                        <button
+                                            onClick={handleMembershipReactivateClick}
+                                            className={styles.menuLink}
+                                        >
+                                            멤버십 재활성화 <span className={styles.arrow}>&gt;</span>
+                                        </button>
+                                    </li>
+                                ) : (
+                                    <li>
+                                        <button
+                                            onClick={handleMembershipCancelClick}
+                                            className={styles.menuLink}
+                                        >
+                                            멤버십 해지 <span className={styles.arrow}>&gt;</span>
+                                        </button>
+                                    </li>
+                                )}
                             </ul>
                         </div>
                     </div>
                 </>
             ) : (
-                <MembershipCancel onCancel={handleCancel} /> // 멤버십 해지 컴포넌트에 onCancel 전달
+                <MembershipCancel onCancel={handleCancel} />
             )}
         </div>
     );

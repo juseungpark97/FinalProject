@@ -16,6 +16,8 @@ import SubscribeSuccess from "./pages/HomePage/SubscribeSuccess";
 import Findidpage from "./pages/BeforePage/findidpage";
 import Findpwpage from "./pages/BeforePage/findpwpage";
 import MembershipCancel from "./components/Mypage/MembershipCancel";
+import HeartList from "./components/Mypage/HeartList";
+"./pages/BeforePage/findpwpage";
 import Landing from "./pages/BeforePage/MainPage";
 import EasterEgg from "./EasterEgg/EasterEgg";
 import ProtectedRoute from "../src/Auth/ProtectedRoute";
@@ -56,7 +58,7 @@ function App() {
         metaDescription = "Upload a new movie.";
         break;
       default:
-        title = "Default Title";
+        title = "CinemaCloud";
         metaDescription = "Default description.";
         break;
     }
@@ -86,11 +88,10 @@ function App() {
         <Route path="/passwordlogin" element={<PublicRoute element={<PwLogin />} />} />
         <Route path="/Findidpage" element={<PublicRoute element={<Findidpage />} />} />
         <Route path="/Findpwdpage" element={<PublicRoute element={<Findpwpage />} />} />
-
         {/* 구독 관련 페이지: 누구나 접근 가능 */}
         <Route path="/subscribe" element={<SubscribePage />} />
+        <Route path="/heart-list" element={<HeartList profileNo={1} />} />
         <Route path="/subscribe/success" element={<SubscribeSuccess />} />
-
         {/* 로그인 했을 때 접근 가능 */}
         <Route path="/home" element={<ProtectedRoute element={<HomePage />} requiredRole="user" />} />
         <Route path="/movie/:movieId" element={<ProtectedRoute element={<MovieDetailPage />} requiredRole="user" />} />
@@ -98,7 +99,6 @@ function App() {
         <Route path="/profiles" element={<ProtectedRoute element={<Profiles />} requiredRole="user" />} />
         <Route path="/help" element={<ProtectedRoute element={<HelpPage />} requiredRole="user" />} />
         <Route path="/easterEgg" element={<ProtectedRoute element={<EasterEgg />} requiredRole="user" />} />
-
         {/* 관리자만 접근 가능 */}
         <Route path="/dashboard/*" element={<ProtectedRoute element={<DashboardPage />} requiredRole="admin" />} />
         <Route path="/upload" element={<ProtectedRoute element={<UploadMovie />} requiredRole="admin" />} />

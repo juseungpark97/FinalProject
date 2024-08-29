@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from '../../components/BeforePage/css/ProfileSelect.module.css';
 import { Profile } from '../../types/Profile';
 
@@ -10,11 +10,11 @@ interface ProfileSelectProps {
     highestScoreProfile: Profile | null;
 }
 
+
 const ProfileSelect: React.FC<ProfileSelectProps> = ({ profiles, onProfileSelect, onAddProfile, onProfileDelete, highestScoreProfile }) => {
-    // 메인 계정을 앞에 두는 로직
     const sortedProfiles = [...profiles].sort((a, b) => {
         if (a.profileMain === 'M' && b.profileMain !== 'M') {
-            return -1; // 메인 계정이 앞으로 오도록 정렬
+            return -1;
         } else if (a.profileMain !== 'M' && b.profileMain === 'M') {
             return 1;
         } else {
@@ -23,7 +23,7 @@ const ProfileSelect: React.FC<ProfileSelectProps> = ({ profiles, onProfileSelect
     });
 
     const handleProfileClick = (profile: Profile) => {
-        onProfileSelect(profile);  // 프로필 클릭 시 상위 컴포넌트에 이벤트 전달
+        onProfileSelect(profile);
     };
 
     return (

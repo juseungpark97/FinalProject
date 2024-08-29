@@ -42,7 +42,7 @@ const Security: React.FC<SecurityProps> = ({ onMenuClick }) => {
                                 href=""
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    onMenuClick('phoneInfo'); // 이 메뉴도 필요에 따라 수정
+                                    onMenuClick('phoneChange'); // 이 메뉴도 필요에 따라 수정
                                 }}
                                 className={styles.menuLink}
                             >

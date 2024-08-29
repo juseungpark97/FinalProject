@@ -24,6 +24,7 @@ import com.kh.last.model.dto.EmailCheckRequest;
 import com.kh.last.model.dto.EmailCheckResponse;
 import com.kh.last.model.dto.LoginResponse;
 import com.kh.last.model.dto.PasswordChangeRequest;
+import com.kh.last.model.dto.PhoneChangeRequest;
 import com.kh.last.model.dto.UserCreateRequest;
 import com.kh.last.model.dto.UserLoginRequest;
 import com.kh.last.model.vo.Subscription;
@@ -256,6 +257,64 @@ public class UserController {
 		if (email == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
 		}
+
+
+		request.setEmail(email);
+		boolean success = userService.myPagePwdChange(request);
+
+		if (success) {
+			return ResponseEntity.ok().body("Password changed successfully");
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body("Current password is incorrect or user not found");
+		}
+	}
+
+	@PutMapping("/cancel-subscription")
+	public ResponseEntity<String> cancelSubscription(@RequestHeader("Authorization") String token) {
+		String email = userService.getEmailFromToken(token);
+		if (email == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
+
+		try {
+			subscriptionService.cancelSubscription(email);
+			return ResponseEntity.ok("Subscription cancelled successfully");
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+
+	@PutMapping("/reactivate-subscription")
+	public ResponseEntity<String> reactivateSubscription(@RequestHeader("Authorization") String token) {
+		String email = userService.getEmailFromToken(token);
+		if (email == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
+
+		try {
+			subscriptionService.reactivateSubscription(email);
+			return ResponseEntity.ok("Subscription reactivated successfully");
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+
+	@PutMapping("/change-phone")
+	public ResponseEntity<String> changePhoneNumber(@RequestHeader("Authorization") String token,
+			@RequestBody PhoneChangeRequest request) {
+		String email = userService.getEmailFromToken(token);
+		if (email == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
+
+		boolean success = userService.changePhoneNumber(email, request);
+		if (success) {
+			return ResponseEntity.ok("Phone number changed successfully");
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to change phone number");
+		}
+	}
 
 		request.setEmail(email);
 		boolean success = userService.myPagePwdChange(request);

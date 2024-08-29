@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.kh.last.model.dto.PasswordChangeRequest;
+import com.kh.last.model.dto.PhoneChangeRequest;
 import com.kh.last.model.vo.Subscription;
 import com.kh.last.model.vo.USERS;
 import com.kh.last.repository.SubscriptionRepository;
@@ -95,6 +96,25 @@ public class UserService {
 			}
 		}
 		return false;
+	}
+	public boolean changePhoneNumber(String email, PhoneChangeRequest request) {
+	    Optional<USERS> userOpt = userRepository.findByEmail(email);
+	    if (userOpt.isEmpty()) {
+	        return false;
+	    }
+
+	    USERS user = userOpt.get();
+
+	    // 현재 핸드폰 번호와 요청된 번호가 일치하는지 확인
+	    if (!user.getPhone().equals(request.getCurrentPhone())) {
+	        return false;
+	    }
+
+	    // 새 핸드폰 번호로 업데이트
+	    user.setPhone(request.getNewPhone());
+	    userRepository.save(user);
+
+	    return true;
 	}
 
 	public boolean isUserSubscribed(String email) {

@@ -27,11 +27,21 @@ public class Subscription {
     @Column(name = "sub_status", nullable = false, length = 30)
     private String subStatus;
 
-    // expiryDate 필드 추가
+    @Column(name = "is_cancelled", nullable = false)
+    private boolean isCancelled = false;
+
+    // 만료일을 계산하는 메서드
     @Transient // 데이터베이스 컬럼이 아니라 계산된 값일 경우
     private Date expiryDate;
 
     public Date getExpiryDate() {
         return this.endDate;
+    }
+
+    // 만료일이 지나면 상태를 INACTIVE로 변경하는 메서드
+    public void checkAndSetInactive() {
+        if (this.isCancelled && this.endDate.before(new Date(System.currentTimeMillis()))) {
+            this.subStatus = "INACTIVE";
+        }
     }
 }

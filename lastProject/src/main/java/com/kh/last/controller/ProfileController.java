@@ -304,10 +304,5 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "Error unlocking profile"));
         }
     }
-
-
-
     
-    
-
 }
