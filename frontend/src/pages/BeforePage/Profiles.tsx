@@ -21,6 +21,8 @@ const ProfilePage: React.FC = () => {
         return profile.tetrisHighScore > (maxProfile?.tetrisHighScore || 0) ? profile : maxProfile;
     }, null as Profile | null);
 
+
+
     useEffect(() => {
         // URL에서 토큰 추출
         const params = new URLSearchParams(location.search);
@@ -31,6 +33,8 @@ const ProfilePage: React.FC = () => {
             localStorage.setItem('kakaoAccessToken', token);
         }
     }, [location]);
+
+
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
@@ -125,7 +129,7 @@ const ProfilePage: React.FC = () => {
 
 
         else {
-            console.error('토큰이 없습니다');
+            navigate("/");
         }
     }, [navigate]);
 
