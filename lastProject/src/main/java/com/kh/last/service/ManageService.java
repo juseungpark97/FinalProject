@@ -119,7 +119,7 @@ public class ManageService {
 
 	public List<Faq> getFaq() {
 		List<Faq> list = faqRepository.findAll();
-
+		
 		return list;
 	}
 
