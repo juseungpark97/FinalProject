@@ -11,7 +11,7 @@ const ChangePasswordForm: React.FC = () => {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [isCodeSent, setIsCodeSent] = useState(false);
-    
+
     const navigate = useNavigate(); // useNavigate 훅을 사용하여 페이지 전환
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +70,7 @@ const ChangePasswordForm: React.FC = () => {
             setMessage('');
         }
     };
-
+    
     return (
         <form className={styles.loginForm}>
             <div className={styles.formContent}>
@@ -88,7 +88,9 @@ const ChangePasswordForm: React.FC = () => {
                     disabled={isCodeSent}
                 />
                 {!isCodeSent && (
-                    <button type="button" className={styles.loginButton} onClick={handleSendCode}>인증 코드 전송</button>
+                    <>
+                        <button type="button" className={styles.loginButton} onClick={handleSendCode}>인증 코드 전송</button>
+                    </>
                 )}
                 {isCodeSent && (
                     <>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styles from '../../pages/BeforePage/css/LoginPage.module.css';
+import { useNavigate } from 'react-router-dom';
 
 const FindIdForm: React.FC = () => {
     const [phone, setPhone] = useState('');
@@ -39,60 +40,61 @@ const FindIdForm: React.FC = () => {
                 const emailResponse = await axios.get('http://localhost:8088/api/verification/get-email', { params: { phone } });
                 setUserEmail(emailResponse.data);  // Assuming the email is returned in response.data
                 setIsVerified(true);
-                setMessage('인증이 완료되었습니다. 이메일: ' + emailResponse.data);
                 setError('');
             }
         } catch (error) {
             setError('인증번호가 올바르지 않습니다. 다시 시도해주세요.');
-            setMessage('');
         }
     };
 
     return (
-        <form className={styles.loginForm}>
-            <div className={styles.formContent}>
-                <h1 className={styles.formTitle}>아이디 찾기</h1>
-                {!isVerified ? (
-                    <>
-                        <label htmlFor="phone" className={styles.visuallyHidden}>휴대폰 번호</label>
-                        <input
-                            type="tel"
-                            id="phone"
-                            className={styles.inputField}
-                            placeholder="휴대폰 번호"
-                            value={phone}
-                            onChange={handlePhoneChange}
-                            aria-label="휴대폰 번호"
-                            required
-                            disabled={isCodeSent}
-                        />
-                        {isCodeSent && (
-                            <>
-                                <label htmlFor="verificationCode" className={styles.visuallyHidden}>인증번호</label>
-                                <input
-                                    type="text"
-                                    id="verificationCode"
-                                    className={styles.inputField}
-                                    placeholder="인증번호"
-                                    value={verificationCode}
-                                    onChange={handleCodeChange}
-                                    aria-label="인증번호"
-                                    required
-                                />
-                                <button type="button" className={styles.loginButton} onClick={handleVerifyCode}>인증번호 확인</button>
-                            </>
-                        )}
-                        {!isCodeSent && (
-                            <button type="button" className={styles.loginButton} onClick={handleSendCode}>인증번호 전송</button>
-                        )}
-                    </>
-                ) : (
-                    <p className={styles.successMessage}>이메일: {userEmail}</p>
-                )}
-                {message && <p className={styles.successMessage}>{message}</p>}
-                {error && <p className={styles.error}>{error}</p>}
-            </div>
-        </form>
+            <form className={styles.loginForm}>
+                <div className={styles.formContent}>
+                    <h1 className={styles.formTitle}>아이디 찾기</h1>
+                    {!isVerified ? (
+                        <>
+                            <label htmlFor="phone" className={styles.visuallyHidden}>휴대폰 번호</label>
+                            <input
+                                type="tel"
+                                id="phone"
+                                className={styles.inputField}
+                                placeholder="휴대폰 번호"
+                                value={phone}
+                                onChange={handlePhoneChange}
+                                aria-label="휴대폰 번호"
+                                required
+                                disabled={isCodeSent}
+                            />
+                            {isCodeSent && (
+                                <>
+                                    <label htmlFor="verificationCode" className={styles.visuallyHidden}>인증번호</label>
+                                    <input
+                                        type="text"
+                                        id="verificationCode"
+                                        className={styles.inputField}
+                                        placeholder="인증번호"
+                                        value={verificationCode}
+                                        onChange={handleCodeChange}
+                                        aria-label="인증번호"
+                                        required
+                                    />
+                                    <button type="button" className={styles.loginButton} onClick={handleVerifyCode}>인증번호 확인</button>
+                                </>
+                            )}
+                            {!isCodeSent && (
+                                <>
+                                    <button type="button" className={styles.loginButton} onClick={handleSendCode}>인증번호 전송</button>
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <p className={styles.successMessage}>이메일: {userEmail}</p>
+                        </>
+                    )}
+                    {error && <p className={styles.error}>{error}</p>}
+                </div>
+            </form>
     );
 };
 
