@@ -337,7 +337,7 @@ const EasterEgg: React.FC = () => {
         setStage((prevStage) => drawPlayer(prevStage, player));
     }, [player]);
 
-    
+
     return (
         <div className="tetris-wrapper">
             <button className="back-button" onClick={handleBack}>
@@ -362,8 +362,8 @@ const EasterEgg: React.FC = () => {
                     )}
                     <div className="score">Score: {score}</div>
                     <div className="controls">
-                        <button onClick={startGame}>Start Game</button>
-                        <button onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</button>
+                        <button className="btn-blue" onClick={startGame}>Start Game</button>
+                        <button className="btn-blue" onClick={togglePause}>{isPaused ? 'Resume' : 'Pause'}</button>
                     </div>
                 </div>
                 <div className="preview">
