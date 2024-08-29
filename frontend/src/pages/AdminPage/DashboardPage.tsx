@@ -18,6 +18,10 @@ const DashboardPage: React.FC = () => {
   return (
     <>
       <div className={styles.dashboardPage}>
+        <Header
+          selectedProfile={profile}
+          setSelectedProfile={setProfile}
+        />
         <SideMenu />
         <div className={styles.content}>
           <Routes>

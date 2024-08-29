@@ -99,9 +99,20 @@ export default function MovieManage() {
     <div className={styles.tableContainer}>
       <div className={styles.headerContainer}>
         <h1 className={styles.movimanage}>영화 관리</h1>
-        <div>
-          <a onClick={() => setViewMode('all')}>전체목록</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-          <a onClick={() => setViewMode('disabled')}>비활성화된 영화</a>
+        <div className={styles.filterContainer}>
+          <span
+            className={viewMode === 'all' ? styles.activeFilter : ''}
+            onClick={() => setViewMode('all')}
+          >
+            전체목록
+          </span>
+          &nbsp;|&nbsp;
+          <span
+            className={viewMode === 'disabled' ? styles.activeFilter : ''}
+            onClick={() => setViewMode('disabled')}
+          >
+            비활성화된 영화
+          </span>
         </div>
         <div className={styles.searchContainer}>
           <input
