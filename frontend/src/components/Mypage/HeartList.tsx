@@ -31,7 +31,7 @@ const HeartList: React.FC<{ profileNo: number }> = ({ profileNo }) => {
 
     // 영화 클릭 시, MovieDetailPage로 이동하는 함수
     const handleMovieClick = (movieId: number) => {
-        navigate(`/movies/${movieId}`);
+        navigate(`/movie/${movieId}`);
     };
 
     return (
