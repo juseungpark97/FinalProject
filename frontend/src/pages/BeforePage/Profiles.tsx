@@ -36,6 +36,7 @@ const ProfilePage: React.FC = () => {
 
 
 
+
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         const kakaoAccessToken = localStorage.getItem("kakaoAccessToken");
@@ -52,7 +53,12 @@ const ProfilePage: React.FC = () => {
                     else {
                         axios.get('http://localhost:8088/api/users/me', { headers: { 'Authorization': `Bearer ${token}` } })
                             .then(response => {
+                                if (response.data.role == "admin") {
+                                    navigate("/dashboard");
+
+                                }
                                 const userNo = response.data.userNo;
+
                                 axios.get(`http://localhost:8088/api/profiles/user/${userNo}`, { headers: { 'Authorization': `Bearer ${token}` } })
                                     .then(response => {
                                         if (Array.isArray(response.data)) {
