@@ -4,14 +4,14 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f0f4f8;
+    background-color: #000;
     text-align: center;
     font-family: Arial, sans-serif;
 }
 
 .subscribeSuccess h1 {
     font-size: 2.5rem;
-    color: #4caf50;
+    color: #a36e2e;
     /* 성공 메시지에 적합한 녹색 색상 */
     margin-bottom: 20px;
 }
