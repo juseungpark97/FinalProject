@@ -36,23 +36,26 @@ const HeartList: React.FC<{ profileNo: number }> = ({ profileNo }) => {
 
     return (
         <div className={styles.myPage}>
-            <h2>내가 좋아한 영상</h2>
-            <ul className={styles.quickLinks}>
-                {likedMovies.length > 0 ? (
-                    likedMovies.map(movie => (
-                        <li
-                            key={movie.id}
-                            className={styles.menuLink}
-                            onClick={() => handleMovieClick(movie.id)}  // 영화 클릭 시 이동
-                        >
-                            <img src={movie.thumbnailUrl} alt={movie.title} className={styles.thumbnail} />
-                            <div>{movie.title}</div>
-                        </li>
-                    ))
-                ) : (
-                    <p>좋아요한 영상이 없습니다.</p>
-                )}
-            </ul>
+            <div className={styles.content}>
+                <h1>좋아요 한 영상</h1>
+                <h3>좋아요 영상목록</h3>
+                <ul className={styles.quickLinks}>
+                    {likedMovies.length > 0 ? (
+                        likedMovies.map(movie => (
+                            <li
+                                key={movie.id}
+                                className={styles.menuLink}
+                                onClick={() => handleMovieClick(movie.id)}  // 영화 클릭 시 이동
+                            >
+                                <img src={movie.thumbnailUrl} alt={movie.title} className={styles.thumbnail} />
+                                <div>{movie.title}</div>
+                            </li>
+                        ))
+                    ) : (
+                        <p>좋아요한 영상이 없습니다.</p>
+                    )}
+                </ul>
+            </div>
         </div>
     );
 };
