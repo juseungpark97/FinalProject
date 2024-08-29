@@ -92,11 +92,11 @@ function App() {
         <Route path="/subscribe" element={<SubscribePage />} />
         <Route path="/heart-list" element={<HeartList profileNo={1} />} />
         <Route path="/subscribe/success" element={<SubscribeSuccess />} />
+        <Route path="/profiles" element={<Profiles />} />
         {/* 로그인 했을 때 접근 가능 */}
         <Route path="/home" element={<ProtectedRoute element={<HomePage />} requiredRole="user" />} />
         <Route path="/movie/:movieId" element={<ProtectedRoute element={<MovieDetailPage />} requiredRole="user" />} />
         <Route path="/account" element={<ProtectedRoute element={<Account />} requiredRole="user" />} />
-        <Route path="/profiles" element={<ProtectedRoute element={<Profiles />} requiredRole="user" />} />
         <Route path="/help" element={<ProtectedRoute element={<HelpPage />} requiredRole="user" />} />
         <Route path="/easterEgg" element={<ProtectedRoute element={<EasterEgg />} requiredRole="user" />} />
         {/* 관리자만 접근 가능 */}
