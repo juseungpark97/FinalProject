@@ -48,7 +48,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 	        "(SELECT COUNT(w) FROM WatchLog w WHERE w.movie.id = m.id AND w.viewedAt BETWEEN :startDate AND :endDate) viewCount " + 
 	        ") " + 
 	        "FROM Movie m " +
-	        "WHERE (SELECT COUNT(w) FROM WatchLog w WHERE w.movie.id = m.id AND w.viewedAt BETWEEN :startDate AND :endDate) >= 1 " +
+	        "WHERE (SELECT COUNT(w) FROM WatchLog w WHERE w.movie.id = m.id AND w.viewedAt BETWEEN :startDate AND :endDate) >= 3 " +
 	        "ORDER BY viewCount DESC")
 	Page<MovieViewDTO> findMoviesWithViewCountAbove100(@Param("startDate") LocalDateTime startDate,
 	                                                   @Param("endDate") LocalDateTime endDate,

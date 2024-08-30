@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
             )}
             <SliderSection title="이런 영화는 어떠세요?" movies={recommendedMovies} />
             <Frame />
-            <SliderSection title="밤늦게 즐기는 스릴러" movies={filteredMovies} />
+            <SliderSection title="이후 추가 태그 가능" movies={filteredMovies} />
           </>
         )}
       </section>
