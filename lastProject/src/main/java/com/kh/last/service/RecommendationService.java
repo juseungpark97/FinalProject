@@ -44,7 +44,7 @@ public class RecommendationService {
         Map<String, Integer> profileTags = parseJsonToMap(profile.getProfileVector());
 
         List<Movie> recommendations = new ArrayList<>();
-        for (Movie movie : movieRepository.findAll()) {
+        for (Movie movie : movieRepository.findByStatus("A")) {
             List<String> movieTags = parseJsonToList(movie.getTags());
             double similarity = calculateCosineSimilarity(profileTags, movieTags);
             if (similarity > 0.1) {  // 임계치 예시

@@ -53,4 +53,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 	Page<MovieViewDTO> findMoviesWithViewCountAbove100(@Param("startDate") LocalDateTime startDate,
 	                                                   @Param("endDate") LocalDateTime endDate,
 	                                                   Pageable pageable);
+	
+	List<Movie> findByStatus(String status);
 }

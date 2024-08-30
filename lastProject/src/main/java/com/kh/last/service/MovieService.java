@@ -68,7 +68,7 @@ public class MovieService {
     }
 
     public List<Movie> findAllMovies() {
-        return movieRepository.findAll();
+    	return movieRepository.findByStatus("A");
     }
 
     public List<Movie> findMoviesByGenre(String genre) {
