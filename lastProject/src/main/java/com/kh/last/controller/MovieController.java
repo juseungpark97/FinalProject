@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
@@ -151,14 +152,18 @@ public class MovieController {
     public ResponseEntity<List<Movie>> getRecentMovies(@RequestParam Long profileNo) {
         List<Movie> recentMovies = watchLogRepository.findRecentMoviesByProfile(profileNo);
         
-        if (recentMovies == null || recentMovies.isEmpty()) {
+        // status가 'A'인 영화만 필터링
+        List<Movie> filteredMovies = recentMovies.stream()
+                .filter(movie -> "A".equals(movie.getStatus()))
+                .collect(Collectors.toList());
+
+        if (filteredMovies.isEmpty()) {
             Logger logger = LoggerFactory.getLogger(MovieController.class);
             logger.info("No recent movies found for profileNo: {}", profileNo); // 로그 출력
             return ResponseEntity.ok(Collections.emptyList()); // 빈 목록 반환
         }
 
-        return ResponseEntity.ok(recentMovies); // 200 OK 응답
+        return ResponseEntity.ok(filteredMovies); // 200 OK 응답
     }
-
-    
+   
 }
