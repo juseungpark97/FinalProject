@@ -77,9 +77,7 @@ const HomePage: React.FC = () => {
         ) : (
           <>
             <SliderSection title="최근 시청한 영상" movies={recentMovies} />
-            <Frame />
-            <SliderSection title="영화 이어보기" movies={filteredMovies} />
-            <Frame />
+
             {mostWatchedGenre && moviesByMostWatchedGenre.length > 0 && (
               <>
                 <SliderSection
